@@ -1,0 +1,19 @@
+\form#0:\[ \int_l^u f(x) dx \]
+\form#1:\[ L(\mu, \sigma^2) \propto \frac{1}{\sigma^{2N}} exp\left( \frac{-Q(\vec \mu)}{2\sigma^2}\right) \]
+\form#2:\[ Q(\vec \mu ) = \sum_{i,j} \frac{(\mu_i - mu_j)^2}{\nu_{ij} } \]
+\form#3:$\vec \mu = \{ \mu_1 \ldots \mu_N\} $
+\form#4:$\nu_{ij} $
+\form#5:\[ dX_t = \alpha (\theta - X_t) \d t + \sigma \d W_t \]
+\form#6:$ X_0 $
+\form#7:\[ E(X_t | X_0 ) = X_0 e^{-\alpha t} + \theta (1- e^{-\alpha t}) \]
+\form#8:\[ V_{ij} = \frac{\sigma^2}{2\alpha} (1 - e^{-2 \alpha s}) e^{-2\alpha (t-s)} \]
+\form#9:\[ \log L = (X - E(X) )^T V^{-1} (X-E(X) ) + N\log(2\pi \det V) \]
+\form#10:$ E(X_t | X_0 ) = X_0 e^{-\alpha t} + \theta (1- e^{-\alpha t}) $
+\form#11:$ V_{ij} = \frac{\sigma^2}{2\alpha} (1 - e^{-2 \alpha s}) e^{-2\alpha (t-s)} $
+\form#12:$ \log L = (X - E(X) )^T V^{-1} (X-E(X) ) + N\log(2\pi \det V) $
+\form#13:\[ L(\mu, \sigma^2) \propto \frac{1}{\sigma^{2N}} \exp\left( \frac{-Q(\vec \mu)}{2\sigma^2}\right) \]
+\form#14:\[ V_{ij} = \frac{\sigma^2}{2\alpha} (1 - e^{-2 \alpha s_{ij} }) e^{-2\alpha (t-s_{ij} )} \]
+\form#15:$s_{ij} $
+\form#16:$X_0$
+\form#17:$ t-s_{ij} $
+\form#18:$ s_{ij} $

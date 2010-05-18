@@ -1,0 +1,9 @@
+Package: phyloscape
+Version: 0.1-1
+Title: phyloscape
+Description: Phylogenetic comparative methods for arbitrary landscapes
+Depends: geiger
+License: GPL
+Author: Carl Boettiger
+Maintainer: Carl Boettiger <cboettig@ucdavis.edu> 
+

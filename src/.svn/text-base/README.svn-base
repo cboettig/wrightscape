@@ -1,0 +1,47 @@
+regimes.c
+	Test the regimes data structure
+	Modify to handle a single regime
+	Implement a transition density calculation where transitions occur at nodes alone  <<< 
+	Pagel & Meade, Huelsenbeck papers -- what about transitions at nodes?  
+	
+linear.c 
+	BM not really subset of OU, as alpha = 0 not acceptible OU calculation.
+	Modify the OU model to handle appropriately small alpha with Taylor Expansion or as BM
+
+max likelihood
+	Implement and test maximum likelihood searches over parameters against existing methods
+
+mcmc.c
+	Start implementing a basic MCMC solver!
+
+
+matrix_method.c
+	nonlinear transition densities?  
+	Test the stationary distribution? <<<<<
+
+
+Handle the root node value... as a parameter?  Get better understanding of how existing software handles this!
+R interface hands down tree and traits, but not model being tested.  
+
+
+Generate some non-linear w(y|x) with pde  
+
+
+Error handling.  This should probably be done mostly at the R level, enforcing the strict formats and conventions of the input (i.e. if not doing regimes, all states should be listed at 0.  States must be numbered incrementally from 0 to n-1, where n is the number of regimes present.)
+
+
+########### Progress List ############
+
+
+
+
+############# STEPPING STONES ########
+
+Recursive Joint Prob method using BM, compare to analyticals
+
+Bayesian OU vs BM in RJMCMC
+
+Use Pagel's BayesTraits run to "paint tree" with uncertainty, then repeat OUCH analysis with uncertainty in branch color
+
+
+
