@@ -73,21 +73,22 @@ double multimin(void * params)
 		status = gsl_multimin_test_size (size, ERR_TOL);
 		if (status == GSL_SUCCESS)
 		{
-			printf ("converged to minimum at\n");
+//			printf ("converged to minimum at\n");
 		}
 			
 	} while (status == GSL_CONTINUE && iter < MAX_ITER);
 
 	/* Print out status, whether or not it converged */
 	size = gsl_multimin_fminimizer_size (s);
-	printf ("iter: %5d, -llik = %3.3f, size = %.3f, par values = ",
-		   iter,
-		   s->fval, 
-		   size );
-	for(i = 0; i < n_pars; i++)
-		printf (" %1lf, ", gsl_vector_get (s->x, i) );
-	printf("\n");
-
+	if(0){ // Printing turned off
+		printf ("iter: %5d, -llik = %3.3f, size = %.3f, par values = ",
+			   iter,
+			   s->fval, 
+			   size );
+		for(i = 0; i < n_pars; i++)
+			printf (" %1lf, ", gsl_vector_get (s->x, i) );
+		printf("\n");
+	}
    /* Write the values of the gsl_vec x back into the parameter list */
 	for(i=0; i < n_pars; i++){
 		if(mytree->fitpar[i] == 1){

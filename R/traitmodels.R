@@ -2,18 +2,14 @@
 
 
 
-traitmodels <- function(tree, traits, pars=NULL){
+traitmodels <- function(tree, data){
 
-	if(pars == NULL){
-		pars <- c(tree@sigma, tree@alpha, tree$theta[[1]][1] )
-	}
-	fitpars <- c(1,1,0)
+	pars <- c(tree@sigma, tree@sqrt.alpha, tree@theta[[1]][1] )
+	fitpars <- c(1,1,1)
 
+	data <- data[[1]]
+	data[is.na(data)] = 0 
 
-	traits[is.na(traits)] = 0 
-
-	# this is hardwired into OU now 
-#	traits[1] = pars[3];
 
 	ancestors <- as.numeric(tree@ancestors)
 	ancestors[is.na(ancestors)] = 0 
@@ -33,7 +29,7 @@ traitmodels <- function(tree, traits, pars=NULL){
 	o<- .C("traitmodels",
 		as.double(times),
 		as.integer(ancestors),
-		as.double(traits),
+		as.double(data),
 		as.integer(states),
 		as.integer(nstates),
 		as.integer(n),
@@ -42,13 +38,13 @@ traitmodels <- function(tree, traits, pars=NULL){
 		as.integer(npars),
 		double(1)
 	  )
-	o[[10]]
+	list(loglik=o[[10]], sigma = sqrt( o[[7]][1] ), sqrt.alpha = sqrt( o[[7]][2] ), theta = sqrt( o[[7]][3] ))  
 }
 
 testme <- function(){
 	require(geiger)
 	data(bimac)
-	traits <- log(bimac$size)
-	tree <- with(bimac,ouchtree(nodes=node,ancestors=ancestor,times=time,labels=species))
-	traitmodels(tree, traits)
+	tree <- with(bimac,ouchtree(nodes=node,ancestors=ancestor,times=time/max(time),labels=species))
+	ou1 <- hansen(log(bimac['size']), tree, bimac['OU.1'], 1, 1)
+	out <- traitmodels(ou1, log(bimac['size']))
 }

@@ -45,8 +45,8 @@ void traitmodels(	const double * times, ///< The lengths of each node. Nodes ide
 //	tree_print(mytree);
 //	matrix_regimes(mytree);
 	
-	printf("analytic bm llik = %lf\n", bm_likelihood(mytree) );
-	printf("analytic ou llik = %lf\n", ou_likelihood(mytree) );
+//	printf("analytic bm llik = %lf\n", bm_likelihood(mytree) );
+//	printf("analytic ou llik = %lf\n", ou_likelihood(mytree) );
 //	printf("matrix llik = %lf\n",  matrix_likelihood(mytree) );
 
 
