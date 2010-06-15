@@ -42,9 +42,14 @@ traitmodels <- function(tree, data){
 }
 
 testme <- function(){
-	require(geiger)
+	require(phyloniche)
 	data(bimac)
 	tree <- with(bimac,ouchtree(nodes=node,ancestors=ancestor,times=time/max(time),labels=species))
+	bm <- brown(log(bimac['size']), tree)
 	ou1 <- hansen(log(bimac['size']), tree, bimac['OU.1'], 1, 1)
-	out <- traitmodels(ou1, log(bimac['size']))
+	model_list <- list(bm = bm, ou1 = ou1)
+	o <- LR_bootstrap_all(model_list, NULL, nboot=20, cpu=2, update="wrightscape")
 }
+
+
+
