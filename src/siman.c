@@ -138,7 +138,7 @@
 
 
 
-	void siman(tree * mytree, gsl_rng * rng) 
+	double siman(tree * mytree, gsl_rng * rng) 
      {
 		block * myblock = block_alloc(mytree->nfreepars);
 
@@ -158,6 +158,6 @@
 
        gsl_siman_solve(rng, myblock, E1, S1, M1, P1, block_copy, block_copy_construct, block_destroy,0, siman_params);
    	   P1(myblock); printf("\n");
-
+	 return(E1(myblock));
      }
 

@@ -26,7 +26,17 @@
  * (3) calls the parameter search algorithm (minimizer or MCMC)
  * (4) cleans up and returns data
  */
-void traitmodels(const double * times, const int * ancestors, const double * traits, const int * states, const int * nstates, const int * n, const double * pars, const int * fitpars, const int * npars)
+void traitmodels(	const double * times, ///< The lengths of each node. Nodes identified by index value.  
+					const int * ancestors, ///< A list of the ancestors of each node.  The root node is number 0.  
+					const double * traits, ///< The trait data
+					const int * states, ///< Regimes list for each node
+					const int * nstates, ///< number of regimes (currently must be 1)
+					const int * n, ///< number of nodes
+					const double * pars, ///< list of parameters.  Sigma, alpha, theta.  
+					const int * fitpars, ///< logical indicating which parameters are fit and which held constant
+					const int * npars, ///< how many parameters total
+					double * likelihood
+				)
 {
 	int i;
 	tree * mytree = tree_alloc(*n, *npars);
@@ -34,22 +44,20 @@ void traitmodels(const double * times, const int * ancestors, const double * tra
 
 //	tree_print(mytree);
 //	matrix_regimes(mytree);
-
-	int nfreepars = 0; // DoF for AIC scores
-	for(i=0;i<*npars;i++) nfreepars += fitpars[i];
 	
 	printf("analytic bm llik = %lf\n", bm_likelihood(mytree) );
 	printf("analytic ou llik = %lf\n", ou_likelihood(mytree) );
-	printf("matrix llik = %lf\n",  matrix_likelihood(mytree) );
+//	printf("matrix llik = %lf\n",  matrix_likelihood(mytree) );
 
-	gsl_rng * rng = gsl_rng_alloc(gsl_rng_default);
 
-	/* consider using a pointer to the likelihood method */
-//	siman(mytree, rng);
-//	multimin(mytree);
-
-	tree_free(mytree);
+	/* consider using a pointer to the likelihood method 
+	 * siman method needs more testing */
+/*	gsl_rng * rng = gsl_rng_alloc(gsl_rng_default);
+	siman(mytree, rng);
 	gsl_rng_free(rng);
+*/
+	*likelihood = multimin(mytree);
+	tree_free(mytree);
 }
 
 	
@@ -69,30 +77,37 @@ void traitmodels(const double * times, const int * ancestors, const double * tra
  * */
 int main(void)
 {
-	// test data
+/*	// test data
 	const double times[] =  {0, 1, 1, 3, 2, 1, 1}; 
 	const int ancestors[] = {-1, 2, 0, 0, 2, 1, 1};
 	const double traits[] = {0, 0, 0, -2, 1, 2, 2};	
 	const int states[] =	{0, 0, 0, 0, 0, 0, 0};
 	const int nstates = 1;
 	const int n = 7;
+*/
 
-
-	const double pars[] = {4., .02, 2.5}; //, 4.1, .21, 3.1, 0.1, 0.1}; 
-	const int fitpars[] = {1,   1,   1}; //,  0,   0,   0,   0,   0};
+	// sigma2 alpha, theta
+	const double pars[] = {.04836469, 0.1921554, 2.953806}; //, 4.1, .21, 3.1, 0.1, 0.1}; 
+	// Which parameters should be fitted??
+	const int fitpars[] = {1,   1,   0}; //,  0,   0,   0,   0,   0};
 	const int npars = 3;
+	double likelihood = 0;
 
-
-	traitmodels(times, ancestors, traits, states, &nstates, &n, pars, fitpars, &npars);
+//	traitmodels(times, ancestors, traits, states, &nstates, &n, pars, fitpars, &npars, &likelihood);
 
 	// bimac data
 	const int bimac_n = 45;
-	const double bimac_times[] = { 0, 12, 20,  2,  2,  4,  8,  5,  5,  5,  5, 10,  9,  4,  8,  2, 20,  2,  4,  2, 1,  2, 26,
-							 4, 2, 2,  2,  2, 15, 10, 10, 10, 10, 16, 12,  4,  2,  2, 10,  8,  2,  1,  1,  2,  2};
+//	const double bimac_times[] = { 0, 12, 20,  2,  2,  4,  8,  5,  5,  5,  5, 10,  9,  4,  8,  2, 20,  2,  4,  2, 1,  2, 26,
+//							 4, 2, 2,  2,  2, 15, 10, 10, 10, 10, 16, 12,  4,  2,  2, 10,  8,  2,  1,  1,  2,  2};
+	double bimac_times[] = { 0, 12./38, 20./38,  2./38,  2./38,  4./38,  8./38,  5./38,  5./38,  5./38,  5./38, 10./38,  9./38,  4./38,  8./38,  2./38, 20/38,  2./38,  4./38,  2./38, 1./38,  2./38, 26./38, 4./38, 2./38, 2./38,  2./38,  2./38, 15./38, 10./38, 10./38, 10./38, 10./38, 16./38, 12./38,  4./38,  2./38,  2./38, 10./38,  8./38,  2./38,  1./38,  1./38,  2./38,  2./38};
+
+//	gsl_vector_view A = gsl_vector_view_array(bimac_times, 45);
+//	gsl_vector_fprintf(stdout, &A.vector, "%g");
+
 	const int bimac_ancestors[] = {-1,  0,  1,  2,  3,  2,  0,  6,  7,  8,  9,  8,  7, 12, 13,14,  6, 16, 17, 18, 19, 18, 1,
 							3,  4,  4,  5,  5,  9, 10, 10, 11, 11, 12, 13, 14, 15, 15, 16, 17, 19, 20, 20, 21, 21};
 
-	const double bimac_traits[] = { 2.400000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
+	const double bimac_traits[] = { 2.900000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
 							  0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
 							  0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 2.602690, 2.660260,
 							  2.660260, 2.653242, 2.674149, 2.701361, 3.161247, 3.299534, 3.328627, 3.353407,
@@ -104,7 +119,7 @@ int main(void)
 	const int LP_states[] =  {1, 1, 2, 2, 2, 2, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 							2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1}; 
 
-	traitmodels(bimac_times, bimac_ancestors, bimac_traits, bimac_states, &bimac_nstates, &bimac_n, pars, fitpars, &npars);
+	traitmodels(bimac_times, bimac_ancestors, bimac_traits, bimac_states, &bimac_nstates, &bimac_n, pars, fitpars, &npars, &likelihood);
 
 	return 0;
 }

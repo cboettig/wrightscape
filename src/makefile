@@ -2,7 +2,7 @@
 #	Makefile for GNU C++ Compiler	#
 #-----------------------------------#
 CC = gcc
-CFLAGS = -Wall -lgsl -lgslcblas -lm -O4 -fpic -funroll-loops --fast-math
+CFLAGS = -Wall -lgsl -lgslcblas -lm -O4 -fpic -funroll-loops 
 EXE = jointprob 
 FILES = jointprob.c tree.c multimin.c regimes.c siman.c matrix_method.c linearsoln.c 
 

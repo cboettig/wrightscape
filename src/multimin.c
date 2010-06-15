@@ -17,7 +17,7 @@ double my_f (const gsl_vector *v, void *params)
 
 
 
-void multimin(void * params)
+double multimin(void * params)
 {
 	tree * mytree = (tree *) params;
 
@@ -97,10 +97,11 @@ void multimin(void * params)
 				mytree->pars[i]);
 		}
 	}
+	double loglik = -s->fval;
 
 	gsl_vector_free(x);
 	gsl_vector_free(ss);
 	gsl_multimin_fminimizer_free (s);
-
+	return(loglik);
 }
 

@@ -1,6 +1,6 @@
-Package: phyloscape
+Package: wrightscape
 Version: 0.1-1
-Title: phyloscape
+Title: wrightscape
 Description: Phylogenetic comparative methods for arbitrary landscapes
 Depends: geiger
 License: GPL

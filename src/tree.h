@@ -7,7 +7,7 @@
 
 /* multimin parameters */
 #define INIT_STEP .1
-#define MAX_ITER 500
+#define MAX_ITER 1500
 #define ERR_TOL 1e-3
 
 
@@ -58,13 +58,13 @@ void tree_free(tree * t);
 
 /* functions in multimin.c*/
 double my_f (const gsl_vector *v, void *params);
-void multimin(void * params);
+double multimin(void * params);
 
 /* functions in models.c*/
 void matrix_regimes(tree * mytree);
 
 /* (external) functions in siman */
-void siman(tree * mytree, gsl_rng * rng);
+double siman(tree * mytree, gsl_rng * rng);
 
 
 /** Defines the transition matrices object used for the matrix-based recursion method */

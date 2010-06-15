@@ -1,52 +1,50 @@
 #traitmodels.R
-traitmodels <- function(){
-
-	data(bimac)
-	traits <- log(bimac$size)
-	tree <- with(bimac,ouchtree(nodes=node,ancestors=ancestor,times=time,labels=species))
 
 
-#	if(class(tree) == "phylo"){
-#		tree = ape2ouch(tree);
-#	}
-#	if(class(data) == "data.frame"){
-#		traits = data[,1]
-#	} else {
-#		traits = as.numeric(c( rep('NA',length(data)-1)  , data));
-#	}
+
+traitmodels <- function(traits, tree){
+	pars <- c(.44, .19, 2.9)
+	fitpars <- c(1,1,0)
+
 
 	traits[is.na(traits)] = 0 
 
-	## Make this into a function that takes data from an OU tree, optionally with a painting, and a mapping of that painting to models
-#	if(class(tree) == "ouch"){
-		ancestors <- as.numeric(tree@ancestors)
-		ancestors[is.na(ancestors)] = 0 
+	traits[1] = pars[3];
 
-		plot(tree)
+	ancestors <- as.numeric(tree@ancestors)
+	ancestors[is.na(ancestors)] = 0 
 
-		times <-tree@times
-		## ouch gives cumulative time, not branch-length!!
-		t <- times
-		for(i in 1:length(ancestors) ){
-			if(ancestors[i] > 0){
-				times[i] <- times[i] - t[ancestors[i]]
-			}
-		}
-		ancestors <- ancestors-1
-		n = length(times)
-	
-#	}
+	## ouch gives cumulative time, not branch-length!!
+	anc <- as.integer(tree@ancestors[!is.na(tree@ancestors)])
+	lengths <- c(0, tree@times[!is.na(tree@ancestors)] - tree@times[anc] )
+	times <- lengths/max(tree@times)
 
+	ancestors <- ancestors-1
+	n <- length(times)
 
-
-	.C("traitmodels",
-		as.numeric(times),
+	states <- rep(0, n)
+	nstates <- 1
+	npars <- length(pars)
+		
+	o<- .C("traitmodels",
+		as.double(times),
 		as.integer(ancestors),
-		as.numeric(traits),
+		as.double(traits),
 		as.integer(states),
+		as.integer(nstates),
 		as.integer(n),
-		as.numeric(pars),
+		as.double(pars),
 		as.integer(fitpars),
-		as.integer(npars)
+		as.integer(npars),
+		double(1)
 	  )
+	o[[10]]
+}
+
+testme <- function(){
+	require(geiger)
+	data(bimac)
+	traits <- log(bimac$size)
+	tree <- with(bimac,ouchtree(nodes=node,ancestors=ancestor,times=time,labels=species))
+	traitmodels(traits, tree)
 }

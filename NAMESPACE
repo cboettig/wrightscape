@@ -1,2 +1,2 @@
-useDynLib(traitmodels)
+useDynLib(wrightscape)
 export(traitmodels)
