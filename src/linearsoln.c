@@ -16,6 +16,8 @@
  *
  *  This should really implement a clever and general algorithm.  See the wikipedia page on Least Common Ancestor
  *  or the tutorial, \see{http://www.topcoder.com/tc?module=Static&d1=tutorials&d2=lowestCommonAncestor}
+ *
+ *  Really no need to be fast as it should only be called once per tree, as it is indep of parameters and painting!
  * */
 double sep_time(int i, int j, tree * mytree)
 	{
@@ -77,13 +79,16 @@ double sep_time(int i, int j, tree * mytree)
  *
  */
 // Consider functionalizing this more so that most code can be reused in bm, bm_full, etc
+// This should be able to store septime information, not call it each time the paramter values are changed!!
+// i.e. septime should be passed to the algorithm, 
 double ou_likelihood(tree * mytree)
 {
 	double sigma2 = mytree->pars[0];
 	double alpha = mytree->pars[1];
 	double theta = mytree->pars[2];
 
-	double root = mytree->trait[0];
+//	double root = mytree->trait[0];
+	double root = theta;
 	int n = (mytree->n+1)/2;
 	int i, j;
 	double s, t = 0;
@@ -233,7 +238,7 @@ double bm_likelihood(tree * mytree)
 		diff_X[i] = traits[i] - root;
 	}
 
-	/* Compute V: @f$ V_{ij} = \frac{\sigma^2}{2\alpha} (1 - e^{-2 \alpha s}) e^{-2\alpha (t-s)} @f$ */
+	/* Compute V: @f$ V_{ij} =  @f$ */
 	for(i=0;i<n;i++){
 		for(j=0;j<n;j++){
 			s = t - sep_time(tips[i],tips[j],mytree)/2;

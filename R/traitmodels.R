@@ -2,14 +2,18 @@
 
 
 
-traitmodels <- function(traits, tree){
-	pars <- c(.44, .19, 2.9)
+traitmodels <- function(tree, traits, pars=NULL){
+
+	if(pars == NULL){
+		pars <- c(tree@sigma, tree@alpha, tree$theta[[1]][1] )
+	}
 	fitpars <- c(1,1,0)
 
 
 	traits[is.na(traits)] = 0 
 
-	traits[1] = pars[3];
+	# this is hardwired into OU now 
+#	traits[1] = pars[3];
 
 	ancestors <- as.numeric(tree@ancestors)
 	ancestors[is.na(ancestors)] = 0 
@@ -46,5 +50,5 @@ testme <- function(){
 	data(bimac)
 	traits <- log(bimac$size)
 	tree <- with(bimac,ouchtree(nodes=node,ancestors=ancestor,times=time,labels=species))
-	traitmodels(traits, tree)
+	traitmodels(tree, traits)
 }
