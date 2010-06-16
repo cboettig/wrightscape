@@ -8,7 +8,7 @@
 /* multimin parameters */
 #define INIT_STEP .1
 #define MAX_ITER 1500
-#define ERR_TOL 1e-3
+#define ERR_TOL 1e-6
 
 
 #include <stdio.h>

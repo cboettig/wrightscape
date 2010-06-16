@@ -41,15 +41,37 @@ traitmodels <- function(tree, data){
 	list(loglik=o[[10]], sigma = sqrt( o[[7]][1] ), sqrt.alpha = sqrt( o[[7]][2] ), theta = sqrt( o[[7]][3] ))  
 }
 
-testme <- function(){
+boot_wright <- function(nboot=20){
+	nboot = 1000
 	require(phyloniche)
+	require(wrightscape)
 	data(bimac)
 	tree <- with(bimac,ouchtree(nodes=node,ancestors=ancestor,times=time/max(time),labels=species))
 	bm <- brown(log(bimac['size']), tree)
 	ou1 <- hansen(log(bimac['size']), tree, bimac['OU.1'], 1, 1)
+
+
+	lik_w <- model_bootstrap(ou1, NULL, nboot, update="wrightscape")
+
+
 	model_list <- list(bm = bm, ou1 = ou1)
-	o <- LR_bootstrap_all(model_list, NULL, nboot=20, cpu=2, update="wrightscape")
+	LR_w <- LR_bootstrap_all(model_list, NULL, nboot=nboot, cpu=1, update="wrightscape")
+	p_val_w <- t(summary(LR_w))
+
+	save(list=ls(), file="corrected_ou.Rdat")
 }
 
+wright_plot <- function(LR_w){
+	p_val_w <- t(summary(LR_w))
+	pdf("BMvOU1.pdf")
+	hist(-2*LR_w[[2]]$t, col="lightblue", border="white", xlab="Likelihood Ratio", cex.axis=1.6, cex.lab=1.6, main="")
+	abline(v=-2*LR_w[[2]]$t0, lwd=4, lty=2, col="darkblue")
+	text(-2*LR_w[[2]]$t0, 0.5*par()$yaxp[2], paste("p = ", round(p_val_w[2], digits=3)), cex=1.6)   # halfway up the vert line
+	dev.off()
 
-
+	pdf("OU1vBM.pdf")
+	hist(-2*LR_w[[3]]$t, col="lightblue", border="white", xlab="Likelihood Ratio", cex.axis=1.6, cex.lab=1.6, main="")
+	abline(v=-2*LR_w[[3]]$t0, lwd=4, lty=2, col="darkblue")
+	text(-2*LR_w[[3]]$t0, 0.5*par()$yaxp[2], paste("p = ", round(p_val_w[3], digits=3)), cex=1.6)   # halfway up the vert line
+	dev.off()
+}
