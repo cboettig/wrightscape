@@ -151,7 +151,7 @@ double ou_likelihood(tree * mytree)
 	V_det = gsl_linalg_LU_det(&V_view.matrix,signum);
 
 
-	/* @f$ -2 \log L = (X - E(X) )^T V^{-1} (X-E(X) ) + N\log(2\pi \det V) @f$ */
+	/* @f$ -2 \log L = (X - E(X) )^T V^{-1} (X-E(X) ) + N\log(2\pi) + \log(\det V) @f$ */
 	// Consider using appropriate blas optimized multiplication, not general matrix-matrix method!!
 	gsl_blas_dgemm (CblasTrans, CblasNoTrans,
 				   1.0, &DIFF.matrix, V_inverse,
@@ -173,6 +173,7 @@ double ou_likelihood(tree * mytree)
 
 	return -Xt_Vi_X/2. -  n*log(2*M_PI)/2. - log(V_det)/2.;
 }
+
 
 
 
