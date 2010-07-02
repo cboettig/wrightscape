@@ -144,11 +144,18 @@ double ou_likelihood(tree * mytree)
 			V[n*i+j] = sigma2/(2*alpha)*(1-exp(-2*alpha*s) )* exp(-2*alpha*(t-s) );
 		}
 	}
+
+//	printf("%d %d\n", tips[n-1], tips[n-1]);
+	printf("%g %g %g %g %g\n", s, t, sigma2, alpha, sigma2/(2*alpha)*(1-exp(-2*alpha*s) )* exp(-2*alpha*(t-s) ));
+
 	gsl_matrix_view V_view = gsl_matrix_view_array(V, n, n);
+//	gsl_matrix_fprintf(stdout, &V_view.matrix, "%g");
+
 	gsl_matrix_view DIFF = gsl_matrix_view_array(diff_X, n, 1);
 	gsl_linalg_LU_decomp (&V_view.matrix, p, &signum);
 	gsl_linalg_LU_invert(&V_view.matrix, p, V_inverse);
 	V_det = gsl_linalg_LU_det(&V_view.matrix,signum);
+
 
 
 	/* @f$ -2 \log L = (X - E(X) )^T V^{-1} (X-E(X) ) + N\log(2\pi) + \log(\det V) @f$ */

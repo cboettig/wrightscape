@@ -5,10 +5,19 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
 
-int get_lca(int i, int j, int n_nodes, const int * ancestor)
+/** get the last common ancestor of two nodes
+ *  This version isn't particularly efficient, but the 
+ *  calculation can in principle be done only once for 
+ *  a given tree and stored as a matrix that is passed
+ *  to the likelihood function.
+ *
+ */
+int get_lca(int i, int j, int n_nodes, const int * ancestor, const double * branch_length, double * sep)
 	{
 	int * ancestor_list = (int *) malloc(n_nodes * sizeof(int));
 	int k = 0, s = 0;
+	double * time_to_ancestor = (double *) calloc(n_nodes, sizeof(double));
+
 	for(k=0; k<n_nodes; k++)
 	{
 		ancestor_list[k]=0;
@@ -16,6 +25,7 @@ int get_lca(int i, int j, int n_nodes, const int * ancestor)
 	k = 0;
 	while(1){
 		ancestor_list[k] = i;
+		time_to_ancestor[k+1] = time_to_ancestor[k] + branch_length[i];
 		if(i==0) break;
 		i = ancestor[i];
 		k++;
@@ -31,6 +41,8 @@ int get_lca(int i, int j, int n_nodes, const int * ancestor)
 		if(j==0) break;
 		j = ancestor[j];
 	}
+	*sep = time_to_ancestor[k];
+	free(time_to_ancestor);
 	free(ancestor_list);
 	return s;	
 }
@@ -41,7 +53,8 @@ int get_lca(int i, int j, int n_nodes, const int * ancestor)
 double node_age(int i, const int * ancestor, const double * branch_length){
 	double time=0;
 	while(ancestor[i] >= 0 )
-	{	
+	{
+		printf("%d\n", i);
 		time += branch_length[i];
 		i = ancestor[i];
 	}
@@ -58,10 +71,16 @@ double log_normal_lik(int n, double * X_EX, double * V)
 	int signum;
 
 	gsl_matrix_view V_view = gsl_matrix_view_array(V, n, n);
+	gsl_matrix_fprintf(stdout, &V_view.matrix, "%g");
+
+
 	gsl_matrix_view DIFF = gsl_matrix_view_array(X_EX, n, 1);
 	gsl_linalg_LU_decomp (&V_view.matrix, p, &signum);
 	gsl_linalg_LU_invert(&V_view.matrix, p, V_inverse);
 	V_det = gsl_linalg_LU_det(&V_view.matrix,signum);
+
+
+
 
 	/* @f$ -2 \log L = (X - E(X) )^T V^{-1} (X-E(X) ) + N\log(2\pi) + \log(\det V) @f$ */
 	// Consider using appropriate blas optimized multiplication, not general matrix-matrix method!!
@@ -90,7 +109,7 @@ double calc_mean(
 	double Xo, ///< root state
 	const double * alpha, ///< value of alpha in each regime, length n_regimes
 	const double * theta, ///< value of theta in each regime
-	const double * sigma, ///< value of sigma in each regime
+	const double * sigma, ///< value of sigma in each regime.  (not needed for mean calc)
 	const int * regimes, ///< specification of the regimes (paintings), length n_nodes
 	const int * ancestor, ///< ancestor of the node, length n_nodes
 	const double * branch_length ///< branch length ancestral to the node, length n_nodes
@@ -102,7 +121,7 @@ double calc_mean(
 	double prev_time;
 
 	/* Compute E(X_i) */
-	double gamma=0, omega=0;
+	long double gamma=0, omega=0;
 	while( ancestor[i] >= 0 )
 	{
 		prev_time = time - branch_length[i]; 
@@ -117,8 +136,8 @@ double calc_mean(
 
 
 
-double calc_gamma(int i, const int * ancestor, const double * branch_length, const int * regimes, const double * alpha){
-	double gamma = 0;
+long double calc_gamma(int i, const int * ancestor, const double * branch_length, const int * regimes, const double * alpha){
+	long double gamma = 0;
 	while( ancestor[i] >= 0 )
 	{
 		gamma += alpha[regimes[i]] * branch_length[i];
@@ -132,22 +151,22 @@ double calc_gamma(int i, const int * ancestor, const double * branch_length, con
  */
 double calc_var(
 	int i, int j, ///< nodes being compared
-	int lca, ///< last common ancestor
-	double Xo, ///< root state
+	int lca, ///< last common ancestor, pass to avoid recalculating
+	double Xo, ///< root state (not needed for variance calc)
 	const double * alpha, ///< value of alpha in each regime, length n_regimes
-	const double * theta, ///< value of theta in each regime
+	const double * theta, ///< value of theta in each regime (not needed for variance calculation)
 	const double * sigma, ///< value of sigma in each regime
 	const int * regimes, ///< specification of the regimes (paintings), length n_nodes
 	const int * ancestor, ///< ancestor of the node, length n_nodes
 	const double * branch_length ///< branch length ancestral to the node, length n_nodes
 	)
 {
-	double gamma_i = calc_gamma(i, ancestor, branch_length, regimes, alpha);
-	double gamma_j = calc_gamma(j, ancestor, branch_length, regimes, alpha);
+	long double gamma_i = calc_gamma(i, ancestor, branch_length, regimes, alpha);
+	long double gamma_j = calc_gamma(j, ancestor, branch_length, regimes, alpha);
 	double time = node_age(lca, ancestor, branch_length); 
 	double prev_time;
 	int ri;
-	double omega=0;
+	long double omega=0;
 
 	i = lca;
 	while( ancestor[i] >= 0) 
@@ -165,8 +184,8 @@ double calc_var(
 
 int * alloc_tips(int n_nodes, const int * ancestor){
 	int n_tips = (n_nodes+1)/2;
-	int * child = (int *) malloc(n_nodes*sizeof(int) );
-	int * tips = (int *) malloc(n_tips*sizeof(int) );
+	int * child = (int *) calloc(n_nodes,sizeof(int) );
+	int * tips = (int *) calloc(n_tips,sizeof(int) );
 	int i, j, k=0, empty;
 	for(i=0; i < n_nodes; i++){ 
 		empty = 1;
@@ -181,6 +200,7 @@ int * alloc_tips(int n_nodes, const int * ancestor){
 		if (child[i] == 0){
 			tips[k] = i;
 			k++;
+	//		printf("%d\n", i);
 		}
 	}
 	free(child);
@@ -208,7 +228,7 @@ double gen_lik(	double Xo, ///< root state
 	int lca;
 
 	int * tips = alloc_tips(n_nodes, ancestor);
-	
+	double sep;
 	for(i = 0; i < n_tips; i++){
 		ki = tips[i];
 		X_EX[i] = traits[ki] - calc_mean(ki, Xo, alpha, theta, sigma, regimes, ancestor, branch_length);
@@ -217,13 +237,14 @@ double gen_lik(	double Xo, ///< root state
 		ki = tips[i];
 		for(j=0; j< n_tips; j++){
 			kj = tips[j];
-			lca = get_lca(ki,kj, n_nodes, ancestor);
+			lca = get_lca(ki,kj, n_nodes, ancestor, branch_length, &sep);
 			V[n_tips*i+j] = calc_var(ki,kj,lca, Xo, alpha, theta, sigma, regimes, ancestor, branch_length);
-//			printf("%.2lf ", V[n_tips*i+j]);
+//			printf("%g\n ", V[n_tips*i+j]);
 		}
 //		printf("\n");
 	}
 //	printf("\n");
+
 
 	llik = log_normal_lik(n_tips, X_EX, V);
 	free(X_EX); 
@@ -242,9 +263,9 @@ int main(void)
 	int n_nodes = 7;
 */
 	int n_nodes = 45;
-	double branch_length[] = { 0, 12./38, 20./38,  2./38,  2./38,  4./38,  
+	double branch_length[] = { 0.0, 12./38, 20./38,  2./38,  2./38,  4./38,  
 							 8./38,  5./38,  5./38,  5./38,  5./38, 10./38,  
-							 9./38,  4./38,  8./38,  2./38, 20/38,  2./38,  
+							 9./38,  4./38,  8./38,  2./38, 20./38,  2./38,  
 							 4./38,  2./38, 1./38,  2./38, 26./38, 4./38, 
 							 2./38, 2./38,  2./38,  2./38, 15./38, 10./38, 
 							 10./38, 10./38, 10./38, 16./38, 12./38,  4./38,  
@@ -256,37 +277,44 @@ int main(void)
 						3,  4,  4,  5,  5,  9, 10, 10, 11, 11, 12, 
 						13, 14, 15, 15, 16, 17, 19, 20, 20, 21, 21};
 
-	double traits[] = { 2.900000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
+	double traits[] = {   0.0000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
 						  0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
 						  0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 2.602690, 2.660260,
 						  2.660260, 2.653242, 2.674149, 2.701361, 3.161247, 3.299534, 3.328627, 3.353407,
 						  3.360375, 3.049273, 2.906901, 2.980619, 2.933857, 2.975530, 3.104587, 3.346389,
 						  2.928524, 2.939162, 2.990720, 3.058707, 3.068053};
-	int regimes[45] = {0};
-	int LP_regimes[] =  {1, 1, 2, 2, 2, 2, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	//int regimes[45] = {0};
+	int regimes[] =  {1, 1, 2, 2, 2, 2, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 						2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1}; 
 
 
-	double Xo = 2.9;
-	double alpha[1] = {0.1921554};
-	double theta[1] = {2.953806};
-	double sigma[1] = {sqrt(0.04836469)};
+	double Xo = 2.953806;
+	double alpha[3] = { 0.192155, 0.192155, 0.192155};
+	double theta[3] = {2.953806,  2.953806, 2.953806}; 
+	double sigma[3] = {sqrt( .048365), sqrt( .048365), sqrt( .048365)};
+/* /
+	double Xo = 3.0407;
+	double alpha[3] = {2.6, 2.6, 2.6};
+	double theta[3] = {2.565, 3.0407, 3.355242 };
+	double sigma[3] = {sqrt(0.0505),  sqrt(0.0505), sqrt(0.0505) };
+*/
+	printf("-llik = %lf\n\n", gen_lik(Xo, alpha, theta, sigma, regimes, ancestor, branch_length, traits, n_nodes) );
 
-	printf("-llik = %lf\n", gen_lik(Xo, alpha, theta, sigma, regimes, ancestor, branch_length, traits, n_nodes) );
 /*
-	int i = 3; int j = 3;
 
+	int i = 44, j = 44;
 	double t = node_age(i, ancestor, branch_length);
 	double mean = (Xo-theta[0])*exp(-alpha[0]*t) + theta[0];
 	double Ex = calc_mean(i, Xo, alpha, theta, sigma, regimes, ancestor, branch_length);
 	printf("Mean: %lf, %lf\n", Ex, mean);
-
-	// double s = 2;
-	//double covar = gsl_pow_2(sigma[0]) / (2*alpha[0]) * ( 1 - exp(-2*alpha[0] * s) )*exp(-2*alpha[0]*(t-s) );
-	
-	int lca = get_lca(i,j, n_nodes, ancestor);
+	double sep;
+	int lca = get_lca(i,j, n_nodes, ancestor, branch_length, &sep);
+	double s = t-sep;
+	double covar = gsl_pow_2(sigma[0]) / (2*alpha[0]) * ( 1 - exp(-2*alpha[0] * s) )*exp(-2*alpha[0]*(t-s) );
 	double Vx = calc_var(i, j, lca, Xo, alpha, theta, sigma, regimes, ancestor, branch_length);
-	printf("Var(%d,%d): %lf\n",i,j, Vx);
+	printf("Var(%d,%d): %g, %lf\n",i,j, Vx, covar);
+
+	printf("%g %g %g %g\n", s, t, gsl_pow_2(sigma[0]), alpha[0]);
 */
 
 	return 0;
