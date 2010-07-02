@@ -4,6 +4,9 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
+double multimin(gsl_vector *x, void * params);
+
+
 
 /** get the last common ancestor of two nodes
  *  This version isn't particularly efficient, but the 
@@ -267,11 +270,12 @@ double optim_func (const gsl_vector *v, void *params)
 	int i, n_regimes = mytree->n_regimes;
 	mytree->Xo = gsl_vector_get(v, 0);
 	for(i = 0; i < n_regimes; i++){
-		mytree->alpha[i] = GSL_MAX(0, v->data[1+i]);
+		mytree->alpha[i] = GSL_MAX(1e-6, v->data[1+i]);
 		mytree->theta[i] = v->data[1+n_regimes+i];
-		mytree->sigma[i] = GSL_MAX(0, v->data[1+2*n_regimes+i]);
+		mytree->sigma[i] = GSL_MAX(1e-6, v->data[1+2*n_regimes+i]);
 	}
-	return calc_lik(mytree->Xo, mytree->alpha, mytree->theta, mytree->sigma, 
+	
+	return -calc_lik(mytree->Xo, mytree->alpha, mytree->theta, mytree->sigma, 
 			 mytree->regimes, mytree->ancestor, mytree->branch_length, mytree->traits, mytree->n_nodes); 
 }
 
@@ -307,6 +311,7 @@ void fit_model(double * Xo,
 		gsl_vector_set(x, 1+*n_regimes+i, theta[i]);
 		gsl_vector_set(x, 1+2 * *n_regimes+i, mytree->sigma[i]);
 	}
+	
 	multimin(x, mytree); 
 }
 
@@ -364,8 +369,6 @@ int main(void)
 	double theta[3] = {3.355242, 3.0407, 2.565};
 	double sigma[3] = {sqrt(0.0505),  sqrt(0.0505), sqrt(0.0505) };
 	int n_regimes = 3;
-
-	printf("-llik = %lf\n\n", calc_lik(Xo, alpha, theta, sigma, regimes, ancestor, branch_length, traits, n_nodes) );
 
 
 	fit_model(&Xo, alpha, theta, sigma, regimes, ancestor, branch_length, traits, &n_nodes, &n_regimes);
