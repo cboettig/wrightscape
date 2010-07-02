@@ -61,15 +61,14 @@ double calc_gamma(int i, const int * ancestor, const double * branch_length, con
  * @f[ E(X_t) = \exp \left( - \sum \alpha_i \Delta t_i \right) \left( X_) + \sum \theta_i \left( e^{\alpha_i t_i}-e^{\alpha_i t_{i-1} } \right) \right)
  */
 double calc_var(
+	int i, int j, ///< nodes being compared
 	double Xo, ///< root state
-	double * alpha, ///< value of alpha in each regime, length n_regimes
-	double * theta, ///< value of theta in each regime
-	double * sigma, ///< value of sigma in each regime
-	int * regimes, ///< specification of the regimes (paintings), length n_nodes
-	int * ancestor, ///< ancestor of the node, length n_nodes
-	double * branch_length, ///< branch length ancestral to the node, length n_nodes
-	int i, ///< Focal tip i
-	int j ///< Focal tip j
+	const double * alpha, ///< value of alpha in each regime, length n_regimes
+	const double * theta, ///< value of theta in each regime
+	const double * sigma, ///< value of sigma in each regime
+	const int * regimes, ///< specification of the regimes (paintings), length n_nodes
+	const int * ancestor, ///< ancestor of the node, length n_nodes
+	const double * branch_length ///< branch length ancestral to the node, length n_nodes
 	)
 {
 
@@ -135,13 +134,18 @@ int main(void)
 	double theta[] = {2};
 	double sigma[] = {1};
 
-	int i = 6;
+	int i = 6; int j = 6;
+
 	double t = node_age(i, ancestor, branch_length);
 	double mean = (Xo-theta[0])*exp(-alpha[0]*t) + theta[0];
 	double gamma = calc_gamma(i, ancestor, branch_length, regimes, alpha);
-
 	printf("%lf %lf \n", alpha[0]*t, gamma);
+
+
 	printf("%lf, %lf\n", calc_mean(i, Xo, alpha, theta, sigma, regimes, ancestor, branch_length), mean);
+
+	double var = gsl_pow_2(sigma[0]) / (2*alpha[0]) * ( 1 - exp(-2*alpha[0] * t) );
+	printf("%lf %lf\n", calc_var(i, j, Xo, alpha, theta, sigma, regimes, ancestor, branch_length), var);
 
 	return 0;
 }
