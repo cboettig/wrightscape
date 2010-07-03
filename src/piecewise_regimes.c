@@ -110,7 +110,8 @@ double calc_mean(
 	const double * theta, ///< value of theta in each regime
 	const int * regimes, ///< specification of the regimes (paintings), length n_nodes
 	const int * ancestor, ///< ancestor of the node, length n_nodes
-	const double * branch_length ///< branch length ancestral to the node, length n_nodes
+	const double * branch_length, ///< branch length ancestral to the node, length n_nodes
+	double * output_gamma
 	)
 {
 	int ri;
@@ -129,6 +130,7 @@ double calc_mean(
 		i = ancestor[i];
 		time = prev_time;
 	}
+	*output_gamma = gamma;
 	return exp(-gamma)*(Xo + omega);
 }
 
@@ -157,11 +159,14 @@ double calc_var(
 	const double * sigma, ///< value of sigma in each regime
 	const int * regimes, ///< specification of the regimes (paintings), length n_nodes
 	const int * ancestor, ///< ancestor of the node, length n_nodes
-	const double * branch_length ///< branch length ancestral to the node, length n_nodes
+	const double * branch_length, ///< branch length ancestral to the node, length n_nodes
+	const double * gamma_vec
 	)
 {
-	long double gamma_i = calc_gamma(i, ancestor, branch_length, regimes, alpha);
-	long double gamma_j = calc_gamma(j, ancestor, branch_length, regimes, alpha);
+//	double gamma_i = calc_gamma(i, ancestor, branch_length, regimes, alpha);
+//	double gamma_j = calc_gamma(j, ancestor, branch_length, regimes, alpha);
+	double gamma_i = gamma_vec[i], gamma_j = gamma_vec[j];
+
 	double time = node_age(lca, ancestor, branch_length); 
 	double prev_time;
 	int ri;
@@ -226,27 +231,31 @@ double calc_lik (
 	int n_tips = (n_nodes+1)/2;
 	double * X_EX = (double *) malloc(n_tips*sizeof(double));
 	double * V = (double *) malloc(n_tips*n_tips*sizeof(double));
+	double * gamma_vec = (double *) calloc(n_nodes,sizeof(double));
 
-	double llik;
+	double llik, mean, gamma_i;
 	int lca;
 
 	int * tips = alloc_tips(n_nodes, ancestor);
 	double sep;
 	for(i = 0; i < n_tips; i++){
 		ki = tips[i];
-		X_EX[i] = traits[ki] - calc_mean(ki, *Xo, alpha, theta, regimes, ancestor, branch_length);
+		mean = calc_mean(ki, *Xo, alpha, theta, regimes, ancestor, branch_length, &gamma_i);
+		X_EX[i] = traits[ki] - mean;
+		gamma_vec[ki] = gamma_i;
 	}
 	for(i=0; i < n_tips; i++){
 		ki = tips[i];
 		for(j=0; j< n_tips; j++){
 			kj = tips[j];
 			lca = lca_matrix[ki*n_nodes+kj];
-			V[n_tips*i+j] = calc_var(ki,kj,lca, alpha, sigma, regimes, ancestor, branch_length);
+			V[n_tips*i+j] = calc_var(ki,kj,lca, alpha, sigma, regimes, ancestor, branch_length, gamma_vec);
 		}
 	}
 
 
 	llik = log_normal_lik(n_tips, X_EX, V);
+	free(gamma_vec);
 	free(X_EX); 
 	free(V);
 	free(tips);
@@ -331,6 +340,8 @@ void fit_model(double * Xo,
 	}
 	
 	multimin(x, mytree);
+//	optim_func(x, mytree);
+
 	gsl_vector_free(x);
 	free(mytree->lca_matrix);
 	free(mytree);
@@ -397,22 +408,6 @@ int main(void)
 	printf("alphas: %g %g %g\n", alpha[0], alpha[1], alpha[2]);
 	printf("thetas: %g %g %g\n", theta[0], theta[1], theta[2]);
 	printf("sigmas: %g %g %g\n", sigma[0], sigma[1], sigma[2]);
-/*
-
-	int i = 44, j = 44;
-	double t = node_age(i, ancestor, branch_length);
-	double mean = (Xo-theta[0])*exp(-alpha[0]*t) + theta[0];
-	double Ex = calc_mean(i, Xo, alpha, theta, regimes, ancestor, branch_length);
-	printf("Mean: %lf, %lf\n", Ex, mean);
-	double sep;
-	int lca = get_lca(i,j, n_nodes, ancestor, branch_length, &sep);
-	double s = t-sep;
-	double covar = gsl_pow_2(sigma[0]) / (2*alpha[0]) * ( 1 - exp(-2*alpha[0] * s) )*exp(-2*alpha[0]*(t-s) );
-	double Vx = calc_var(i, j, lca, alpha, sigma, regimes, ancestor, branch_length);
-	printf("Var(%d,%d): %g, %lf\n",i,j, Vx, covar);
-
-	printf("%g %g %g %g\n", s, t, gsl_pow_2(sigma[0]), alpha[0]);
-*/
 
 	return 0;
 }
