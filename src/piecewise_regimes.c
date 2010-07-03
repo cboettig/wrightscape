@@ -146,6 +146,9 @@ long double calc_gamma(int i, const int * ancestor, const double * branch_length
 
 /**
  * @f[ E(X_t) = \exp \left( - \sum \alpha_i \Delta t_i \right) \left( X_) + \sum \theta_i \left( e^{\alpha_i t_i}-e^{\alpha_i t_{i-1} } \right) \right)
+ *
+ * Function would be faster if it could reuse the gamma values calculated for the means.  
+ * Function would be much faster if it stored gamma
  */
 double calc_var(
 	int i, int j, ///< nodes being compared
@@ -206,7 +209,8 @@ int * alloc_tips(int n_nodes, const int * ancestor){
 /**
  * Consider passing lca matrix to gen_lik
  * */
-double calc_lik (double Xo, ///< root state
+double calc_lik (
+	const double *Xo, ///< root state
 	const double * alpha, ///< value of alpha in each regime, length n_regimes
 	const double * theta, ///< value of theta in each regime
 	const double * sigma, ///< value of sigma in each regime
@@ -214,7 +218,8 @@ double calc_lik (double Xo, ///< root state
 	const int * ancestor, ///< ancestor of the node, length n_nodes
 	const double * branch_length, ///< branch length ancestral to the node, length n_nodes
 	const double * traits, ///< traits
-	int n_nodes
+	int n_nodes, 
+	int * lca_matrix 
 	)
 {
 	int i,j,ki, kj;
@@ -229,13 +234,13 @@ double calc_lik (double Xo, ///< root state
 	double sep;
 	for(i = 0; i < n_tips; i++){
 		ki = tips[i];
-		X_EX[i] = traits[ki] - calc_mean(ki, Xo, alpha, theta, regimes, ancestor, branch_length);
+		X_EX[i] = traits[ki] - calc_mean(ki, *Xo, alpha, theta, regimes, ancestor, branch_length);
 	}
 	for(i=0; i < n_tips; i++){
 		ki = tips[i];
 		for(j=0; j< n_tips; j++){
 			kj = tips[j];
-			lca = get_lca(ki,kj, n_nodes, ancestor, branch_length, &sep);
+			lca = lca_matrix[ki*n_nodes+kj];
 			V[n_tips*i+j] = calc_var(ki,kj,lca, alpha, sigma, regimes, ancestor, branch_length);
 		}
 	}
@@ -259,7 +264,8 @@ typedef struct {
 	double * alpha;
 	double * theta;
 	double * sigma;
-	double Xo;
+	double * Xo;
+	int * lca_matrix;
 } tree;
 
 
@@ -268,7 +274,8 @@ double optim_func (const gsl_vector *v, void *params)
 {
 	tree * mytree = (tree *) params;
 	int i, n_regimes = mytree->n_regimes;
-	mytree->Xo = gsl_vector_get(v, 0);
+	mytree->Xo[0] = mytree->theta[mytree->regimes[0]];   // Force root to match Theta of regime assigned to it, should also reduce vector size!
+//	mytree->Xo[0] = gsl_vector_get(v, 0);
 	for(i = 0; i < n_regimes; i++){
 		mytree->alpha[i] = GSL_MAX(1e-6, v->data[1+i]);
 		mytree->theta[i] = v->data[1+n_regimes+i];
@@ -276,7 +283,7 @@ double optim_func (const gsl_vector *v, void *params)
 	}
 	
 	return -calc_lik(mytree->Xo, mytree->alpha, mytree->theta, mytree->sigma, 
-			 mytree->regimes, mytree->ancestor, mytree->branch_length, mytree->traits, mytree->n_nodes); 
+			 mytree->regimes, mytree->ancestor, mytree->branch_length, mytree->traits, mytree->n_nodes, mytree->lca_matrix); 
 }
 
 void fit_model(double * Xo, 
@@ -290,9 +297,9 @@ void fit_model(double * Xo,
 	int * n_nodes, 
 	int * n_regimes )
 {
-	int i;
+	int i,j;
 	tree * mytree = (tree  *) malloc(sizeof(tree));
-	mytree->Xo = *Xo;
+	mytree->Xo = Xo;
 	mytree->alpha = alpha;
 	mytree->theta = theta;
 	mytree->sigma = sigma;
@@ -304,6 +311,17 @@ void fit_model(double * Xo,
 	mytree->n_regimes = *n_regimes;
 
 
+	/* Save time by calculating least common ancestor ahead of time.
+	 * Though this does the calc for all nodes, only tip ones are used. 
+	 * Current get_lca algorithm is only designed for tips anyway.  */
+	double sep; // separation time, not actually used
+	mytree->lca_matrix = (int *) malloc(gsl_pow_2(*n_nodes) * sizeof(int) );
+	for(i=0; i < *n_nodes; i++){
+		for(j=0; j < *n_nodes; j++){
+			mytree->lca_matrix[*n_nodes*i+j] = get_lca(i,j, *n_nodes, ancestor, branch_length, &sep);
+		}
+	}
+
 	gsl_vector *x = gsl_vector_alloc(1 + 3 * *n_regimes);
 	gsl_vector_set(x, 0, *Xo);
 	for(i = 0; i < *n_regimes; i++){
@@ -312,7 +330,10 @@ void fit_model(double * Xo,
 		gsl_vector_set(x, 1+2 * *n_regimes+i, mytree->sigma[i]);
 	}
 	
-	multimin(x, mytree); 
+	multimin(x, mytree);
+	gsl_vector_free(x);
+	free(mytree->lca_matrix);
+	free(mytree);
 }
 
 
@@ -372,6 +393,10 @@ int main(void)
 
 
 	fit_model(&Xo, alpha, theta, sigma, regimes, ancestor, branch_length, traits, &n_nodes, &n_regimes);
+	printf("Xo = %g\n", Xo);
+	printf("alphas: %g %g %g\n", alpha[0], alpha[1], alpha[2]);
+	printf("thetas: %g %g %g\n", theta[0], theta[1], theta[2]);
+	printf("sigmas: %g %g %g\n", sigma[0], sigma[1], sigma[2]);
 /*
 
 	int i = 44, j = 44;
