@@ -304,7 +304,8 @@ void fit_model(double * Xo,
 	double * branch_length, 
 	double * traits, 
 	int * n_nodes, 
-	int * n_regimes )
+	int * n_regimes,
+	double * llik)
 {
 	int i,j;
 	tree * mytree = (tree  *) malloc(sizeof(tree));
@@ -339,8 +340,7 @@ void fit_model(double * Xo,
 		gsl_vector_set(x, 1+2 * *n_regimes+i, mytree->sigma[i]);
 	}
 	
-	multimin(x, mytree);
-//	optim_func(x, mytree);
+	*llik = multimin(x, mytree);
 
 	gsl_vector_free(x);
 	free(mytree->lca_matrix);
@@ -401,13 +401,13 @@ int main(void)
 	double theta[3] = {3.355242, 3.0407, 2.565};
 	double sigma[3] = {sqrt(0.0505),  sqrt(0.0505), sqrt(0.0505) };
 	int n_regimes = 3;
+	double llik = 0;
 
-
-	fit_model(&Xo, alpha, theta, sigma, regimes, ancestor, branch_length, traits, &n_nodes, &n_regimes);
+	fit_model(&Xo, alpha, theta, sigma, regimes, ancestor, branch_length, traits, &n_nodes, &n_regimes, &llik);
 	printf("Xo = %g\n", Xo);
 	printf("alphas: %g %g %g\n", alpha[0], alpha[1], alpha[2]);
 	printf("thetas: %g %g %g\n", theta[0], theta[1], theta[2]);
 	printf("sigmas: %g %g %g\n", sigma[0], sigma[1], sigma[2]);
-
+	printf("log likelihood: %g\n", llik);
 	return 0;
 }
