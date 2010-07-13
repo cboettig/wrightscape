@@ -4,7 +4,7 @@
 CC = gcc
 CFLAGS = -Wall -lgsl -lgslcblas -lm -O4 -fpic -funroll-loops 
 EXE = piecewise_regimes 
-FILES = piecewise_regimes.c multimin.c siman.c 
+FILES = piecewise_regimes.c multimin.c siman.c mvn.c 
 
 build: $(FILES)
 	$(CC) $(CFLAGS) -o $(EXE) $(FILES)

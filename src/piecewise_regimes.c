@@ -7,6 +7,7 @@
 
 #include "optimizers.h"
 
+int mvn(const gsl_rng * rng, const gsl_vector * mean, gsl_matrix * covar, gsl_vector * ANS);
 
 
 /** get the last common ancestor of two nodes
@@ -101,6 +102,8 @@ double log_normal_lik(int n, double * X_EX, double * V)
 }
 
 
+
+
 /**
  * @f[ E(X_t) = \exp \left( - \sum \alpha_i \Delta t_i \right) \left( X_) + \sum \theta_i \left( e^{\alpha_i t_i}-e^{\alpha_i t_{i-1} } \right) \right)
  */
@@ -137,16 +140,6 @@ double calc_mean(
 
 
 
-long double calc_gamma(int i, const int * ancestor, const double * branch_length, const int * regimes, const double * alpha){
-	long double gamma = 0;
-	while( ancestor[i] >= 0 )
-	{
-		gamma += alpha[regimes[i]] * branch_length[i];
-		i = ancestor[i];
-	}
-	return gamma;
-}
-
 /**
  * @f[ E(X_t) = \exp \left( - \sum \alpha_i \Delta t_i \right) \left( X_) + \sum \theta_i \left( e^{\alpha_i t_i}-e^{\alpha_i t_{i-1} } \right) \right)
  *
@@ -164,8 +157,6 @@ double calc_var(
 	const double * gamma_vec
 	)
 {
-//	double gamma_i = calc_gamma(i, ancestor, branch_length, regimes, alpha);
-//	double gamma_j = calc_gamma(j, ancestor, branch_length, regimes, alpha);
 	double gamma_i = gamma_vec[i], gamma_j = gamma_vec[j];
 
 	double time = node_age(lca, ancestor, branch_length); 
@@ -225,7 +216,7 @@ double calc_lik (
 	const double * branch_length, ///< branch length ancestral to the node, length n_nodes
 	const double * traits, ///< traits
 	int n_nodes, 
-	int * lca_matrix 
+	int * lca_matrix  ///< much faster having this passed in rather than recalculatd
 	)
 {
 	int i,j,ki, kj;
@@ -284,8 +275,8 @@ double optim_func (const gsl_vector *v, void *params)
 {
 	tree * mytree = (tree *) params;
 	int i, n_regimes = mytree->n_regimes;
-	mytree->Xo[0] = mytree->theta[mytree->regimes[0]];   // Force root to match Theta of regime assigned to it, should also reduce vector size!
-//	mytree->Xo[0] = gsl_vector_get(v, 0);
+//	mytree->Xo[0] = mytree->theta[mytree->regimes[0]];   // Force root to match Theta of regime assigned to it, should also reduce vector size!
+	mytree->Xo[0] = gsl_vector_get(v, 0);
 	for(i = 0; i < n_regimes; i++){
 		mytree->alpha[i] = GSL_MAX(1e-6, v->data[1+i]);
 		mytree->theta[i] = v->data[1+n_regimes+i];
@@ -295,6 +286,62 @@ double optim_func (const gsl_vector *v, void *params)
 	return -calc_lik(mytree->Xo, mytree->alpha, mytree->theta, mytree->sigma, 
 			 mytree->regimes, mytree->ancestor, mytree->branch_length, mytree->traits, mytree->n_nodes, mytree->lca_matrix); 
 }
+
+
+
+
+
+
+
+
+
+
+void simulate (const gsl_rng * rng, tree * mytree, gsl_vector * simdata)
+{
+	int i,j,ki, kj;
+	int n_tips = (mytree->n_nodes+1)/2;
+	gsl_vector * EX = gsl_vector_alloc(n_tips);
+	gsl_matrix * V = gsl_matrix_alloc(n_tips,n_tips);
+	double * gamma_vec = (double *) calloc(mytree->n_nodes,sizeof(double));
+	double gamma_i;
+	int lca;
+
+	int * tips = alloc_tips(mytree->n_nodes, mytree->ancestor);
+	for(i = 0; i < n_tips; i++){
+		ki = tips[i];
+		gsl_vector_set( EX,
+						i,
+						calc_mean(ki, *(mytree->Xo), mytree->alpha, 
+								  mytree->theta, mytree->regimes, 
+								  mytree->ancestor, mytree->branch_length, 
+								  &gamma_i)
+					   );
+		gamma_vec[ki] = gamma_i;
+	}
+	for(i=0; i < n_tips; i++){
+		ki = tips[i];
+		for(j=0; j< n_tips; j++){
+			kj = tips[j];
+			lca = mytree->lca_matrix[ki*mytree->n_nodes+kj];
+			gsl_matrix_set(	V, i, j, 
+							calc_var(ki,kj,lca, mytree->alpha, 
+									 mytree->sigma, mytree->regimes, 
+									 mytree->ancestor, mytree->branch_length, 
+									 gamma_vec)
+						  );
+		}
+	}
+
+	mvn(rng, EX, V, simdata); 
+	gsl_vector_free(EX);
+	gsl_matrix_free(V);
+	free(tips);
+	free(gamma_vec);
+}
+
+
+
+
 
 void fit_model(double * Xo, 
 	double * alpha, 
@@ -347,11 +394,35 @@ void fit_model(double * Xo,
 	
 	*llik = multimin(x, mytree);
 
+	int n_tips = (mytree->n_nodes+1)/2;
+	gsl_vector * simdata = gsl_vector_alloc(n_tips);
+	simulate (rng, mytree, simdata);
+	gsl_vector_fprintf(stdout, simdata, "%g");
+	gsl_vector_free(simdata);
+
 	gsl_rng_free(rng);
 	gsl_vector_free(x);
 	free(mytree->lca_matrix);
 	free(mytree);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 int main(void)
