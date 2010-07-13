@@ -1,10 +1,4 @@
-#define INIT_STEP .1
-#define MAX_ITER 5000
-#define ERR_TOL 1e-6
-#define PRINT 1
-#include <gsl/gsl_multimin.h>
-double optim_func (const gsl_vector *v, void *params);
-
+#include "optimizers.h"
 
 double multimin(gsl_vector *x, void * params)
 {

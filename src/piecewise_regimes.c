@@ -4,7 +4,8 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
-double multimin(gsl_vector *x, void * params);
+
+#include "optimizers.h"
 
 
 
@@ -340,8 +341,13 @@ void fit_model(double * Xo,
 		gsl_vector_set(x, 1+2 * *n_regimes+i, mytree->sigma[i]);
 	}
 	
+
+	gsl_rng * rng = gsl_rng_alloc(gsl_rng_default);
+//	*llik = siman(x, mytree, rng);
+	
 	*llik = multimin(x, mytree);
 
+	gsl_rng_free(rng);
 	gsl_vector_free(x);
 	free(mytree->lca_matrix);
 	free(mytree);
@@ -393,6 +399,11 @@ int main(void)
 	double alpha[3] = { 0.192155, 0.192155, 0.192155};
 	double theta[3] = {2.953806,  2.953806, 2.953806}; 
 	double sigma[3] = {sqrt( .048365), sqrt( .048365), sqrt( .048365)};
+
+	double Xo = 1;
+	double alpha[3] = {1., 1., 1.};
+	double theta[3] = {3., 3., 3.};
+	double sigma[3] = {1.,  1., 1. };
 
 */
 
