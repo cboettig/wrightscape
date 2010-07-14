@@ -122,6 +122,9 @@ simulate_wrightscape <- function(tree, regimes, Xo, alpha, theta, sigma){
 }
 
 
+## These should be part of an independent phylogenetic bootstrapping library (or at least file)
+## Consider extending to some other functions, such as ape's ace fn, geiger's ancestral states, etc
+
 LR_bootstrap <- function(true_model, test_model, nboot = 200){
 # Bootstraps the likelihood ratio statistic using boot function
 # Args:
@@ -187,8 +190,6 @@ bootstrap.wrighttree <- function(model, nboot = 200, fit=TRUE)
 	refit_model <- update(model, data=simdata)
 }
 
-
-
 choose_model <- function(model_list, nboot=200){
 	LR <- lapply( 1:(length(model_list)-1),
 					 function(i) LR_bootstrap( model_list[[i]], model_list[[i+1]], nboot )
@@ -200,6 +201,8 @@ choose_model <- function(model_list, nboot=200){
 	LR	
 }
 
+
+
 pretty_plot <- function(LR, main=""){
 	xlim = 1.1*c(min( LR$t, LR$t0), max( LR$t, LR$t0) )
 	hist(LR$t, col="lightblue", border="white", xlab="Likelihood Ratio", cex.axis=1.6, cex.lab=1.6, main=main, xlim=xlim)
@@ -207,62 +210,6 @@ pretty_plot <- function(LR, main=""){
 	p_val <- 1-sum(LR$t < LR$t0)/length(LR$t)  
 	text(LR$t0, 0.5*par()$yaxp[2], paste("p = ", round(p_val, digits=3)), cex=1.6)   # halfway up the vert line
 }
-
-anoles_test <- function(nboot=20){
-#	require(phyloniche)
-	require(wrightscape)
-	data(bimac)
-	tree <- with(bimac,ouchtree(nodes=node,ancestors=ancestor,times=time/max(time),labels=species))
-	bm <- brown(log(bimac['size']), tree)
-	ou1 <- hansen(log(bimac['size']), tree, bimac['OU.1'], 1, 1)
-	ws1 <- wrightscape(log(bimac['size']), tree, bimac['OU.1'], 1, 1)
-	ou2 <- hansen(log(bimac['size']), tree, bimac['OU.LP'], 1, 1)
-	ws2 <- wrightscape(log(bimac['size']), tree, bimac['OU.LP'], (ou2@sqrt.alpha)^2, ou2@sigma)
-
-	model_list <- list(bm = bm, ws1 = ws1, ou2 = ou2, ws2 = ws2)
-	LR <- choose_model(model_list, 100)
-	pretty_plot(LR[[3]])
-
-	
-# some "by hand" methods available
-	LR <- LR_bootstrap(ou2, ws2, n=100)
-	plot(LR)
-	x <- simulate(ws2)
-	up_w <- update(ws2, x$rep.1)
-	up_h <- update(ou2, x$rep.1)
-
-
-}
-
-
-sedges_test <- function(nboot=20){
-#	require(phyloniche)
-	source("/home/cboettig/Documents/ucdavis/research/phylotrees/code/Comparative-Phylogenetics/R/data_formats.R")
-	require(wrightscape)
-	require(maticce)
-	data(carex)
-	attach(carex)
-
-	treedata <- ape2ouch_all(ovales.tree, ovales.data)
-	ou2_regimes <- paintBranches(list(ovales.nodes[[2]]), treedata$tree)
-	ou1_regimes <- as.factor(rep(1, length(ou2_regimes) ))
-	names(ou1_regimes) <- names(ou2_regimes)
-
-# Fit the models
-	bm <- brown(treedata$data, treedata$tree)
-	ws1 <- wrightscape(treedata$data, treedata$tree, ou1_regimes, 1, 1)
-	ou2 <- hansen(treedata$data, treedata$tree, ou2_regimes, 1, 1)
-	ws2 <- wrightscape(treedata$data, treedata$tree, ou2_regimes, (ou2@sqrt.alpha)^2, ou2@sigma)
-
-	model_list <- list(bm = bm, ws1 = ws1, ou2 = ou2, ws2 = ws2)
-	LR <- choose_model(model_list, 100)
-	pretty_plot(LR[[1]], main="support for OU over BM")
-	pretty_plot(LR[[3]], main="support for differential selective strength")
-
-
-		
-	}
-
 
 
 
