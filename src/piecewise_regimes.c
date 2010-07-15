@@ -271,34 +271,6 @@ typedef struct {
 
 
 
-double optim_func (const gsl_vector *v, void *params)
-{
-	tree * mytree = (tree *) params;
-	int i, n_regimes = mytree->n_regimes;
-//	mytree->Xo[0] = mytree->theta[mytree->regimes[0]];   // Force root to match Theta of regime assigned to it, should also reduce vector size!
-	mytree->Xo[0] = gsl_vector_get(v, 0);
-	for(i = 0; i < n_regimes; i++){
-		mytree->alpha[i] = v->data[1+i];
-		mytree->theta[i] = v->data[1+n_regimes+i];
-		mytree->sigma[i] = v->data[1+2*n_regimes+i];
-
-		if( (mytree->alpha[i] < 0) | (mytree->sigma[i] < 0) ){ return GSL_POSINF; }
-		if( (mytree->Xo[i] < 0) | (mytree->theta[i] < 0) ){ return GSL_POSINF; }
-	}
-	
-	return -calc_lik(mytree->Xo, mytree->alpha, mytree->theta, mytree->sigma, 
-			 mytree->regimes, mytree->ancestor, mytree->branch_length, mytree->traits, mytree->n_nodes, mytree->lca_matrix); 
-}
-
-
-
-
-
-
-
-
-
-
 void simulate (const gsl_rng * rng, tree * mytree)
 {
 	int i,j,ki, kj;
@@ -353,6 +325,28 @@ void simulate (const gsl_rng * rng, tree * mytree)
 
 
 
+
+double optim_func (const gsl_vector *v, void *params)
+{
+	tree * mytree = (tree *) params;
+	int i, n_regimes = mytree->n_regimes;
+// Force root to match Theta of regime assigned to it, should also reduce vector size!
+	mytree->Xo[0] = mytree->theta[mytree->regimes[0]];
+ //	mytree->Xo[0] = gsl_vector_get(v, 0);
+	for(i = 0; i < n_regimes; i++){
+		mytree->alpha[i] = v->data[i];
+		mytree->theta[i] = v->data[n_regimes+i];
+		mytree->sigma[i] = v->data[2*n_regimes+i];
+
+		if( (mytree->alpha[i] < 0) | (mytree->sigma[i] < 0) ){ return GSL_POSINF; }
+		if(  mytree->theta[i] < 0 ){ return GSL_POSINF; }
+	}
+	
+	return -calc_lik(mytree->Xo, mytree->alpha, mytree->theta, mytree->sigma, 
+			 mytree->regimes, mytree->ancestor, mytree->branch_length, mytree->traits, mytree->n_nodes, mytree->lca_matrix); 
+}
+
+
 /* Called by R */
 void fit_model(double * Xo, 
 	double * alpha, 
@@ -364,7 +358,8 @@ void fit_model(double * Xo,
 	double * traits, 
 	int * n_nodes, 
 	int * n_regimes,
-	double * llik)
+	double * llik,
+	int * use_siman)
 {
 	int i,j;
 	tree * mytree = (tree  *) malloc(sizeof(tree));
@@ -391,18 +386,20 @@ void fit_model(double * Xo,
 		}
 	}
 
-	gsl_vector *x = gsl_vector_alloc(1 + 3 * *n_regimes);
-	gsl_vector_set(x, 0, *Xo);
+// Force Xo to match theta
+	gsl_vector *x = gsl_vector_alloc(3 * *n_regimes);
+//	gsl_vector_set(x, 0, *Xo);
 	for(i = 0; i < *n_regimes; i++){
-		gsl_vector_set(x, 1+i, alpha[i]);
-		gsl_vector_set(x, 1+*n_regimes+i, theta[i]);
-		gsl_vector_set(x, 1+2 * *n_regimes+i, mytree->sigma[i]);
+		gsl_vector_set(x, i, alpha[i]);
+		gsl_vector_set(x, *n_regimes+i, theta[i]);
+		gsl_vector_set(x, 2 * *n_regimes+i, mytree->sigma[i]);
 	}
-	
 
 	gsl_rng * rng = gsl_rng_alloc(gsl_rng_default);
-//	*llik = siman(x, mytree, rng);
-	*llik = multimin(x, mytree);
+	if(*use_siman)
+		*llik = siman(x, mytree, rng); 
+	else 
+		*llik = multimin(x, mytree);
 
 
 	gsl_rng_free(rng);
@@ -410,6 +407,13 @@ void fit_model(double * Xo,
 	free(mytree->lca_matrix);
 	free(mytree);
 }
+
+
+
+
+
+
+
 
 
 void simulate_model(
@@ -469,24 +473,14 @@ void simulate_model(
 	*llik =  calc_lik(mytree->Xo, mytree->alpha, mytree->theta, mytree->sigma, 
 			 mytree->regimes, mytree->ancestor, mytree->branch_length, mytree->traits, mytree->n_nodes, mytree->lca_matrix);
 
-	for(i=0; i< mytree->n_regimes; i++) printf("%g %g %g\n", mytree->alpha[i], mytree->theta[i], mytree->sigma[i] );
-	printf("sim llik: %g\n", *llik);
+//	for(i=0; i< mytree->n_regimes; i++) printf("%g %g %g\n", mytree->alpha[i], mytree->theta[i], mytree->sigma[i] );
+//	printf("sim llik: %g\n", *llik);
 	
 	gsl_rng_free(rng);
 	gsl_vector_free(x);
 	free(mytree->lca_matrix);
 	free(mytree);
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -546,19 +540,21 @@ int main(void)
 
 */
 
-	double Xo = 3.0407;
+	double Xo = 3;
 	double alpha[3] = {2.6, 2.6, 2.6};
-	double theta[3] = {3.355242, 3.0407, 2.565};
-	double sigma[3] = {sqrt(0.0505),  sqrt(0.0505), sqrt(0.0505) };
+	double theta[3] = {3., 3.,3};
+	double sigma[3] = {.2,  .2, .2 };
 	int n_regimes = 3;
 	double llik = 0;
 
-	fit_model(&Xo, alpha, theta, sigma, regimes, ancestor, branch_length, traits, &n_nodes, &n_regimes, &llik);
-/*	printf("Xo = %g\n", Xo);
+	int use_siman = 1;
+
+	fit_model(&Xo, alpha, theta, sigma, regimes, ancestor, branch_length, traits, &n_nodes, &n_regimes, &llik, &use_siman);
+	printf("Xo = %g\n", Xo);
 	printf("alphas: %g %g %g\n", alpha[0], alpha[1], alpha[2]);
 	printf("thetas: %g %g %g\n", theta[0], theta[1], theta[2]);
 	printf("sigmas: %g %g %g\n", sigma[0], sigma[1], sigma[2]);
-*/
+
 	printf("log likelihood: %g\n", llik);
 
 	double seed = 1.0;

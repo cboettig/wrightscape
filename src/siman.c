@@ -65,8 +65,9 @@ void S1(const gsl_rng * r, void *xp, double step_size)
 	block *x = ((block *) xp);
 	int i = (int) round(gsl_rng_uniform(r) * (x->vec->size-1));
 	gsl_vector_set(x->vec,i,
-		GSL_MAX(0, gsl_vector_get(x->vec,i) + 
-			gsl_ran_gaussian_ziggurat(r,step_size))
+		//GSL_MAX(0, 
+		gsl_vector_get(x->vec,i) + 	gsl_ran_gaussian_ziggurat(r,step_size)
+		//)
 	); 
 }
 	 /* print function */

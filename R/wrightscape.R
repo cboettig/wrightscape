@@ -5,7 +5,7 @@ update.wrighttree <- function(ws, data){
 	wrightscape(data=data, tree=ws$tree, regimes=ws$regimes, Xo=ws$Xo, alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma)
 }
 
-wrightscape <- function(data, tree, regimes, alpha=1, sigma=1, theta = NULL, Xo = NULL){
+wrightscape <- function(data, tree, regimes, alpha=1, sigma=1, theta = NULL, Xo = NULL, use_siman=0){
 
 	# data should be a numeric instead of data.frame.  Should check node names or node order too!
 	dataIn <- data
@@ -58,7 +58,8 @@ wrightscape <- function(data, tree, regimes, alpha=1, sigma=1, theta = NULL, Xo 
 		as.double(data),
 		as.integer(n_nodes),
 		as.integer(n_regimes),
-		double(1)
+		double(1),
+		as.integer(use_siman) #use the simulated annealing approach 
 	  )
 
 	output <- list(data=dataIn, tree=tree, regimes=regimesIn, loglik=o[[11]], Xo = o[[1]], alpha = o[[2]], theta =  o[[3]], sigma = o[[4]]  )  
