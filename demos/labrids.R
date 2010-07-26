@@ -24,7 +24,7 @@ names(protrusion) <- diet_data[,1]
 
 
 # Convert the data, dropping unmatched tips
-labrid <- treedata(labrid_tree, gape)
+labrid <- treedata(labrid_tree, protrusion)
 
 
 
@@ -48,7 +48,7 @@ ws2 <- wrightscape(labrid$data, labrid$tree, regime=parrotfish_regime, (ou2@sqrt
 labrid_models <- list(bm = bm, ws1=ws1, ou2=ou2, ws2=ws2)
 
 	LR <- choose_model(labrid_models, 100)
-	png("labrid_gape.png",width=2000, height=600) 
+	png("labrid_protrusion.png",width=2000, height=600) 
 	par(mfrow=c(1,3))
 	pretty_plot(LR[[1]], main="support for OU over BM")
 	pretty_plot(LR[[2]], main="support for 2 peaks over 1")
