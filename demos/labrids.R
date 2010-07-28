@@ -25,19 +25,19 @@ names(protrusion) <- diet_data[,1]
 
 # Convert the data, dropping unmatched tips
 labrid <- treedata(labrid_tree, gape)
-
-
-
 names(labrid$data) <- rownames(labrid$data)
 labrid <- ape2ouch_all(labrid$phy, labrid$data)
+
+
 # We'll paint the parrotfish a different regime
 parrotfish <- labrid$tree@nodelabels[c(pmatch("Scarus_spinus", labrid$tree@nodelabels), pmatch("Crypto", labrid$tree@nodelabels) )]
 parrotfish_clade <- as.integer(mrcaOUCH(parrotfish, labrid$tree))
-
 parrotfish_regime <- paintBranches(parrotfish_clade, labrid$tree)
 
+# create the single regime mode for ou1
 single_regime <- as.factor(character(labrid$tree@nnodes))
 names(single_regime) <- labrid$tree@nodes
+
 
 bm <- brown(labrid$data, labrid$tree)
 ou1 <- hansen(labrid$data, labrid$tree, regime=single_regime, 1, 1)

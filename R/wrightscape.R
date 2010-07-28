@@ -197,12 +197,13 @@ fast_boot <- function(model, nboot=200){
 }
 
 
-plot.wrightboot <- function(object){
+plot.wrightboot <- function(object, CHECK_OUTLIERS=FALSE){
 	par(mfrow=c(1,3) )
 	n_regimes <- (dim(object)[1]-2)/3
 	alphas <- 3:(2+n_regimes)
 	sigmas <- (3+n_regimes):(2*n_regimes+2)
 	thetas <- (3+2*n_regimes):(3*n_regimes+2)
+	outliers <- numeric(nboot)
 
 	xlim <- c(0, 3*median(object[alphas,]) )
 	ylim <- c(0, max(sapply(alphas, function(i) max(density(object[i,])$y))))
@@ -210,7 +211,7 @@ plot.wrightboot <- function(object){
 	plot(density(object[alphas[1], ]), xlim=xlim, ylim=ylim, xlab="Alpha values", type='n', main="", cex.lab=1.6, cex.axis = 1.6)
 	k <- 1
 	for(i in alphas){
-		outliers <- object[i,] > xlim[2]
+		if(CHECK_OUTLIERS) outliers <- object[i,] > xlim[2]
 		if( sum(outliers) > 0 ) print(paste(sum(outliers), " outliers in alpha ", k))
 		lines(density(object[i,!outliers]), lwd = 3, lty=k)
 		k <- k+1
@@ -221,7 +222,7 @@ plot.wrightboot <- function(object){
 	plot(density(object[sigmas[1], ]), xlim=xlim, ylim=ylim, xlab="Sigma values", type='n', main="", cex.lab=1.6, cex.axis = 1.6)
 	k <- 1
 	for(i in sigmas){
-		outliers <- object[i,] > xlim[2]
+		if(CHECK_OUTLIERS) outliers <- object[i,] > xlim[2]
 		if( sum(outliers) > 0 ) print(paste(sum(outliers), " outliers in sigma ", k))
 		lines(density(object[i,!outliers]), lwd = 3, lty=k)
 		k <- k+1
@@ -232,7 +233,7 @@ plot.wrightboot <- function(object){
 	plot(density(object[thetas[1], ]), xlim=xlim, ylim=ylim, xlab="Theta values", type='n', main="", cex.lab=1.6, cex.axis = 1.6)
 	k <- 1
 	for(i in thetas){
-		outliers <- object[i,] > xlim[2]
+		if(CHECK_OUTLIERS) outliers <- object[i,] > xlim[2]
 		if( sum(outliers) > 0 ) print(paste(sum(outliers), " outliers in theta ", k))
 		lines(density(object[i,!outliers]), lwd = 3, lty=k)
 		k <- k+1
