@@ -177,6 +177,75 @@ LR_bootstrap <- function(true_model, test_model, nboot = 200){
 						object=test_model)
 }
 
+
+fast_boot <- function(model, nboot=200){
+	fits <- lapply(1:nboot, function(i) update(model, data=simulate(model)$rep.1 ) )
+	if(is(fits[[1]], "wrighttree") ){
+		n_regimes <- length( fits[[1]]$sigma )
+		n_pars <- 3*n_regimes+2
+		regime_names <- levels(fits[[1]]$regimes[[1]])
+		alpha_names <- sapply(1:n_regimes, function(i) paste("alpha.", regime_names[i]) )
+		sigma_names <- sapply(1:n_regimes, function(i) paste("sigma.", regime_names[i]) )
+		theta_names <- sapply(1:n_regimes, function(i) paste("theta.", regime_names[i]) )
+
+		X <- sapply(1:nboot, function(i)  c(fits[[i]]$loglik, fits[[i]]$Xo, fits[[i]]$alpha, fits[[i]]$sigma, fits[[i]]$theta ) )
+		rownames(X) <- c("loglik", "Xo", alpha_names, sigma_names, theta_names) 
+	}
+	class(X) <- wrightboot
+	X
+
+}
+
+
+plot.wrightboot <- function(object){
+	par(mfrow=c(1,3) )
+	n_regimes <- (dim(object)[1]-2)/3
+	alphas <- 3:(2+n_regimes)
+	sigmas <- (3+n_regimes):(2*n_regimes+2)
+	thetas <- (3+2*n_regimes):(3*n_regimes+2)
+
+	xlim <- c(0, 3*median(object[alphas,]) )
+	ylim <- c(0, max(sapply(alphas, function(i) max(density(object[i,])$y))))
+
+	plot(density(object[alphas[1], ]), xlim=xlim, ylim=ylim, xlab="Alpha values", type='n', main="", cex.lab=1.6, cex.axis = 1.6)
+	k <- 1
+	for(i in alphas){
+		outliers <- object[i,] > xlim[2]
+		if( sum(outliers) > 0 ) print(paste(sum(outliers), " outliers in alpha ", k))
+		lines(density(object[i,!outliers]), lwd = 3, lty=k)
+		k <- k+1
+	}
+
+	xlim <- c(0, 3*median(object[sigmas,] ) )
+	ylim <- c(0, max(sapply(sigmas, function(i) max(density(object[i,])$y))))
+	plot(density(object[sigmas[1], ]), xlim=xlim, ylim=ylim, xlab="Sigma values", type='n', main="", cex.lab=1.6, cex.axis = 1.6)
+	k <- 1
+	for(i in sigmas){
+		outliers <- object[i,] > xlim[2]
+		if( sum(outliers) > 0 ) print(paste(sum(outliers), " outliers in sigma ", k))
+		lines(density(object[i,!outliers]), lwd = 3, lty=k)
+		k <- k+1
+	}
+
+	xlim <- c(0, 3*median(object[thetas,] ) )
+	ylim <- c(0, max(sapply(thetas, function(i) max(density(object[i,])$y))))
+	plot(density(object[thetas[1], ]), xlim=xlim, ylim=ylim, xlab="Theta values", type='n', main="", cex.lab=1.6, cex.axis = 1.6)
+	k <- 1
+	for(i in thetas){
+		outliers <- object[i,] > xlim[2]
+		if( sum(outliers) > 0 ) print(paste(sum(outliers), " outliers in theta ", k))
+		lines(density(object[i,!outliers]), lwd = 3, lty=k)
+		k <- k+1
+	}
+}
+
+# efficently bootstrap parameters and likelihood ratios
+fast_boot_all <- function(model_list, nboot=200){
+	fits <- fast_boot(model_list[[i]], nboot)
+# still in progress....
+}
+
+
 bootstrap.wrighttree <- function(model, nboot = 200, fit=TRUE)
 {
 # Bootstraps the likelihood ratio statistic using boot function.  Should give bootstraps for all parameters!!!!

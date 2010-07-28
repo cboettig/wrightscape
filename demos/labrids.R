@@ -24,7 +24,7 @@ names(protrusion) <- diet_data[,1]
 
 
 # Convert the data, dropping unmatched tips
-labrid <- treedata(labrid_tree, protrusion)
+labrid <- treedata(labrid_tree, gape)
 
 
 
@@ -44,6 +44,21 @@ ou1 <- hansen(labrid$data, labrid$tree, regime=single_regime, 1, 1)
 ws1 <- wrightscape(labrid$data, labrid$tree, regime=single_regime, 1, 1)
 ou2 <- hansen(labrid$data, labrid$tree, regime=parrotfish_regime, 1, 1)
 ws2 <- wrightscape(labrid$data, labrid$tree, regime=parrotfish_regime, (ou2@sqrt.alpha)^2, ou2@sigma)
+
+
+
+par_boots <- fast_boot(ws2, nboot = 200)
+
+
+png("gape_pars.png", width=800, height=400)
+plot(par_boots)
+legend("topright", c("Wrasses", "Parrotfish"), lty=c(1,2), lwd=2) 
+dev.off()
+
+
+
+
+
 
 labrid_models <- list(bm = bm, ws1=ws1, ou2=ou2, ws2=ws2)
 
