@@ -178,15 +178,21 @@ LR_bootstrap <- function(true_model, test_model, nboot = 200){
 }
 
 
-fast_boot <- function(model, nboot=200){
-	fits <- lapply(1:nboot, function(i) update(model, data=simulate(model)$rep.1 ) )
+fast_boot <- function(model, nboot=200, cpus=1){
+
+	require(snowfall)
+	sfInit(parallel=TRUE, cpus=cpus)
+	sfExportAll()
+	sfLibrary(wrightscape)
+
+	fits <- sfLapply(1:nboot, function(i) update(model, data=simulate(model)$rep.1 ) )
 	if(is(fits[[1]], "wrighttree") ){
 		n_regimes <- length( fits[[1]]$sigma )
 		n_pars <- 3*n_regimes+2
 		regime_names <- levels(fits[[1]]$regimes[[1]])
-		alpha_names <- sapply(1:n_regimes, function(i) paste("alpha.", regime_names[i]) )
-		sigma_names <- sapply(1:n_regimes, function(i) paste("sigma.", regime_names[i]) )
-		theta_names <- sapply(1:n_regimes, function(i) paste("theta.", regime_names[i]) )
+		alpha_names <- sfSapply(1:n_regimes, function(i) paste("alpha.", regime_names[i]) )
+		sigma_names <- sfSapply(1:n_regimes, function(i) paste("sigma.", regime_names[i]) )
+		theta_names <- sfSapply(1:n_regimes, function(i) paste("theta.", regime_names[i]) )
 
 		X <- sapply(1:nboot, function(i)  c(fits[[i]]$loglik, fits[[i]]$Xo, fits[[i]]$alpha, fits[[i]]$sigma, fits[[i]]$theta ) )
 		rownames(X) <- c("loglik", "Xo", alpha_names, sigma_names, theta_names) 
@@ -203,6 +209,7 @@ plot.wrightboot <- function(object, CHECK_OUTLIERS=FALSE){
 	alphas <- 3:(2+n_regimes)
 	sigmas <- (3+n_regimes):(2*n_regimes+2)
 	thetas <- (3+2*n_regimes):(3*n_regimes+2)
+	nboot <- dim(object)[2]
 	outliers <- numeric(nboot)
 
 	xlim <- c(0, 3*median(object[alphas,]) )
@@ -240,12 +247,6 @@ plot.wrightboot <- function(object, CHECK_OUTLIERS=FALSE){
 	}
 }
 
-# efficently bootstrap parameters and likelihood ratios
-fast_boot_all <- function(model_list, nboot=200){
-	fits <- fast_boot(model_list[[i]], nboot)
-# still in progress....
-}
-
 
 bootstrap.wrighttree <- function(model, nboot = 200, fit=TRUE)
 {
@@ -261,11 +262,16 @@ bootstrap.wrighttree <- function(model, nboot = 200, fit=TRUE)
 	refit_model <- update(model, data=simdata)
 }
 
-choose_model <- function(model_list, nboot=200){
-	LR <- lapply( 1:(length(model_list)-1),
+choose_model <- function(model_list, nboot=200, cpus=1){
+	require(snowfall)
+	sfInit(parallel=TRUE, cpus=cpus)
+	sfExportAll()
+	sfLibrary(wrightscape)
+
+	LR <- sfLapply( 1:(length(model_list)-1),
 					 function(i) LR_bootstrap( model_list[[i]], model_list[[i+1]], nboot )
 		  		   )
-	p_vals <- sapply( 1:(length(model_list)-1),
+	p_vals <- sfSapply( 1:(length(model_list)-1),
 			function(i)  sum( LR[[i]]$t < LR[[i]]$t0 )/length(LR[[i]]$t)
 		  )
 	print(p_vals)
