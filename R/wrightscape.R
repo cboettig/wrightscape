@@ -191,7 +191,7 @@ fast_boot <- function(model, nboot=200){
 		X <- sapply(1:nboot, function(i)  c(fits[[i]]$loglik, fits[[i]]$Xo, fits[[i]]$alpha, fits[[i]]$sigma, fits[[i]]$theta ) )
 		rownames(X) <- c("loglik", "Xo", alpha_names, sigma_names, theta_names) 
 	}
-	class(X) <- wrightboot
+	class(X) <- "wrightboot"
 	X
 
 }

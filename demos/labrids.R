@@ -3,13 +3,19 @@
 # This data has not been released
 require(wrightscape)
 require(geiger)
-source("/home/cboettig/Documents/ucdavis/research/phylotrees/code/Comparative-Phylogenetics/R/data_formats.R")
 
 path = "/home/cboettig/Documents/ucdavis/research/phylotrees/data/labrids/"
 labrid_tree <- read.nexus(paste(path, "labrid_tree.nex", sep=""))
 labrid_data <-read.csv(paste(path,"labrid.csv", sep=""))
-rownames(labrid_data) <- labrid_data[,1]
 diet_data <- read.csv(paste(path,"labrid_herbivory.csv", sep=""))
+
+labrid <- format_data(labrid_tree, diet_data, species_names=diet_data[,1],  regimes = 2)  
+
+gapesize <- labrid$data[3]/labrid$data[5]
+bm_ <- brown(gapesize, labrid$tree)
+
+
+rownames(labrid_data) <- labrid_data[,1]
 rownames(diet_data) <- diet_data[,1]
 
 # We'll just use the fin angle data
