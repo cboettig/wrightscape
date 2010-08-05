@@ -20,13 +20,11 @@ ou2 <- hansen(gapesize, labrid$tree, regime=labrid$regimes, 1, 1)
 ws2 <- wrightscape(gapesize, labrid$tree, regime=labrid$regimes, (ou2@sqrt.alpha)^2, ou2@sigma)
 
 
-par_boots <- fast_boot(ws2, nboot = 200)
+par_boots <- fast_boot(ws2, nboot = 100)
 png("gape_pars.png", width=800, height=400)
 plot(par_boots)
 legend("topright", c("Wrasses", "Parrotfish"), lty=c(1,2), lwd=2) 
 dev.off()
-
-
 
 
 labrid_models <- list(bm = bm, ws1=ws1, ou2=ou2, ws2=ws2)
