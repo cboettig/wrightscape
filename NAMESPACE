@@ -1,2 +1,2 @@
 useDynLib(wrightscape)
-export(wrightscape, simulate_wrightscape, simulate.wrighttree, update.wrighttree, LR_bootstrap, pretty_plot, choose_model, fast_boot, format_data)
+export(wrightscape, simulate_wrightscape, simulate.wrighttree, update.wrighttree, LR_bootstrap, pretty_plot, choose_model, fast_boot, format_data, plot.wrightboot, bootstrap.wrighttree)

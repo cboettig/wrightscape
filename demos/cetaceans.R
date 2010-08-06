@@ -1,5 +1,4 @@
 require(wrightscape)
-require(geiger)
 path = "/home/cboettig/Documents/ucdavis/research/phylotrees/data/artiodactyla/"
 
 tree <- read.nexus(paste(path, "artiodactyla_tree.nex", sep=""))

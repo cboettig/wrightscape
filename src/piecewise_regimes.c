@@ -4,7 +4,7 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
-
+#include <gsl/gsl_errno.h>
 #include "optimizers.h"
 
 int mvn(const gsl_rng * rng, const gsl_vector * mean, gsl_matrix * covar, gsl_vector * ANS);
@@ -361,6 +361,9 @@ void fit_model(double * Xo,
 	double * llik,
 	int * use_siman)
 {
+
+//	gsl_set_error_handler_off ();
+
 	int i,j;
 	tree * mytree = (tree  *) malloc(sizeof(tree));
 	mytree->Xo = Xo;
