@@ -197,13 +197,15 @@ fast_boot <- function(model, nboot=200, cpus=1){
 		X <- sapply(1:nboot, function(i)  c(fits[[i]]$loglik, fits[[i]]$Xo, fits[[i]]$alpha, fits[[i]]$sigma, fits[[i]]$theta ) )
 		rownames(X) <- c("loglik", "Xo", alpha_names, sigma_names, theta_names) 
 	}
-	class(X) <- "wrightboot"
-	X
+	out <- list(bootstrap_values = X, model=model, nboot=nboot)
+	class(out) <- "wrightboot"
+	out
 
 }
 
 
-plot.wrightboot <- function(object, CHECK_OUTLIERS=FALSE){
+plot.wrightboot <- function(input, CHECK_OUTLIERS=FALSE){
+	object <- input$bootstrap_values
 	par(mfrow=c(1,3) )
 	n_regimes <- (dim(object)[1]-2)/3
 	alphas <- 3:(2+n_regimes)
@@ -245,6 +247,8 @@ plot.wrightboot <- function(object, CHECK_OUTLIERS=FALSE){
 		lines(density(object[i,!outliers]), lwd = 3, lty=k)
 		k <- k+1
 	}
+	legend("topright", levels(input$model$regimes), lty=1:length(levels(input$model$regimes)), lwd=2) 
+
 }
 
 
@@ -279,7 +283,6 @@ choose_model <- function(model_list, nboot=200, cpus=1){
 }
 
 
-
 pretty_plot <- function(LR, main=""){
 	xlim = 1.1*c(min( LR$t, LR$t0), max( LR$t, LR$t0) )
 	hist(LR$t, col="lightblue", border="white", xlab="Likelihood Ratio", cex.axis=1.6, cex.lab=1.6, main=main, xlim=xlim)
@@ -288,7 +291,11 @@ pretty_plot <- function(LR, main=""){
 	text(LR$t0, 0.5*par()$yaxp[2], paste("p = ", round(p_val, digits=3)), cex=1.6)   # halfway up the vert line
 }
 
-
+# plot the wrightscape tree using the ouch plotting function
+plot.wrighttree <- function(object)
+{
+	plot(object$tree, regimes=object$regimes)
+}
 
 
 

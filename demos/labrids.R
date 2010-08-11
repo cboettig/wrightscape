@@ -25,7 +25,10 @@ labrid <- format_data(labrid_tree, diet_data, species_names=diet_data[,1],  regi
 sfInit(parallel=TRUE, cpu=cpu)
 sfExportAll()
 sfLibrary(wrightscape)
-sfSapply(c(3,4,5,9,10,11), function(i){
+
+i <- 3
+
+#sfSapply(c(3,4,5,9,10,11), function(i){
 	trait_name <- names(labrid$data)[i]	
 	trait <- labrid$data[i]
 
@@ -40,7 +43,7 @@ sfSapply(c(3,4,5,9,10,11), function(i){
 	par_boots <- fast_boot(ws2, nboot = nboot, cpus=cpu)
 	png(paste(trait_name, "_pars.png", sep=""), width=800, height=400)
 	plot(par_boots)
-	legend("topright", c("Wrasses", "Parrotfish"), lty=c(1,2), lwd=2) 
+	legend("topright", levels(ws2$regimes), lty=c(1,2), lwd=2) 
 	dev.off()
 
 

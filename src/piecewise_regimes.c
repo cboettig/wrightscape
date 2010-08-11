@@ -135,6 +135,7 @@ double calc_mean(
 		time = prev_time;
 	}
 	*output_gamma = gamma;
+
 	return exp(-gamma)*(Xo + omega);
 }
 
