@@ -54,7 +54,8 @@ compute_regimes <- function(tree, traits, species_names, regimes){
 	list(regimes=regimes, noregimes=noregimes)
 }
 
-format_data <- function(tree, traits, species_names = NULL, regimes = NULL ){
+## changed default of regimes to 1 from NULL, to handle trivial cases
+format_data <- function(tree, traits, species_names = NULL, regimes = 1 ){
 	require(geiger)
 
 # Function checks that tree and trait match and convert them into a format used by wrightscape
@@ -101,18 +102,20 @@ format_data <- function(tree, traits, species_names = NULL, regimes = NULL ){
 	matched <- treedata(tree, traits, species_names)
 	# treedata returns a matrix which loses class type for trait data.frame
 	# so we restore the the dataframe structure
+
 	if( is(matched$data, "matrix") ){ 
 		matched$data <- as.data.frame(matched$data, stringsAsFactors=FALSE)
-
+		if(is(traits, "data.frame")){
 		for(i in 1:length(traits)){
-			tmp <- class(traits[[i]])
-			if(tmp == "factor") tmp <- "character"
-			class(matched$data[[i]]) <- tmp
+				tmp <- class(traits[[i]])
+				# each datarow that isn't numeric should be a character string (for regime, etc)
+				if(tmp == "factor") tmp <- "character"
+				class(matched$data[[i]]) <- tmp
+			}
 		}
 	} 
 	traits <- matched$data
 	species_names <- rownames(matched$data) 
-
 
 
 
@@ -122,8 +125,15 @@ format_data <- function(tree, traits, species_names = NULL, regimes = NULL ){
    
 	# Makes sure data is reformatted to ouch format matching the tree
 	if( is(traits, "data.frame") ){
-message("traits ouch-formatted as data.frame")
-	    dataIn <- traits[match(tree@nodelabels, species_names),]
+		message("traits ouch-formatted as data.frame")
+		if(length(traits)>1){
+		    dataIn <- traits[match(tree@nodelabels, species_names),]
+		} else {
+			#hack to get around size-1 data-frames 
+			traits[[2]] = NA
+			dataIn <- traits[match(tree@nodelabels, species_names),]
+			dataIn[[2]] <- NULL
+		}
 	} else if(is(traits, "numeric") ){ 
 message("traits ouch-formatted as numeric")
 	    dataIn <- traits[match(tree@nodelabels, species_names)]
@@ -133,8 +143,13 @@ message("traits ouch-formatted as numeric")
 
 
 
-
-	R <- compute_regimes(tree, traits, species_names, regimes) 
+	if(regimes > 1){	
+		R <- compute_regimes(tree, traits, species_names, regimes) 
+	} else {
+		regimes= as.factor(rep(" ", length=tree@nnodes))
+		names(regimes) <- tree@nodes 
+		R <- list(regimes=regimes) 
+	}
 	list(tree=tree, data=dataIn, regimes=R$regimes, noregimes=R$noregimes)
 } 
 

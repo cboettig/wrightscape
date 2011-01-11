@@ -16,4 +16,4 @@ debug:  $(FILES)
 	$(CC) $(CFLAGS) -g -o $(EXE) $(FILES)
 	
 clean:
-	rm *.o *.so 
+	rm *.o 
