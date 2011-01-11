@@ -5,6 +5,14 @@ update.wrighttree <- function(ws, data){
 	wrightscape(data=data, tree=ws$tree, regimes=ws$regimes, Xo=ws$Xo, alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma)
 }
 
+
+simulate.wrighttree <- function(ws){
+	output <- simulate_wrightscape(tree=ws$tree, regimes=ws$regimes, Xo=ws$Xo, alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma)
+}
+
+loglik.wrightree <- function(ws) ws$loglik
+getParameters.wrighttree <- function(ws){ c(alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma, Xo=ws$Xo) }
+
 wrightscape <- function(data, tree, regimes, alpha=1, sigma=1, theta = NULL, Xo = NULL, use_siman=0){
 
 	# data should be a numeric instead of data.frame.  Should check node names or node order too!
@@ -67,10 +75,6 @@ wrightscape <- function(data, tree, regimes, alpha=1, sigma=1, theta = NULL, Xo 
 	output
 }
 
-
-simulate.wrighttree <- function(ws){
-	simulate_wrightscape(tree=ws$tree, regimes=ws$regimes, Xo=ws$Xo, alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma)
-}
 
 simulate_wrightscape <- function(tree, regimes, Xo, alpha, theta, sigma){
 
