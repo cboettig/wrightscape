@@ -1,7 +1,7 @@
 # labrid example
 
 cpu=16
-nboot=200
+nboot=1000
 require(wrightscape)
 require(pmc)
 require(socialR)

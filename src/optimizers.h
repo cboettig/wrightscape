@@ -14,8 +14,8 @@
 
 /* setup parameters for multimin method*/
 #define INIT_STEP .2
-#define MAX_ITER 1000
-#define ERR_TOL 1e-10
+#define MAX_ITER 10000
+#define ERR_TOL 1e-8
 #define PRINT 1
 #include <gsl/gsl_multimin.h>
 
