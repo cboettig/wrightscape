@@ -10,7 +10,7 @@ simulate.wrighttree <- function(ws){
 	output <- simulate_wrightscape(tree=ws$tree, regimes=ws$regimes, Xo=ws$Xo, alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma)
 }
 
-loglik.wrightree <- function(ws) ws$loglik
+loglik.wrighttree <- function(ws) ws$loglik
 getParameters.wrighttree <- function(ws){ c(alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma, Xo=ws$Xo) }
 
 wrightscape <- function(data, tree, regimes, alpha=1, sigma=1, theta = NULL, Xo = NULL, use_siman=0){

@@ -3,7 +3,8 @@
 cpu=16
 nboot=200
 require(wrightscape)
-
+require(pmc)
+require(socialR)
 
 # This data has not been released
 path = "../data/labrids/"
@@ -42,7 +43,7 @@ i <- 3
 save(list=ls(), file="labrids.Rdat")
 
 out <- montecarlotest(ou2, ws2, cpu=cpu,nboot=nboot) 
-
+social_plot(plot(out), tags="phylogenetics", file="labrids.png")
 #})
 
 
