@@ -3,8 +3,8 @@
 #-----------------------------------#
 CC = gcc
 CFLAGS = -Wall -lgsl -lgslcblas -lm -O4 -fpic -funroll-loops 
-EXE = jointprob 
-FILES = jointprob.c tree.c multimin.c regimes.c siman.c matrix_method.c linearsoln.c 
+EXE = piecewise_regimes.exe 
+FILES = piecewise_regimes.c multimin.c siman.c mvn.c 
 
 build: $(FILES)
 	$(CC) $(CFLAGS) -o $(EXE) $(FILES)
@@ -15,4 +15,5 @@ profile: $(FILES)
 debug:  $(FILES)
 	$(CC) $(CFLAGS) -g -o $(EXE) $(FILES)
 	
-
+clean:
+	rm *.o 

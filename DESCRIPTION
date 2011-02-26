@@ -2,8 +2,9 @@ Package: wrightscape
 Version: 0.1-1
 Title: wrightscape
 Description: Phylogenetic comparative methods for arbitrary landscapes
-Depends: geiger
-License: GPL
+Depends: geiger, boot, maticce, snowfall, ouch
+SystemRequirements: Gnu Scientific Library version >= 1.8
+License: GPL-2
 Author: Carl Boettiger
 Maintainer: Carl Boettiger <cboettig@ucdavis.edu> 
 
