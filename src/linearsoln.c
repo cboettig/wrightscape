@@ -52,14 +52,11 @@ double sep_time(int i, int j, tree * mytree)
 		j = mytree->ancestor[j];
 	}
 //	printf("LCA = %d, time = %lf \n", s, time_to_ancestor[k] );
-	
 	sep = time_to_ancestor[k];	
 	free(time_to_ancestor);
 	free(ancestor_list);
 	return 2*sep;
 }
-
-
 
 /**
  * 
