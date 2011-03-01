@@ -72,7 +72,7 @@ double sep_time(int i, int j, tree * mytree)
  * (thus shared time \f$ s_{ij} \f$ since \f$ X_0 \f$. 
  *
  * As  this is multivariate normal, the the log-likelihood is then
- * \f[ -2 \log L = (X - E(X) )^T V^{-1} (X-E(X) ) + N\log(2\pi \det V) \f]
+ * \f[ -2 \log L = (X - E(X) )^T V^{-1} (X-E(X) ) + N\log(2\pi) + log(\det V) \f]
  *
  */
 // Consider functionalizing this more so that most code can be reused in bm, bm_full, etc
@@ -192,7 +192,6 @@ double ou_likelihood(tree * mytree)
 double bm_likelihood(tree * mytree)
 {
 	double sigma2 = mytree->pars[0];
-
 	double root = mytree->trait[0];
 	int n = (mytree->n+1)/2;
 	int i, j;
