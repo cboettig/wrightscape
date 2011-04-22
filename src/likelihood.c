@@ -1,6 +1,6 @@
 /**
 * @file likelihood.c
-* @brief base functions to calculate the likelihood for general multitype OU processes on a phylogenetic tree
+* @brief calculate the likelihood for general multitype OU processes on a phylogenetic tree
 * @author Carl Boettiger <cboettig@gmail.com>
 * @version 0.1
 * @date 2011-04-22
@@ -127,7 +127,7 @@ double log_normal_lik(int n, double * X_EX, double * V)
 }
 
 
-/** Calculate mean for likelihood computation, used by calc_lik 
+/** Calculate mean for likelihood computation, 
  */
 double calc_mean(
 	int i,
@@ -179,9 +179,10 @@ double calc_var(
 	const double * gamma_vec
 	)
 {
-/* FIXME typo in latex equation; breaks Doxygen documentation
- * @f[ E(X_t) = \exp \left( - \sum \alpha_i \Delta t_i \right) \left( X_i)
- * + \sum \theta_i \left( e^{\alpha_i t_i}-e^{\alpha_i t_{i-1} } \right) \right) */
+/** 
+ * @f[ E(X_t) = \exp \left( - \sum \alpha_i \Delta t_i \right)
+ * \left( X_{t_i} + \sum \theta_i \left(
+ * e^{\alpha_i t_i}-e^{\alpha_i t_{i-1} } \right) \right) @f] */
 	double gamma_i = gamma_vec[i], gamma_j = gamma_vec[j];
 
 	double time = node_age(lca, ancestor, branch_length); 
@@ -203,6 +204,14 @@ double calc_var(
 }
 
 
+/**
+* @brief Create a vector of length n tips with the identies of the tip nodes
+*
+* @param n_nodes Total number of nodes (internal and tips)
+* @param ancestor List of ancestors
+*
+* @return an integer array of the tip nodes
+*/
 int * alloc_tips(int n_nodes, const int * ancestor){
 	int n_tips = (n_nodes+1)/2;
 	int * child = (int *) calloc(n_nodes,sizeof(int) );
@@ -228,18 +237,12 @@ int * alloc_tips(int n_nodes, const int * ancestor){
 }
 
 
-double calc_lik (
-	const double *Xo, ///< root state
-	const double * alpha, ///< value of alpha in each regime, length n_regimes
-	const double * theta, ///< value of theta in each regime
-	const double * sigma, ///< value of sigma in each regime
-	const int * regimes, ///< specification of the regimes (paintings), length n_nodes
-	const int * ancestor, ///< ancestor of the node, length n_nodes
-	const double * branch_length, ///< branch length ancestral to the node, length n_nodes
-	const double * traits, ///< traits
-	int n_nodes, 
-	int * lca_matrix  ///< much faster having this passed in rather than recalculatd
-	)
+
+
+double calc_lik (const double *Xo, const double *alpha, const double *theta, 
+	             const double *sigma, const int *regimes, const int *ancestor,
+                 const double * branch_length, const double * traits, 
+                 int n_nodes, int * lca_matrix)
 {
 	int i,j,ki, kj;
 	int n_tips = (n_nodes+1)/2;

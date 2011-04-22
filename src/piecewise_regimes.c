@@ -146,21 +146,12 @@ void calc_lca(int * ancestor, double * branch_length,
 
 
 /** Simulate under the model.  Called by R */
-void simulate_model(
-	double * Xo, 
-	double * alpha, 
-	double * theta, 
-	double * sigma, 
-	int * regimes, 
-	int * ancestor, 
-	double * branch_length,
-	double * traits,
-	int * n_nodes, 
-	int * n_regimes,
-	double * llik, 
-	double * seed
-	)
+void simulate_model (double * Xo, double * alpha, double * theta, 
+                     double * sigma, int * regimes, int * ancestor, 
+                     double * branch_length, double * traits, int * n_nodes,
+                     int * n_regimes, double * llik, double * seed)
 {
+
 	int i,j;
 	tree * mytree = (tree  *) malloc(sizeof(tree));
 	mytree->Xo = Xo;
@@ -174,10 +165,7 @@ void simulate_model(
 	mytree->n_nodes = *n_nodes;
 	mytree->n_regimes = *n_regimes;
 
-
-	/* Save time by calculating least common ancestor ahead of time.
-	 * Though this does the calc for all nodes, only tip ones are used. 
-	 * Current get_lca algorithm is only designed for tips anyway.  */
+	/* Save time by calculating least common ancestor ahead of time. */
 	double sep; // separation time, not actually used
 	mytree->lca_matrix = (int *) malloc(gsl_pow_2(*n_nodes) * sizeof(int) );
 	for(i=0; i < *n_nodes; i++){
@@ -186,6 +174,8 @@ void simulate_model(
 		}
 	}
 
+
+    /* Allocate the parameter vector */
 	gsl_vector *x = gsl_vector_alloc(1 + 3 * *n_regimes);
 	gsl_vector_set(x, 0, *Xo);
 	for(i = 0; i < *n_regimes; i++){
@@ -194,18 +184,19 @@ void simulate_model(
 		gsl_vector_set(x, 1+2 * *n_regimes+i, mytree->sigma[i]);
 	}
 	
-
 	gsl_rng * rng = gsl_rng_alloc(gsl_rng_default);
-
 	gsl_rng_set(rng, *seed);
-	simulate (rng, mytree);
 
+   /* These are the only lines that differ from the fit_models wrapper */ 
+	simulate (rng, mytree);
 	*llik =  calc_lik(mytree->Xo, mytree->alpha, mytree->theta, mytree->sigma, 
-			 mytree->regimes, mytree->ancestor, mytree->branch_length, mytree->traits, mytree->n_nodes, mytree->lca_matrix);
+			          mytree->regimes, mytree->ancestor, mytree->branch_length, 
+                      mytree->traits, mytree->n_nodes, mytree->lca_matrix);
 
 //	for(i=0; i< mytree->n_regimes; i++) printf("%g %g %g\n", mytree->alpha[i], mytree->theta[i], mytree->sigma[i] );
 //	printf("sim llik: %g\n", *llik);
-	
+
+
 	gsl_rng_free(rng);
 	gsl_vector_free(x);
 	free(mytree->lca_matrix);

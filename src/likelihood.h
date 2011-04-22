@@ -37,7 +37,6 @@
 #include "mvn.h"
 
 
-// This wants to live in a header
 typedef struct {
 	size_t n_nodes;
 	size_t n_regimes;
