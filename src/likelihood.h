@@ -54,10 +54,13 @@ typedef struct {
 
 int get_lca (int i, int j, int n_nodes, const int * ancestor, 
              const double * branch_length, double * sep);
+
 void simulate (const gsl_rng * rng, tree * mytree);
-double calc_lik (const double *Xo, const double alpha[], const double *theta,
-                 const double *sigma, const int *regimes, 
-                 const int *ancestor, const double *branch_length, 
-                 const double *traits, int *n_nodes, int *lca_matrix);
+
+double calc_lik (const double *Xo, const double alpha[], 
+                 const double theta[], const double sigma[], 
+                 const int regimes[], const int ancestor[], 
+                 const double branch_length[], const double traits[],
+                 int *n_nodes, int lca_matrix[]);
 
 

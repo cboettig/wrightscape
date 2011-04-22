@@ -171,7 +171,8 @@ void simulate_model (double * Xo, double * alpha, double * theta,
 	mytree->lca_matrix = (int *) malloc(gsl_pow_2(*n_nodes) * sizeof(int) );
 	for(i=0; i < *n_nodes; i++){
 		for(j=0; j < *n_nodes; j++){
-			mytree->lca_matrix[*n_nodes*i+j] = get_lca(i,j, *n_nodes, ancestor, branch_length, &sep);
+			mytree->lca_matrix[*n_nodes*i+j] = 
+                get_lca(i,j, *n_nodes, ancestor, branch_length, &sep);
 		}
 	}
 
