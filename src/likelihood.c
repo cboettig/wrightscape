@@ -239,17 +239,17 @@ int * alloc_tips(int n_nodes, const int * ancestor){
 
 
 
-double calc_lik (const double *Xo, const double *alpha, const double *theta, 
-	             const double *sigma, const int *regimes, const int *ancestor,
-                 const double * branch_length, const double * traits, 
-                 int *n_nodes, int * lca_matrix)
+void calc_lik (const double *Xo, const double alpha[], const double theta[], 
+	             const double sigma[], const int regimes[], const int ancestor[],
+                 const double branch_length[], const double traits[], 
+                 int *n_nodes, int lca_matrix[], double *llik)
 {
 	int i,j,ki, kj;
 	int n_tips = (*n_nodes+1)/2;
 	double *X_EX = (double *) malloc(n_tips * sizeof(double));
 	double *V = (double *) malloc(n_tips * n_tips * sizeof(double));
 	double *gamma_vec = (double *) calloc(*n_nodes, sizeof(double));
-	double llik, mean, gamma_i;
+	double mean, gamma_i;
 	int lca;
 
 	int * tips = alloc_tips(*n_nodes, ancestor);
@@ -274,12 +274,12 @@ double calc_lik (const double *Xo, const double *alpha, const double *theta,
 	}
 
 
-	llik = log_normal_lik(n_tips, X_EX, V);
+	*llik = log_normal_lik(n_tips, X_EX, V);
 	free(gamma_vec);
 	free(X_EX); 
 	free(V);
 	free(tips);
-	return llik;
+//	return llik;
 }
 
 

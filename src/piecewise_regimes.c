@@ -40,9 +40,11 @@ double optim_func (const gsl_vector *v, void *params)
 		if(  mytree->theta[i] < 0 ){ return GSL_POSINF; }
 	}
 	
-	return -calc_lik(mytree->Xo, mytree->alpha, mytree->theta, mytree->sigma,
-    			     mytree->regimes, mytree->ancestor, mytree->branch_length,
-                     mytree->traits, &(mytree->n_nodes), mytree->lca_matrix); 
+	double llik = 0;
+    calc_lik(mytree->Xo, mytree->alpha, mytree->theta, mytree->sigma,
+    		 mytree->regimes, mytree->ancestor, mytree->branch_length,
+             mytree->traits, &(mytree->n_nodes), mytree->lca_matrix, &llik);
+    return -llik;
 }
 
 
@@ -119,7 +121,8 @@ void fit_model(double * Xo,
 
 /* Externally exported function to determine LCA matrix */
 /**
-* @brief Determine the last common ancestor matrix of the tips, used in the likelihood calculation
+* @brief Determine the last common ancestor matrix of the tips,
+* used in the likelihood calculation
 *
 * @param ancestor ancestor of the specified nide
 * @param branch_length double branch lengths below each of the nodes
@@ -133,11 +136,11 @@ void calc_lca(int * ancestor, double * branch_length,
 	/* Save time by calculating least common ancestor ahead of time.
 	 * Though this does the calc for all nodes, only tip ones are used. 
 	 * Current get_lca algorithm is only designed for tips anyway.  */
-	double sep; // separation time, not actually used but lca_matrix wants a handle to it.  
-	lca_matrix = (int *) malloc(gsl_pow_2(*n_nodes) * sizeof(int) );
+	double sep; // separation time, not actually used   
 	for(i=0; i < *n_nodes; i++){
 		for(j=0; j < *n_nodes; j++){
-			lca_matrix[*n_nodes*i+j] = get_lca(i,j, *n_nodes, ancestor, branch_length, &sep);
+			lca_matrix[*n_nodes*i+j] = get_lca(i,j, *n_nodes, ancestor,
+                                               branch_length, &sep);
 		}
 	}
 
@@ -191,9 +194,9 @@ void simulate_model (double * Xo, double * alpha, double * theta,
 
    /* These are the only lines that differ from the fit_models wrapper */ 
 	simulate (rng, mytree);
-	*llik =  calc_lik(mytree->Xo, mytree->alpha, mytree->theta, mytree->sigma, 
-			          mytree->regimes, mytree->ancestor, mytree->branch_length, 
-                      mytree->traits, &(mytree->n_nodes), mytree->lca_matrix);
+	calc_lik(mytree->Xo, mytree->alpha, mytree->theta, mytree->sigma, 
+	         mytree->regimes, mytree->ancestor, mytree->branch_length, 
+             mytree->traits, &(mytree->n_nodes), mytree->lca_matrix, llik);
 
 //	for(i=0; i< mytree->n_regimes; i++) printf("%g %g %g\n", mytree->alpha[i], mytree->theta[i], mytree->sigma[i] );
 //	printf("sim llik: %g\n", *llik);
@@ -271,6 +274,15 @@ int main(void)
 	double llik = 0;
 
 	int use_siman = 0;
+
+    /* Initialize the lca matrix */
+    int * lca = (int *) calloc(n_nodes*n_nodes, sizeof(int));
+   
+   /* test the pure likelihood fn first*/
+    calc_lca(ancestor, branch_length, &n_nodes, lca);
+    calc_lik(&Xo, alpha, theta, sigma, regimes, ancestor, branch_length, traits, &n_nodes, lca, &llik);
+	printf("log likelihood: %g\n", llik);
+
 
 	fit_model(&Xo, alpha, theta, sigma, regimes, ancestor, branch_length, traits, &n_nodes, &n_regimes, &llik, &use_siman);
 	printf("Xo = %g\n", Xo);
