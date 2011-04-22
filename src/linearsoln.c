@@ -1,9 +1,10 @@
 /** 
  * @file linearsoln.c
  * @author Carl Boettiger, <cboettig@gmail.com>
+ *
  * @section DESCRIPTION
  *  
- *  Note: Comments formatted for Doxygen, which generates the documentation files.  
+ * Methods for calculating the likelihood of models that can be solved analytically over the whole tree (BM, OU) 
  *
   */
 
@@ -125,7 +126,7 @@ double ou_likelihood(tree * mytree)
 	t += mytree->time[i];
 
 
-	/** @f$ E(X_t | X_0 ) = X_0 e^{-\alpha t} + \theta (1- e^{-\alpha t}) @f$ */
+	/** the mean is @f$ E(X_t | X_0 ) = X_0 e^{-\alpha t} + \theta (1- e^{-\alpha t}) @f$ */
 	double mean = (root-theta)*exp(-alpha*t) + theta;
 
 	/* Compute E_x */
@@ -134,7 +135,7 @@ double ou_likelihood(tree * mytree)
 		diff_X[i] = traits[i] - mean;
 	}
 
-	/* Compute V: @f$ V_{ij} = \frac{\sigma^2}{2\alpha} (1 - e^{-2 \alpha s}) e^{-2\alpha (t-s)} @f$ */
+	/** Compute V: @f$ V_{ij} = \frac{\sigma^2}{2\alpha} (1 - e^{-2 \alpha s}) e^{-2\alpha (t-s)} @f$ */
 	for(i=0;i<n;i++){
 		for(j=0;j<n;j++){
 			s = t - sep_time(tips[i],tips[j],mytree)/2;
@@ -151,7 +152,7 @@ double ou_likelihood(tree * mytree)
 
 
 
-	/* @f$ -2 \log L = (X - E(X) )^T V^{-1} (X-E(X) ) + N\log(2\pi) + \log(\det V) @f$ */
+	/** Likelihood is: @f$ -2 \log L = (X - E(X) )^T V^{-1} (X-E(X) ) + N\log(2\pi) + \log(\det V) @f$ */
 	// Consider using appropriate blas optimized multiplication, not general matrix-matrix method!!
 	gsl_blas_dgemm (CblasTrans, CblasNoTrans,
 				   1.0, &DIFF.matrix, V_inverse,
@@ -173,11 +174,6 @@ double ou_likelihood(tree * mytree)
 
 	return -Xt_Vi_X/2. -  n*log(2*M_PI)/2. - log(V_det)/2.;
 }
-
-
-
-
-
 
 
 
@@ -252,7 +248,7 @@ double bm_likelihood(tree * mytree)
 	V_det = gsl_linalg_LU_det(&V_view.matrix,signum);
 
 
-	/* @f$ -2 \log L = (X - E(X) )^T V^{-1} (X-E(X) ) + N\log(2\pi \det V) @f$ */
+	/** @f$ -2 \log L = (X - E(X) )^T V^{-1} (X-E(X) ) + N\log(2\pi \det V) @f$ */
 	// Consider using appropriate blas optimized multiplication, not general matrix-matrix method!!
 	gsl_blas_dgemm (CblasTrans, CblasNoTrans,
 				   1.0, &DIFF.matrix, V_inverse,
@@ -278,7 +274,8 @@ double bm_likelihood(tree * mytree)
 
 
 
-/** Likelihood under BM of an ancestral state configuration (all internal as well as tip nodes) */
+/** Likelihood under BM of an ancestral state configuration (all internal as well as tip nodes) 
+ *  This function not yet implemented */
 double bm_ancestral_likelihood(tree * mytree)
 {
 	return 1;

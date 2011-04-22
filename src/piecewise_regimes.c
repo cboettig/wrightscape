@@ -1,3 +1,20 @@
+/** 
+ * @file piecewise_regimes.c
+ * @author Carl Boettiger <cboettig@gmail.com>
+ * @date 17 May 2010
+ *
+ * @section LICENSE 
+ *
+ * GPLv3
+ *
+ * @section DESCRIPTION
+ *
+ * Code for computing the likelihood of a multitype OU process on a phylogenetic tree
+ *
+ */
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -6,8 +23,23 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_errno.h>
 #include "optimizers.h"
+#include "mvn.h"
 
-int mvn(const gsl_rng * rng, const gsl_vector * mean, gsl_matrix * covar, gsl_vector * ANS);
+typedef struct {
+	size_t n_nodes;
+	size_t n_regimes;
+	int * ancestor;
+	int * regimes;
+	double * branch_length;
+	double * traits;
+	double * alpha;
+	double * theta;
+	double * sigma;
+	double * Xo;
+	int * lca_matrix;
+} tree;
+
+
 
 
 /** get the last common ancestor of two nodes
@@ -15,7 +47,6 @@ int mvn(const gsl_rng * rng, const gsl_vector * mean, gsl_matrix * covar, gsl_ve
  *  calculation can in principle be done only once for 
  *  a given tree and stored as a matrix that is passed
  *  to the likelihood function.
- *
  */
 int get_lca(int i, int j, int n_nodes, const int * ancestor, const double * branch_length, double * sep)
 	{
@@ -52,10 +83,10 @@ int get_lca(int i, int j, int n_nodes, const int * ancestor, const double * bran
 	return s;	
 }
 
-
-
-
-double node_age(int i, const int * ancestor, const double * branch_length){
+/** Simple function to compute the age of a node 
+ *  Called by calc_mean and calc_var */
+double node_age(int i, const int * ancestor, const double * branch_length)
+{
 	double time=0;
 	while(ancestor[i] >= 0 )
 	{
@@ -80,10 +111,7 @@ double log_normal_lik(int n, double * X_EX, double * V)
 	gsl_linalg_LU_invert(&V_view.matrix, p, V_inverse);
 	V_det = gsl_linalg_LU_det(&V_view.matrix,signum);
 
-
-
-
-	/* @f$ -2 \log L = (X - E(X) )^T V^{-1} (X-E(X) ) + N\log(2\pi) + \log(\det V) @f$ */
+	/** @f$ -2 \log L = (X - E(X) )^T V^{-1} (X-E(X) ) + N\log(2\pi) + \log(\det V) @f$ */
 	// Consider using appropriate blas optimized multiplication, not general matrix-matrix method!!
 	gsl_blas_dgemm (CblasTrans, CblasNoTrans,
 				   1.0, &DIFF.matrix, V_inverse,
@@ -102,10 +130,8 @@ double log_normal_lik(int n, double * X_EX, double * V)
 }
 
 
-
-
-/**
- * @f[ E(X_t) = \exp \left( - \sum \alpha_i \Delta t_i \right) \left( X_) + \sum \theta_i \left( e^{\alpha_i t_i}-e^{\alpha_i t_{i-1} } \right) \right)
+/** Calculate mean for likelihood computation 
+ * 
  */
 double calc_mean(
 	int i,
@@ -142,8 +168,7 @@ double calc_mean(
 
 
 /**
- * @f[ E(X_t) = \exp \left( - \sum \alpha_i \Delta t_i \right) \left( X_) + \sum \theta_i \left( e^{\alpha_i t_i}-e^{\alpha_i t_{i-1} } \right) \right)
- *
+ * Calculate the variance matrix for the multivariate normal likelihood
  * Function would be faster if it could reuse the gamma values calculated for the means.  
  * Function would be much faster if it stored gamma
  */
@@ -158,6 +183,9 @@ double calc_var(
 	const double * gamma_vec
 	)
 {
+/* FIXME typo in latex equation; breaks Doxygen documentation
+ * @f[ E(X_t) = \exp \left( - \sum \alpha_i \Delta t_i \right) \left( X_i)
+ * + \sum \theta_i \left( e^{\alpha_i t_i}-e^{\alpha_i t_{i-1} } \right) \right) */
 	double gamma_i = gamma_vec[i], gamma_j = gamma_vec[j];
 
 	double time = node_age(lca, ancestor, branch_length); 
@@ -204,9 +232,6 @@ int * alloc_tips(int n_nodes, const int * ancestor){
 }
 
 
-/**
- * Consider passing lca matrix to gen_lik
- * */
 double calc_lik (
 	const double *Xo, ///< root state
 	const double * alpha, ///< value of alpha in each regime, length n_regimes
@@ -254,22 +279,6 @@ double calc_lik (
 	free(tips);
 	return llik;
 }
-
-
-typedef struct {
-	size_t n_nodes;
-	size_t n_regimes;
-	int * ancestor;
-	int * regimes;
-	double * branch_length;
-	double * traits;
-	double * alpha;
-	double * theta;
-	double * sigma;
-	double * Xo;
-	int * lca_matrix;
-} tree;
-
 
 
 void simulate (const gsl_rng * rng, tree * mytree)
@@ -326,7 +335,7 @@ void simulate (const gsl_rng * rng, tree * mytree)
 
 
 
-
+/** This is the likelihood function */
 double optim_func (const gsl_vector *v, void *params)
 {
 	tree * mytree = (tree *) params;
@@ -348,7 +357,7 @@ double optim_func (const gsl_vector *v, void *params)
 }
 
 
-/* Called by R */
+/** Fit the model by maximum likelihood, called by R */
 void fit_model(double * Xo, 
 	double * alpha, 
 	double * theta, 
@@ -414,12 +423,72 @@ void fit_model(double * Xo,
 
 
 
+/* Direct calculation of likelihood, called by R (in progress FIXME) */
+void likelihood_wrightscape(double * Xo, 
+	double * alpha, 
+	double * theta, 
+	double * sigma, 
+	int * regimes, 
+	int * ancestor, 
+	double * branch_length, 
+	double * traits, 
+	int * n_nodes, 
+	int * n_regimes,
+	double * llik)
+{
+
+//	gsl_set_error_handler_off ();
+
+    /* Initialize the tree object */
+	int i,j;
+	tree * mytree = (tree  *) malloc(sizeof(tree));
+	mytree->Xo = Xo;
+	mytree->alpha = alpha;
+	mytree->theta = theta;
+	mytree->sigma = sigma;
+	mytree->regimes = regimes;
+	mytree->ancestor = ancestor;
+	mytree->branch_length = branch_length;
+	mytree->traits = traits;
+	mytree->n_nodes = *n_nodes;
+	mytree->n_regimes = *n_regimes;
+
+    /* Consider passing the lca_matrix up to R for the likelihood function to reuse instead */
+
+	/* Save time by calculating least common ancestor ahead of time.
+	 * Though this does the calc for all nodes, only tip ones are used. 
+	 * Current get_lca algorithm is only designed for tips anyway.  */
+	double sep; // separation time, not actually used
+	mytree->lca_matrix = (int *) malloc(gsl_pow_2(*n_nodes) * sizeof(int) );
+	for(i=0; i < *n_nodes; i++){
+		for(j=0; j < *n_nodes; j++){
+			mytree->lca_matrix[*n_nodes*i+j] = get_lca(i,j, *n_nodes, ancestor, branch_length, &sep);
+		}
+	}
+
+/* Allocate parameter vector */
+gsl_vector *x = gsl_vector_alloc(3 * *n_regimes);
+
+//	gsl_vector_set(x, 0, *Xo);  /* Force Xo to match theta */
+
+/* Initialize the parameter vector */
+	for(i = 0; i < *n_regimes; i++){
+		gsl_vector_set(x, i, alpha[i]);
+		gsl_vector_set(x, *n_regimes+i, theta[i]);
+		gsl_vector_set(x, 2 * *n_regimes+i, mytree->sigma[i]);
+	}
+
+		*llik = multimin(x, mytree);
+
+	gsl_vector_free(x);
+	free(mytree->lca_matrix);
+	free(mytree);
+}
 
 
 
 
-
-
+/** Simulate under the model.  Called by R */
 void simulate_model(
 	double * Xo, 
 	double * alpha, 
@@ -490,7 +559,7 @@ void simulate_model(
 
 
 
-
+/** Test code by running in pure C */
 int main(void)
 {
 /*	
