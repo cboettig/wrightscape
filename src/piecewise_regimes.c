@@ -335,7 +335,7 @@ void simulate (const gsl_rng * rng, tree * mytree)
 
 
 
-/** This is the likelihood function */
+/* optim_func organizes  */
 double optim_func (const gsl_vector *v, void *params)
 {
 	tree * mytree = (tree *) params;
@@ -372,8 +372,11 @@ void fit_model(double * Xo,
 	int * use_siman)
 {
 
+//  Perhaps don't want to see gsl_errors once we're handling in R?
 //	gsl_set_error_handler_off ();
 
+	
+    /** First, initialize the tree structure to facilitate passing all these elements */
 	int i,j;
 	tree * mytree = (tree  *) malloc(sizeof(tree));
 	mytree->Xo = Xo;
@@ -387,7 +390,7 @@ void fit_model(double * Xo,
 	mytree->n_nodes = *n_nodes;
 	mytree->n_regimes = *n_regimes;
 
-
+    /** Second, save time by storing the least common ancestor matrix */
 	/* Save time by calculating least common ancestor ahead of time.
 	 * Though this does the calc for all nodes, only tip ones are used. 
 	 * Current get_lca algorithm is only designed for tips anyway.  */
@@ -399,15 +402,17 @@ void fit_model(double * Xo,
 		}
 	}
 
-// Force Xo to match theta
+    /** Then initialize the vector of parameters to be searched */
 	gsl_vector *x = gsl_vector_alloc(3 * *n_regimes);
-//	gsl_vector_set(x, 0, *Xo);
+//	gsl_vector_set(x, 0, *Xo);  /* Forces Xo to match theta (?) */
 	for(i = 0; i < *n_regimes; i++){
 		gsl_vector_set(x, i, alpha[i]);
 		gsl_vector_set(x, *n_regimes+i, theta[i]);
 		gsl_vector_set(x, 2 * *n_regimes+i, mytree->sigma[i]);
 	}
 
+    /** Select and call a likelihood optimization routine 
+     *  given the tree (with data) and parameters */
 	gsl_rng * rng = gsl_rng_alloc(gsl_rng_default);
 	if(*use_siman)
 		*llik = siman(x, mytree, rng); 
