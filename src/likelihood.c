@@ -242,17 +242,17 @@ int * alloc_tips(int n_nodes, const int * ancestor){
 double calc_lik (const double *Xo, const double *alpha, const double *theta, 
 	             const double *sigma, const int *regimes, const int *ancestor,
                  const double * branch_length, const double * traits, 
-                 int n_nodes, int * lca_matrix)
+                 int *n_nodes, int * lca_matrix)
 {
 	int i,j,ki, kj;
-	int n_tips = (n_nodes+1)/2;
-	double * X_EX = (double *) malloc(n_tips*sizeof(double));
-	double * V = (double *) malloc(n_tips*n_tips*sizeof(double));
-	double * gamma_vec = (double *) calloc(n_nodes,sizeof(double));
+	int n_tips = (*n_nodes+1)/2;
+	double *X_EX = (double *) malloc(n_tips * sizeof(double));
+	double *V = (double *) malloc(n_tips * n_tips * sizeof(double));
+	double *gamma_vec = (double *) calloc(*n_nodes, sizeof(double));
 	double llik, mean, gamma_i;
 	int lca;
 
-	int * tips = alloc_tips(n_nodes, ancestor);
+	int * tips = alloc_tips(*n_nodes, ancestor);
 
     /* Calculate the mean square differences */
 	for(i = 0; i < n_tips; i++){
@@ -267,7 +267,7 @@ double calc_lik (const double *Xo, const double *alpha, const double *theta,
 		ki = tips[i];
 		for(j=0; j< n_tips; j++){
 			kj = tips[j];
-			lca = lca_matrix[ki*n_nodes+kj];
+			lca = lca_matrix[ki * *n_nodes+kj];
 			V[n_tips*i+j] = calc_var(ki,kj,lca, alpha, sigma, regimes,
                                      ancestor, branch_length, gamma_vec);
 		}

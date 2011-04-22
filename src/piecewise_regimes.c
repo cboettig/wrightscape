@@ -40,8 +40,9 @@ double optim_func (const gsl_vector *v, void *params)
 		if(  mytree->theta[i] < 0 ){ return GSL_POSINF; }
 	}
 	
-	return -calc_lik(mytree->Xo, mytree->alpha, mytree->theta, mytree->sigma, 
-			 mytree->regimes, mytree->ancestor, mytree->branch_length, mytree->traits, mytree->n_nodes, mytree->lca_matrix); 
+	return -calc_lik(mytree->Xo, mytree->alpha, mytree->theta, mytree->sigma,
+    			     mytree->regimes, mytree->ancestor, mytree->branch_length,
+                     mytree->traits, &(mytree->n_nodes), mytree->lca_matrix); 
 }
 
 
@@ -191,7 +192,7 @@ void simulate_model (double * Xo, double * alpha, double * theta,
 	simulate (rng, mytree);
 	*llik =  calc_lik(mytree->Xo, mytree->alpha, mytree->theta, mytree->sigma, 
 			          mytree->regimes, mytree->ancestor, mytree->branch_length, 
-                      mytree->traits, mytree->n_nodes, mytree->lca_matrix);
+                      mytree->traits, &(mytree->n_nodes), mytree->lca_matrix);
 
 //	for(i=0; i< mytree->n_regimes; i++) printf("%g %g %g\n", mytree->alpha[i], mytree->theta[i], mytree->sigma[i] );
 //	printf("sim llik: %g\n", *llik);

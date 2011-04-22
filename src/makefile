@@ -3,7 +3,7 @@
 #-----------------------------------#
 CC = gcc
 CFLAGS = -Wall -lgsl -lgslcblas -lm -O4 -fpic -funroll-loops 
-EXE = piecewise_regimes.exe 
+EXE = wrightscape.exe 
 FILES = piecewise_regimes.c likelihood.c multimin.c siman.c mvn.c 
 
 build: $(FILES)
