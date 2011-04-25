@@ -35,13 +35,6 @@ i <- 3
 	ou2 <- hansen(trait, labrid$tree, regime=labrid$regimes, .01, .01)
 	ws2 <- wrightscape(trait, labrid$tree, regime=labrid$regimes, (ou2@sqrt.alpha)^2, ou2@sigma, theta=ou2@theta[[1]])
 
-    data <- trait
-    regimes <- labrid$regimes
-    tree <- labrid$tree
-    sigma <- .01
-    alpha <- .01
-    Xo <- NULL
-
     ouch_test <- ouch(trait, labrid$tree, regime=labrid$regimes)
     brownie_test <- brownie(trait, labrid$tree, regime=labrid$regimes)
 
