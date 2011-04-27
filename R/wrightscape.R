@@ -2,20 +2,32 @@
 
 # update with new data
 update.wrighttree <- function(ws, data){
-	wrightscape(data=data, tree=ws$tree, regimes=ws$regimes, Xo=ws$Xo, alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma)
+	wrightscape(data=data, tree=ws$tree, regimes=ws$regimes, Xo=ws$Xo,
+                alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma)
 }
 
 
 simulate.wrighttree <- function(ws){
-	output <- simulate_wrightscape(tree=ws$tree, regimes=ws$regimes, Xo=ws$Xo, alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma)
+	output <- simulate_wrightscape(tree=ws$tree, regimes=ws$regimes,
+                                   Xo=ws$Xo, alpha=ws$alpha,
+                                   theta=ws$theta, sigma=ws$sigma)
+}
+loglik.wrighttree <- function(ws) ws$loglik
+
+getParameters.wrighttree <- function(ws){
+    c(alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma, Xo=ws$Xo) 
 }
 
-loglik.wrighttree <- function(ws) ws$loglik
-getParameters.wrighttree <- function(ws){ c(alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma, Xo=ws$Xo) }
+simulate.multiOU <- simulate.wrighttree
+loglik.multiOU <- loglik.wrighttree
+getParameters.multiOU <- getParameters.wrighttree
 
-wrightscape <- function(data, tree, regimes, alpha=1, sigma=1, theta = NULL, Xo = NULL, use_siman=0){
 
-	# data should be a numeric instead of data.frame.  Should check node names or node order too!
+wrightscape <- function(data, tree, regimes, alpha=1, sigma=1, 
+                        theta = NULL, Xo = NULL, use_siman=0){
+
+	# data should be a numeric instead of data.frame.  
+    # Should check node names or node order too!
 	dataIn <- data
 	if(is(data, "data.frame") | is(data, "list")) { 
 		data <- data[[1]]
