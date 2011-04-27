@@ -300,6 +300,6 @@ int main(void)
 //	int i;
 //	for(i=0; i < 45; i++) printf("%g\n", traits[i]);
 
-	
+  free(lca);	
 	return 0;
 }

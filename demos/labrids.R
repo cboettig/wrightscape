@@ -1,7 +1,7 @@
 # labrid example
 
 cpu=16
-nboot=1000
+nboot=100
 require(wrightscape)
 require(pmc)
 require(socialR)
@@ -16,7 +16,9 @@ diet_data <- read.csv(paste(path,"labriddata_parrotfish.csv", sep=""))
 for(i in c(3,4,6,7,8)){
 	diet_data[i] <- diet_data[i]/diet_data[5]
 }
-diet_data[5] <- log(diet_data[5]) 
+diet_data[5] <- log(diet_data[5])
+
+## Determine regimes
 labrid <- format_data(labrid_tree, diet_data, species_names=diet_data[,1],  regimes = 2)  
 
 #for(i in 3:11)
@@ -39,11 +41,13 @@ i <- 3
 	ou1 <- hansen(trait, labrid$tree, regime=labrid$noregimes, .01, .01)
 	ou2 <- hansen(trait, labrid$tree, regime=labrid$regimes, .01, .01)
 	ws2 <- wrightscape(trait, labrid$tree, regime=labrid$regimes, (ou2@sqrt.alpha)^2, ou2@sigma, theta=ou2@theta[[1]])
-#	ws2 <- wrightscape(trait, labrid$tree, regime=labrid$regimes, 1, 1, theta=ou2@theta[[1]])
+	ws <- wrightscape(trait, labrid$tree, regime=labrid$regimes, .01, .01, theta=ou2@theta[[1]])
+
+
 save(list=ls(), file="labrids.Rdat")
 
-out <- montecarlotest(ou2, ws2, cpu=cpu,nboot=nboot) 
-social_plot(plot(out), tags="phylogenetics", file="labrids.png")
+#out <- montecarlotest(ou2, ws2, cpu=cpu,nboot=nboot) 
+#social_plot(plot(out), tags="phylogenetics", file="labrids.png")
 #})
 
 

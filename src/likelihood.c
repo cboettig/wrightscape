@@ -292,54 +292,53 @@ void calc_lik (const double *Xo, const double alpha[], const double theta[],
 */
 void simulate (const gsl_rng * rng, tree * mytree)
 {
-	int i,j,ki, kj;
-	int n_tips = (mytree->n_nodes+1)/2;
-	gsl_vector * EX = gsl_vector_alloc(n_tips);
-	gsl_matrix * V = gsl_matrix_alloc(n_tips,n_tips);
-	gsl_vector * simdata = gsl_vector_alloc(n_tips);
-	double * gamma_vec = (double *) calloc(mytree->n_nodes,sizeof(double));
-	double gamma_i;
-	int lca;
+  int i,j,ki, kj;
+  int n_tips = (mytree->n_nodes+1)/2;
+  gsl_vector * EX = gsl_vector_alloc(n_tips);
+  gsl_matrix * V = gsl_matrix_alloc(n_tips,n_tips);
+  gsl_vector * simdata = gsl_vector_alloc(n_tips);
+  double * gamma_vec = (double *) calloc(mytree->n_nodes,sizeof(double));
+  int * tips = alloc_tips(mytree->n_nodes, mytree->ancestor);
 
-	int * tips = alloc_tips(mytree->n_nodes, mytree->ancestor);
-	for(i = 0; i < n_tips; i++){
-		ki = tips[i];
-		gsl_vector_set( EX,
-						i,
-						calc_mean(ki, *(mytree->Xo), mytree->alpha, 
-								  mytree->theta, mytree->regimes, 
-								  mytree->ancestor, mytree->branch_length, 
-								  &gamma_i)
-					   );
-		gamma_vec[ki] = gamma_i;
-	}
-	for(i=0; i < n_tips; i++){
-		ki = tips[i];
-		for(j=0; j< n_tips; j++){
-			kj = tips[j];
-			lca = mytree->lca_matrix[ki*mytree->n_nodes+kj];
-			gsl_matrix_set(	V, i, j, 
-							calc_var(ki,kj,lca, mytree->alpha, 
-									 mytree->sigma, mytree->regimes, 
-									 mytree->ancestor, mytree->branch_length, 
-									 gamma_vec)
-						  );
-		}
-	}
+  double gamma_i;
+  int lca;
 
+  for(i = 0; i < n_tips; i++){
+    ki = tips[i];
+    gsl_vector_set( EX,
+                    i,
+                    calc_mean(ki, *(mytree->Xo), mytree->alpha, 
+                              mytree->theta, mytree->regimes, 
+                              mytree->ancestor, mytree->branch_length, 
+                              &gamma_i));
+    gamma_vec[ki] = gamma_i;
+  }
+  for(i=0; i < n_tips; i++){
+    ki = tips[i];
+    for(j=0; j< n_tips; j++){
+      kj = tips[j];
+      lca = mytree->lca_matrix[ki*mytree->n_nodes+kj];
+      gsl_matrix_set(	V, i, j, 
+                      calc_var(ki,kj,lca, mytree->alpha, 
+                               mytree->sigma, mytree->regimes, 
+                               mytree->ancestor, mytree->branch_length, 
+                               gamma_vec));
+    }
+  }
 
-	mvn(rng, EX, V, simdata);
+  mvn(rng, EX, V, simdata);
 
-	for(i=0; i< n_tips; i++){
-		ki = tips[i];
-		mytree->traits[ki] = gsl_vector_get(simdata,i);
-	}
+  for(i=0; i< n_tips; i++){
+      ki = tips[i];
+      mytree->traits[ki] = gsl_vector_get(simdata,i);
+  }
 
-	gsl_vector_free(EX);
-	gsl_matrix_free(V);
-	free(tips);
-	free(gamma_vec);
-}
+  gsl_vector_free(EX);
+  gsl_matrix_free(V);
+  gsl_vector_free(simdata);
+  free(gamma_vec);
+  free(tips);
+  }
 
 
 

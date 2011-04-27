@@ -16,4 +16,5 @@ debug:  $(FILES)
 	$(CC) $(CFLAGS) -g -o $(EXE) $(FILES)
 	
 clean:
-	rm -f *.o *.exe *.bak 
+	rm -f *.o *.exe *.bak callgrind.* gmon.out
+

@@ -73,10 +73,13 @@ int mvn(gsl_rng * rng, const gsl_vector * mean, gsl_matrix * covar, gsl_vector *
 	gsl_blas_dgemv( CblasTrans, 1.0, x_M_x, rnorms, 0, ANS);
 	gsl_vector_add(ANS, mean);
 	gsl_matrix_free(x_M_x);
+  gsl_vector_free(rnorms);
 
 	return 0;
 	/* answer provided through pass by reference */
 }
+
+
 /*
 int main()
 {

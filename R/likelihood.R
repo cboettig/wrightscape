@@ -31,8 +31,16 @@ wright <- function(data, tree, regimes, Xo=NULL, alpha=1, sigma=1){
         }
         -o$loglik
     }
-    optim(par,f, control=list(maxit=5000)) 
+    optim_output <- optim(par,f, control=list(maxit=5000)) 
 #    optim(par,f, method="L", lower=c(-Inf, rep(0,n_regimes), rep(-Inf, n_regimes), rep(0, n_regimes))) 
+    output <- list(data=data, tree=tree, regimes=regimes, 
+                   loglik=-optim_output$value, Xo=optim_output$par[1], 
+                   alpha=optim_output$par[2:(1+n_regimes)], 
+                   theta=optim_output$par[(2+2*n_regimes):(1+3*n_regimes)],
+                   sigma=optim_output$par[(2+n_regimes):(1+2*n_regimes)],
+                   optim_output=optim_output)
+    class(output) = "wrighttree"
+    output
 }
 
 
@@ -71,7 +79,16 @@ ouch <- function(data, tree, regimes, Xo=NULL, alpha=1, sigma=1){
         }
         -o$loglik
     }
-    optim(par,f) 
+    optim_output <- optim(par,f, control=list(maxit=5000)) 
+#    optim(par,f, method="L", lower=c(-Inf, rep(0,n_regimes), rep(-Inf, n_regimes), rep(0, n_regimes))) 
+    output <- list(data=data, tree=tree, regimes=regimes, 
+                   loglik=-optim_output$value, Xo=optim_output$par[1], 
+                   alpha=optim_output$par[2], 
+                   theta=optim_output$par[-c(1:3)],
+                   sigma=optim_output$par[3],
+                   optim_output=optim_output)
+    class(output) = "wrighttree"
+    output
 }
 
 # Brownie
@@ -97,7 +114,16 @@ brownie <- function(data, tree, regimes, sigma=1){
         o <- multiOU_lik_lca(data, tree, regimes, alpha=alpha, sigma=sigma, theta=theta, Xo=Xo, lca)
         -o$loglik
     }
-    optim(par,f) 
+    optim_output <- optim(par,f, control=list(maxit=5000)) 
+#    optim(par,f, method="L", lower=c(-Inf, rep(0,n_regimes), rep(-Inf, n_regimes), rep(0, n_regimes))) 
+    output <- list(data=data, tree=tree, regimes=regimes, 
+                   loglik=-optim_output$value, Xo=optim_output$par[1], 
+                   alpha=rep(1e-12, n_regimes),
+                   theta=rep(par[1], n_regimes),
+                   sigma=optim_output$par[-1],
+                   optim_output=optim_output)
+    class(output) = "wrighttree"
+    output
 }
 
 
