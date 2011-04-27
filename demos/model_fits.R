@@ -5,7 +5,7 @@ require(pmc)
 require(socialR)
 
 # This data has not been released
-path = "../../../data/labrids/"
+path = "../data/labrids/"
 labrid_tree <- read.nexus(paste(path, "labrid_tree.nex", sep=""))
 fin_data <-read.csv(paste(path,"labrid.csv", sep=""))
 diet_data <- read.csv(paste(path,"labriddata_parrotfish.csv", sep=""))
@@ -29,8 +29,6 @@ i <- 3
 	ou2 <- hansen(trait, labrid$tree, regime=labrid$regimes, .01, .01)
 	ws2 <- wrightscape(trait, labrid$tree, regime=labrid$regimes, (ou2@sqrt.alpha)^2, ou2@sigma, theta=ou2@theta[[1]])
 
-	a <- simulate(ws2)
-	update(ws2, a$rep.1)
 
 ## needs to be fixed, singular lik problems?
     ouch_test <- ouch(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2@sqrt.alpha)^2, sigma=ou2@sigma)
@@ -39,21 +37,22 @@ i <- 3
 
 	brownie_test <- brownie(trait, labrid$tree, regime=labrid$regimes, sigma=ou2@sigma)
 	a <- simulate(brownie_test)
-	update(brownie_test, a$rep.1)
+	b <- update(brownie_test, a$rep.1)
+	a <- simulate(b)
 
 	wright_test <- wright(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2@sqrt.alpha)^2, sigma=ou2@sigma)
 	a <- simulate(wright_test)
-	update(wright_test, a$rep.1)
+	w <- update(wright_test, a$rep.1)
+	a <- simulate(w)
 
-
-cpu <- 16
-sfInit(parallel=TRUE, cpu=cpu)
-sfExportAll()
-sfLibrary(wrightscape)
-sfLibrary(pmc)
+cpu <- 1
+#sfInit(parallel=TRUE, cpu=cpu)
+#sfExportAll()
+#sfLibrary(wrightscape)
+#sfLibrary(pmc)
 
 #out <- montecarlotest(brownie_test, ws2, cpu=1,nboot=2) 
-out <- montecarlotest(brownie_test, wright_test, cpu=cpu,nboot=16) 
+out <- montecarlotest(brownie_test, wright_test, cpu=cpu,nboot=2) 
 social_plot(plot(out), tag="phylogenetics wrightscape labrids")
 #})
 

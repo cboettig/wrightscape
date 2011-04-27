@@ -39,10 +39,10 @@ wright <- function(data, tree, regimes, Xo=NULL, alpha=1, sigma=1){
         sigma <- par[(2+n_regimes):(1+2*n_regimes)]
         theta <- par[(2+2*n_regimes):(1+3*n_regimes)] 
         if (any(alpha < 0)){
-            llik <- -Inf
+            llik <- -1e12
         }
         else if (any(sigma<0)){
-            llik <- -Inf
+            llik <- -1e12
         } else {
             llik<-multiOU_lik_lca(data, tree, regimes, alpha=alpha,
                                   sigma=sigma, theta=theta, Xo=Xo, lca)
