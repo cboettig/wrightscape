@@ -1,3 +1,5 @@
 useDynLib(wrightscape)
 export(wrightscape, simulate_wrightscape, simulate.wrighttree, update.wrighttree, loglik.wrighttree, getParameters.wrighttree, LR_bootstrap, pretty_plot, choose_model, fast_boot, format_data, plot.wrightboot, bootstrap.wrighttree)
-export(multiOU_lik, ouch, brownie, wright)
+
+export(multiOU_lik, ouch, brownie, wright, update.multiOU, simulate.multiOU,
+       loglik.multiOU, getParameters.multiOU)

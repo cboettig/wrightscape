@@ -1,5 +1,14 @@
 #multiou can try and take lca as a parameter option rather than calculating each time, for efficiency
 
+update.multiOU <- function(model, data){
+    switch(model$submodel,
+           wright = wright(model$data, model$tree, model$regimes,
+                           model$Xo, model$alpha, model$sigma),
+           ouch = ouch(model$data, model$tree, model$regimes,
+                       model$Xo, model$alpha, model$sigma),
+           brownie = brownie(model$data, model$tree, model$regimes,
+                             model$sigma))
+}
 wright <- function(data, tree, regimes, Xo=NULL, alpha=1, sigma=1){
     # intialize a parameter vector to optimize: 
     # Xo, alpha, sigma, and the n_regime thetas
@@ -9,8 +18,16 @@ wright <- function(data, tree, regimes, Xo=NULL, alpha=1, sigma=1){
     # Some starting conditions
     if(is.null(Xo)) Xo <- mean(data, na.rm=TRUE) 
     par[1] <- Xo
-    par[2:(1+n_regimes)] <- rep(alpha, n_regimes)
-    par[(2+n_regimes):(1+2*n_regimes)] <- rep(sigma, n_regimes)
+    if(length(alpha) == n_regimes){
+        par[2:(1+n_regimes)] <- alpha
+    } else {
+        par[2:(1+n_regimes)] <- rep(alpha, n_regimes)
+    }
+    if(length(sigma) == n_regimes){
+        par[(2+n_regimes):(1+2*n_regimes)] <- sigma 
+    } else {
+        par[(2+n_regimes):(1+2*n_regimes)] <- rep(sigma, n_regimes)
+    }
     par[(2+2*n_regimes):(1+3*n_regimes)] <- rep(Xo, n_regimes)
 
     lca <- lca_calc(tree)
@@ -22,14 +39,15 @@ wright <- function(data, tree, regimes, Xo=NULL, alpha=1, sigma=1){
         sigma <- par[(2+n_regimes):(1+2*n_regimes)]
         theta <- par[(2+2*n_regimes):(1+3*n_regimes)] 
         if (any(alpha < 0)){
-            o <- list(loglik=-Inf)
+            llik <- -Inf
         }
         else if (any(sigma<0)){
-            o <- list(loglik=-Inf)
+            llik <- -Inf
         } else {
-            o<-multiOU_lik_lca(data, tree, regimes, alpha=alpha, sigma=sigma, theta=theta, Xo=Xo, lca)
+            llik<-multiOU_lik_lca(data, tree, regimes, alpha=alpha,
+                                  sigma=sigma, theta=theta, Xo=Xo, lca)
         }
-        -o$loglik
+        -llik
     }
     optim_output <- optim(par,f, control=list(maxit=5000)) 
 #    optim(par,f, method="L", lower=c(-Inf, rep(0,n_regimes), rep(-Inf, n_regimes), rep(0, n_regimes))) 
@@ -38,8 +56,8 @@ wright <- function(data, tree, regimes, Xo=NULL, alpha=1, sigma=1){
                    alpha=optim_output$par[2:(1+n_regimes)], 
                    theta=optim_output$par[(2+2*n_regimes):(1+3*n_regimes)],
                    sigma=optim_output$par[(2+n_regimes):(1+2*n_regimes)],
-                   optim_output=optim_output)
-    class(output) = "wrighttree"
+                   optim_output=optim_output, submodel="wright")
+    class(output) = "multiOU"
     output
 }
 
@@ -59,7 +77,6 @@ ouch <- function(data, tree, regimes, Xo=NULL, alpha=1, sigma=1){
     par[2] <- alpha
     par[3] <- sigma
     par[-c(1:3)] <- rep(Xo, n_regimes)
-
     lca <- lca_calc(tree)
 
     # Likelihood as a function of optimizable parameters
@@ -69,15 +86,14 @@ ouch <- function(data, tree, regimes, Xo=NULL, alpha=1, sigma=1){
         theta <- par[-c(1:3)]
         sigma <- rep(par[3], n_regimes) # everything else
         if (any(alpha < 0)){ 
-            warning("neg")
-            o <- list(loglik=-Inf)
+            llik <- -Inf
         }
         else if (any(sigma<0)){
-            o <- list(loglik=-Inf)
+            llik <- -Inf
         } else {
-            o <- multiOU_lik_lca(data, tree, regimes, alpha=alpha, sigma=sigma, theta=theta, Xo=Xo, lca)
+            llik <- multiOU_lik_lca(data, tree, regimes, alpha=alpha, sigma=sigma, theta=theta, Xo=Xo, lca)
         }
-        -o$loglik
+        -llik
     }
     optim_output <- optim(par,f, control=list(maxit=5000)) 
 #    optim(par,f, method="L", lower=c(-Inf, rep(0,n_regimes), rep(-Inf, n_regimes), rep(0, n_regimes))) 
@@ -86,8 +102,9 @@ ouch <- function(data, tree, regimes, Xo=NULL, alpha=1, sigma=1){
                    alpha=optim_output$par[2], 
                    theta=optim_output$par[-c(1:3)],
                    sigma=optim_output$par[3],
-                   optim_output=optim_output)
-    class(output) = "wrighttree"
+                   optim_output=optim_output,
+                   submodel="ouch")
+    class(output) = "multiOU"
     output
 }
 
@@ -97,32 +114,35 @@ brownie <- function(data, tree, regimes, sigma=1){
     # intialize a parameter vector to optimize: 
     # Xo, followed by the n_regime sigmas
     n_regimes <- length(levels(regimes))
-    par <- numeric(1+n_regimes)
-
+    pars <- numeric(1+n_regimes)
     # Some starting conditions
-    par[1] <- mean(data, na.rm=TRUE) #Xo
-    par[-1] <- rep(sigma, n_regimes) # sigmas
-
+    pars[1] <- mean(data, na.rm=TRUE) #Xo
+    if(length(sigma) == n_regimes){
+        pars[2:(1+n_regimes)] <- sigma # sigmas
+    } else {
+        pars[2:(1+n_regimes)] <- rep(sigma, n_regimes) # sigmas
+    }
     lca <- lca_calc(tree)
 
     # Likelihood as a function of optimizable parameters
-    f <- function(par){
-        Xo <- par[1]
-        sigma <- par[-1] # everything else
+    f <- function(pars){
+        Xo <- pars[1]
+        sigma <- pars[2:(1+n_regimes)] # everything else
         alpha <- rep(1e-12, n_regimes) 
         theta <- rep(Xo, n_regimes)
-        o <- multiOU_lik_lca(data, tree, regimes, alpha=alpha, sigma=sigma, theta=theta, Xo=Xo, lca)
-        -o$loglik
+        llik <- multiOU_lik_lca(data, tree, regimes, alpha=alpha, sigma=sigma, theta=theta, Xo=Xo, lca)
+        -llik
     }
-    optim_output <- optim(par,f, control=list(maxit=5000)) 
+    optim_output <- optim(pars,f, control=list(maxit=5000)) 
 #    optim(par,f, method="L", lower=c(-Inf, rep(0,n_regimes), rep(-Inf, n_regimes), rep(0, n_regimes))) 
     output <- list(data=data, tree=tree, regimes=regimes, 
                    loglik=-optim_output$value, Xo=optim_output$par[1], 
                    alpha=rep(1e-12, n_regimes),
-                   theta=rep(par[1], n_regimes),
-                   sigma=optim_output$par[-1],
-                   optim_output=optim_output)
-    class(output) = "wrighttree"
+                   theta=rep(pars[1], n_regimes),
+                   sigma=optim_output$par[2:(1+n_regimes)],
+                   optim_output=optim_output,
+                   submodel="brownie")
+    class(output) = "multiOU"
     output
 }
 
@@ -166,7 +186,12 @@ multiOU_lik_lca <- function(data, tree, regimes, alpha=NULL, sigma=NULL, theta=N
 # Args: data -- ouch-style data
 #       tree -- ouch-tree
 #       regimes -- painting of selective regimes, as in ouch
+#       alpha -- (vector length n_regimes) gives strength of selection in each regime
+#       sigma -- (vector length n_regimes) gives diversification rate in each regime
+#       theta -- (vector length n_regimes) gives optimum trait in each regime
+#       Xo -- root value
 #       lca -- least common ancestor matrix, from lca_calc fun
+# Returns: log likelihood 
 
     ## ERROR HANDLING, write this as a seperate function
 	# data should be a numeric instead of data.frame.  Should check node names or node order too!
@@ -207,12 +232,20 @@ multiOU_lik_lca <- function(data, tree, regimes, alpha=NULL, sigma=NULL, theta=N
             as.double(branch_length), as.double(data), as.integer(n_nodes),
             as.integer(lca), as.double(llik))
 
-	output <- list(data=dataIn, tree=tree, regimes=regimesIn, loglik=o[[11]], Xo = o[[1]], alpha = o[[2]], theta =  o[[3]], sigma = o[[4]]  )  
-	class(output) <- "wrighttree"
-	output
+# loglikelhood
+	o[[11]] 
 }
 
 
+
+
+
+
+
+
+## Recalculates lca each time, useful for a single call, 
+# but too slow to use in optimization.  
+# Currently exported, while separate lca and multiOU_lik functions are not.  
 multiOU_lik <- function(data, tree, regimes, alpha=NULL, sigma=NULL, theta=NULL, Xo=NULL){
 
     ## ERROR HANDLING, write this as a seperate function
@@ -261,7 +294,8 @@ multiOU_lik <- function(data, tree, regimes, alpha=NULL, sigma=NULL, theta=NULL,
             as.double(branch_length), as.double(data), as.integer(n_nodes),
             as.integer(lca[[4]]), as.double(llik))
 
-	output <- list(data=dataIn, tree=tree, regimes=regimesIn, loglik=o[[11]], Xo = o[[1]], alpha = o[[2]], theta =  o[[3]], sigma = o[[4]]  )  
-	class(output) <- "wrighttree"
+	output <- list(data=dataIn, tree=tree, regimes=regimesIn, loglik=o[[11]], Xo=o[[1]],
+                   alpha = o[[2]], theta =  o[[3]], sigma = o[[4]]  )  
+	class(output) <- "multiOU"
 	output
 }
