@@ -28,6 +28,8 @@ i <- 3
 	ou1 <- hansen(trait, labrid$tree, regime=labrid$noregimes, .01, .01)
 	ou2 <- hansen(trait, labrid$tree, regime=labrid$regimes, .01, .01)
 	ws2 <- wrightscape(trait, labrid$tree, regime=labrid$regimes, (ou2@sqrt.alpha)^2, ou2@sigma, theta=ou2@theta[[1]])
+	brownie_test <- brownie(trait, labrid$tree, regime=labrid$regimes, sigma=ou2@sigma)
+	wright_test <- wright(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2@sqrt.alpha)^2, sigma=ou2@sigma)
 
 
 ## needs to be fixed, singular lik problems?
@@ -35,25 +37,18 @@ i <- 3
 	#a <- simulate(ouch_test)
 	# update(ouch_test, a)
 
-	brownie_test <- brownie(trait, labrid$tree, regime=labrid$regimes, sigma=ou2@sigma)
-	a <- simulate(brownie_test)
-	b <- update(brownie_test, a)
-	a <- simulate(b)
-
-	wright_test <- wright(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2@sqrt.alpha)^2, sigma=ou2@sigma)
-	a <- simulate(wright_test)
-	w <- update(wright_test, a)
-	a <- simulate(w)
-
+	
 cpu <- 16
+nboot <- 160
 sfInit(parallel=TRUE, cpu=cpu)
 sfExportAll()
-sfLibrary(wrightscape)
+sfLibrary(wrightscape)  # need all this just to export wrightscape?
 sfLibrary(pmc)
 
-#out <- montecarlotest(brownie_test, ws2, cpu=1,nboot=2) 
-out <- montecarlotest(brownie_test, wright_test, cpu=cpu,nboot=16) 
-social_plot(plot(out), tag="phylogenetics wrightscape labrids")
+out <- montecarlotest(brownie_test, ws2, cpu=cpu,nboot=nboot) 
+social_plot(plot(out), tag="phylogenetics wrightscape labrids ws2")
+out2 <- montecarlotest(brownie_test, wright_test, cpu=cpu,nboot=nboot) 
+social_plot(plot(out2), tag="phylogenetics wrightscape labrids")
 #})
 
 
