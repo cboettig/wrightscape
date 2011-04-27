@@ -28,28 +28,34 @@ i <- 3
 	ou1 <- hansen(trait, labrid$tree, regime=labrid$noregimes, .01, .01)
 	ou2 <- hansen(trait, labrid$tree, regime=labrid$regimes, .01, .01)
 	ws2 <- wrightscape(trait, labrid$tree, regime=labrid$regimes, (ou2@sqrt.alpha)^2, ou2@sigma, theta=ou2@theta[[1]])
-a <- simulate(ws)
-update(ws, a)
 
+## needs to be fixed, list error
+#	a <- simulate(ws2)
+#	update(ws2, a)
+
+## needs to be fixed, singular lik problems?
     ouch_test <- ouch(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2@sqrt.alpha)^2, sigma=ou2@sigma)
-#a <- simulate(ouch_test)
-# update(ouch_test, a)
+	#a <- simulate(ouch_test)
+	# update(ouch_test, a)
 
-brownie_test <- brownie(trait, labrid$tree, regime=labrid$regimes, sigma=ou2@sigma)
-a <- simulate(brownie_test)
-update(brownie_test, a)
+	brownie_test <- brownie(trait, labrid$tree, regime=labrid$regimes, sigma=ou2@sigma)
+	a <- simulate(brownie_test)
+	update(brownie_test, a)
 
-wright_test <- wright(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2@sqrt.alpha)^2, sigma=ou2@sigma)
-a <- simulate(wright_test)
-update(wright_test, a)
-#sfInit(parallel=TRUE, cpu=2)
-#sfExportAll()
-#sfLibrary(wrightscape)
-#sfLibrary(pmc)
+	wright_test <- wright(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2@sqrt.alpha)^2, sigma=ou2@sigma)
+	a <- simulate(wright_test)
+	update(wright_test, a)
+
+
+cpu <- 16
+sfInit(parallel=TRUE, cpu=cpu)
+sfExportAll()
+sfLibrary(wrightscape)
+sfLibrary(pmc)
 
 #out <- montecarlotest(brownie_test, ws2, cpu=1,nboot=2) 
-out <- montecarlotest(brownie_test, wright_test, cpu=1,nboot=2) 
-
+out <- montecarlotest(brownie_test, wright_test, cpu=cpu,nboot=16) 
+social_plot(plot(out), tag="phylogenetics wrightscape labrids")
 #})
 
 
