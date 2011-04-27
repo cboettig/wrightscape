@@ -45,14 +45,14 @@ i <- 3
 	w <- update(wright_test, a)
 	a <- simulate(w)
 
-cpu <- 1
-#sfInit(parallel=TRUE, cpu=cpu)
-#sfExportAll()
-#sfLibrary(wrightscape)
-#sfLibrary(pmc)
+cpu <- 16
+sfInit(parallel=TRUE, cpu=cpu)
+sfExportAll()
+sfLibrary(wrightscape)
+sfLibrary(pmc)
 
 #out <- montecarlotest(brownie_test, ws2, cpu=1,nboot=2) 
-out <- montecarlotest(brownie_test, wright_test, cpu=cpu,nboot=2) 
+out <- montecarlotest(brownie_test, wright_test, cpu=cpu,nboot=16) 
 social_plot(plot(out), tag="phylogenetics wrightscape labrids")
 #})
 
