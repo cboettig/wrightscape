@@ -11,6 +11,7 @@ simulate.wrighttree <- function(ws){
 	output <- simulate_wrightscape(tree=ws$tree, regimes=ws$regimes,
                                    Xo=ws$Xo, alpha=ws$alpha,
                                    theta=ws$theta, sigma=ws$sigma)
+  output$rep.1
 }
 loglik.wrighttree <- function(ws) ws$loglik
 

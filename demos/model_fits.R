@@ -37,12 +37,12 @@ i <- 3
 
 	brownie_test <- brownie(trait, labrid$tree, regime=labrid$regimes, sigma=ou2@sigma)
 	a <- simulate(brownie_test)
-	b <- update(brownie_test, a$rep.1)
+	b <- update(brownie_test, a)
 	a <- simulate(b)
 
 	wright_test <- wright(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2@sqrt.alpha)^2, sigma=ou2@sigma)
 	a <- simulate(wright_test)
-	w <- update(wright_test, a$rep.1)
+	w <- update(wright_test, a)
 	a <- simulate(w)
 
 cpu <- 1
