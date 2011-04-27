@@ -239,6 +239,22 @@ int * alloc_tips(int n_nodes, const int * ancestor){
 
 
 
+/**
+* @brief Calculate the likelihood of a multitype OU model (callable from R) 
+*
+* @param Xo  Root value
+* @param alpha[] selective strength in each regime 
+* @param theta[] optimum in each regime
+* @param sigma[] diversification rate in each regime
+* @param regimes[] specify the regime each node belongs to
+* @param ancestor[] specify the ancestor of each node (thus the topology)
+* @param branch_length[] length of the branch below each node
+* @param traits[] trait value observed at each node (tips only)
+* @param n_nodes total number of nodes
+* @param lca_matrix[] a n_nodes^2 matrix of least common ancestor for each pair,
+*  computed by the lca_calc function once per tree for efficiency.
+* @param llik the likelihood returned by the function
+*/
 void calc_lik (const double *Xo, const double alpha[], const double theta[], 
 	             const double sigma[], const int regimes[], const int ancestor[],
                  const double branch_length[], const double traits[], 
@@ -279,7 +295,6 @@ void calc_lik (const double *Xo, const double alpha[], const double theta[],
 	free(X_EX); 
 	free(V);
 	free(tips);
-//	return llik;
 }
 
 

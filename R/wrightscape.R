@@ -16,7 +16,8 @@ simulate.wrighttree <- function(ws){
 loglik.wrighttree <- function(ws) ws$loglik
 
 getParameters.wrighttree <- function(ws){
-    c(alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma, Xo=ws$Xo) 
+    c(alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma,
+      Xo=ws$Xo, ws$convergence) 
 }
 
 simulate.multiOU <- simulate.wrighttree
@@ -28,18 +29,22 @@ wrightscape <- function(data, tree, regimes, alpha=1, sigma=1,
                         theta = NULL, Xo = NULL, use_siman=0){
 
 	# data should be a numeric instead of data.frame.  
-    # Should check node names or node order too!
+  # Should check node names or node order too!
 	dataIn <- data
 	if(is(data, "data.frame") | is(data, "list")) { 
 		data <- data[[1]]
-		if( !is(data, "numeric")) {stop("data should be data frame or numeric") }
+		if( !is(data, "numeric")) {
+      stop("data should be data frame or numeric") 
+    }
 	}
 
 	# regimes should be a factor instead of data.frame
 	regimesIn <- regimes
 	if(is(regimes, "data.frame")) { 
 		regimes <- regimes[[1]]
-		if( !is(regimes, "factor")) {stop("unable to interpret regimes") }
+		if( !is(regimes, "factor")) {
+      stop("unable to interpret regimes") 
+    }
 	}
 
 
@@ -123,6 +128,13 @@ simulate_wrightscape <- function(tree, regimes, Xo, alpha, theta, sigma){
 	regimes <- as.integer(regimes)-1  # convert to C-style indexing
 
 	seed <- runif(1)*2^16
+
+
+	if(length(alpha) == 1){ alpha <- rep(alpha, n_regimes) }
+	if(is.null(theta)) { theta <- rep(Xo, n_regimes) }
+	if(length(sigma) == 1) { sigma <- rep(sigma, n_regimes) }
+
+
 
 	o<- .C("simulate_model",
 		as.double(Xo),

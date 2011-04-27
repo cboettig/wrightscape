@@ -64,6 +64,7 @@ void fit_model(double * Xo,
 {
 
 //  Perhaps don't want to see gsl_errors once we're handling in R?
+//  Still want better/smarter behavior of the optimizer 
 //	gsl_set_error_handler_off ();
 	
     /** First, initialize the tree structure to facilitate passing all these elements */
