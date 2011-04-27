@@ -5,7 +5,7 @@ require(pmc)
 require(socialR)
 
 # This data has not been released
-path = "../../../data/labrids/"
+path = "../data/labrids/"
 labrid_tree <- read.nexus(paste(path, "labrid_tree.nex", sep=""))
 fin_data <-read.csv(paste(path,"labrid.csv", sep=""))
 diet_data <- read.csv(paste(path,"labriddata_parrotfish.csv", sep=""))
@@ -38,7 +38,7 @@ i <- 3
 #sfLibrary(pmc)
 
 #out <- montecarlotest(brownie_test, ws2, cpu=1,nboot=2) 
-#out <- montecarlotest(brownie_test, wright_test, cpu=1,nboot=2) 
+out <- montecarlotest(brownie_test, wright_test, cpu=1,nboot=2) 
 
 #})
 
