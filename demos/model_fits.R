@@ -5,7 +5,7 @@ require(pmc)
 require(socialR)
 
 # This data has not been released
-path = "../data/labrids/"
+path = "../../../data/labrids/"
 labrid_tree <- read.nexus(paste(path, "labrid_tree.nex", sep=""))
 fin_data <-read.csv(paste(path,"labrid.csv", sep=""))
 diet_data <- read.csv(paste(path,"labriddata_parrotfish.csv", sep=""))
@@ -29,9 +29,8 @@ i <- 3
 	ou2 <- hansen(trait, labrid$tree, regime=labrid$regimes, .01, .01)
 	ws2 <- wrightscape(trait, labrid$tree, regime=labrid$regimes, (ou2@sqrt.alpha)^2, ou2@sigma, theta=ou2@theta[[1]])
 
-## needs to be fixed, list error
-#	a <- simulate(ws2)
-#	update(ws2, a)
+	a <- simulate(ws2)
+	update(ws2, a$rep.1)
 
 ## needs to be fixed, singular lik problems?
     ouch_test <- ouch(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2@sqrt.alpha)^2, sigma=ou2@sigma)
@@ -40,11 +39,11 @@ i <- 3
 
 	brownie_test <- brownie(trait, labrid$tree, regime=labrid$regimes, sigma=ou2@sigma)
 	a <- simulate(brownie_test)
-	update(brownie_test, a)
+	update(brownie_test, a$rep.1)
 
 	wright_test <- wright(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2@sqrt.alpha)^2, sigma=ou2@sigma)
 	a <- simulate(wright_test)
-	update(wright_test, a)
+	update(wright_test, a$rep.1)
 
 
 cpu <- 16

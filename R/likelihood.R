@@ -2,11 +2,11 @@
 
 update.multiOU <- function(model, data){
     switch(model$submodel,
-           wright = wright(model$data, model$tree, model$regimes,
+           wright = wright(data, model$tree, model$regimes,
                            model$Xo, model$alpha, model$sigma),
-           ouch = ouch(model$data, model$tree, model$regimes,
+           ouch = ouch(data, model$tree, model$regimes,
                        model$Xo, model$alpha, model$sigma),
-           brownie = brownie(model$data, model$tree, model$regimes,
+           brownie = brownie(data, model$tree, model$regimes,
                              model$sigma))
 }
 wright <- function(data, tree, regimes, Xo=NULL, alpha=1, sigma=1){

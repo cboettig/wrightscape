@@ -2,8 +2,8 @@
 
 # update with new data
 update.wrighttree <- function(ws, data){
-	wrightscape(data=data, tree=ws$tree, regimes=ws$regimes, Xo=ws$Xo,
-                alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma)
+	wrightscape(data=data, tree=ws$tree, regimes=ws$regimes, alpha=ws$alpha,
+              sigma=ws$sigma, theta=ws$theta, Xo=ws$Xo)
 }
 
 
@@ -59,9 +59,17 @@ wrightscape <- function(data, tree, regimes, alpha=1, sigma=1,
 	n_nodes <- length(branch_length)
 	n_regimes <- length(levels(regimes))
 
+  # rep these if not specified
 	if(length(alpha) == 1){ alpha <- rep(alpha, n_regimes) }
 	if(is.null(theta)) { theta <- rep(Xo, n_regimes) }
 	if(length(sigma) == 1) { sigma <- rep(sigma, n_regimes) }
+
+  ## shouldn't be necessary
+  if(is.list(alpha)) unlist(alpha)
+  if(is.list(theta)) unlist(theta)
+  if(is.list(sigma)) unlist(sigma)
+  if(is.list(Xo)) unlist(Xo)
+
 
 	levels(regimes) <- 1:n_regimes
 	regimes <- as.integer(regimes)-1  # convert to C-style indexing
