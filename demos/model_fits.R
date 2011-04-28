@@ -113,10 +113,15 @@ sfExportAll()
 sfLibrary(wrightscape)  # need all this just to export wrightscape?
 sfLibrary(pmc)
 
-out <- montecarlotest(brownie_test, ws2, cpu=cpu,nboot=nboot) 
-social_plot(plot(out), tag="phylogenetics wrightscape labrids ws2")
-out2 <- montecarlotest(brownie_test, wright_test, cpu=cpu,nboot=nboot) 
-social_plot(plot(out2), tag="phylogenetics wrightscape labrids")
+out <- montecarlotest(brownie_phar, release_phar, cpu=cpu,nboot=nboot) 
+social_plot(plot(out), tag="phylogenetics wrightscape labrids", comment="brownie vs release on pharyngeal shift pt, trait = gape")
+out2 <- montecarlotest(release_phar, release_intra, cpu=cpu,nboot=nboot) 
+social_plot(plot(out2), tag="phylogenetics wrightscape labrids", comment="release on pharyngeal vs intramandibular shift, trait=gape")
+out3 <- montecarlotest(release_intra, release_twoshifts, cpu=cpu,nboot=nboot) 
+social_plot(plot(out3), tag="phylogenetics wrightscape labrids", comment="release on pharyngeal vs intramandibular shift, trait=gape")
+
+
+
 #})
 
 
