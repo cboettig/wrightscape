@@ -17,7 +17,7 @@ loglik.wrighttree <- function(ws) ws$loglik
 
 getParameters.wrighttree <- function(ws){
     c(alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma,
-      Xo=ws$Xo, ws$convergence) 
+      Xo=ws$Xo, converge=ws$convergence) 
 }
 
 simulate.multiOU <- simulate.wrighttree

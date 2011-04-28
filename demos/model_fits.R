@@ -3,6 +3,7 @@
 require(wrightscape)
 require(pmc)
 require(socialR)
+tag="phylogenetics wrightscape labrids"
 
 # This data has not been released
 path = "../data/labrids/"
@@ -27,6 +28,13 @@ pharyngeal <- paintBranches(pharyngeal_ancestor, labrid$tree, c("other","pharyng
 
 two_shifts <- paintBranches(c(pharyngeal_ancestor, intra_ancestor), labrid$tree, c("wrasses", "pharyngeal", "intramandibular") )
 
+## This leaves the branch on which the second transition occurs unspecified (fourth regime).  
+## We have to fix this manually
+two_shifts[as.numeric(intra_ancestor)] <- "intramandibular"
+two_shifts <- as.factor(as.character(two_shifts))
+names(two_shifts) <- names(intramandibular)
+
+
 
 ##  loop over traits 
 #for(i in 3:11){
@@ -39,28 +47,58 @@ i <- 3
 	bm <- brown(trait, labrid$tree)
 	ou1 <- hansen(trait, labrid$tree, regime=labrid$noregimes, .01, .01)
 	ou2_phar <- hansen(trait, labrid$tree, regime=labrid$regimes, .01, .01)
-	ou2_intra <- hansen(trait, labrid$tree, regime=intramandibular, .01, .01)
+  ou2_intra <- hansen(trait, labrid$tree, regime=intramandibular, .01, .01)
+  ou3 <- hansen(trait, labrid$tree, regime=two_shifts, ou2_phar@sqrt.alpha, sigma=ou2_phar@sigma )
 
-  ou3 <- hansen(trait, labrid$tree, regime=two_shifts, .01, .01)
+  ## Note that this will converge poorly with the .01, .01 starting conditions
+  #  ou3 <- hansen(trait, labrid$tree, regime=two_shifts, .01, .01 )
+  loglik(ou3) 
+  loglik(ou2_phar)
+
+
+## Make this pretty using pmc and ape plot tools
+plt <- function(){
+phylo_phar <- convert(ou2_phar)
+phylo_intra <- convert(ou2_intra)
+phylo_twoshifts <- convert(ou3)
+ou3 <- hansen(trait, labrid$tree, regime=two_shifts, ou2_phar@sqrt.alpha, sigma=ou2_phar@sigma )
+par(mfrow=c(1,3))
+plot(phylo_phar, edge.color = treepalette(phylo_phar), edge.width=2, cex=1.0, show.tip.label=FALSE)
+plot(phylo_intra, edge.color = treepalette(phylo_intra), edge.width=2, cex=1.0, show.tip.label=FALSE)
+plot(phylo_twoshifts, edge.color = treepalette(phylo_twoshifts), edge.width=2, cex=1.0, show.tip.label=FALSE)
+}
+social_plot(plt(), file="labrids.png", tag=tag)
+
+
+#plot(labrid$tree, regimes=two_shifts)
 
 
   ## Compare intramandibular and pharyngeal joint paintings
+  ##  Note that we use the more restricted estimates from ouch to seed the search
 
-#  pharyngeal vs intramnadibular regimes
+#  pharyngeal vs intramadibular regimes
   ouch_phar <- ouch(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
 	brownie_phar <- brownie(trait, labrid$tree, regime=labrid$regimes, sigma=ou2_phar@sigma)
 	wright_phar <- wright(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
-
+  
   ouch_intra <- ouch(trait, labrid$tree, regime=intramandibular, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
 	brownie_intra <- brownie(trait, labrid$tree, regime=intramandibular, sigma=ou2_intra@sigma)
 	wright_intra <- wright(trait, labrid$tree, regime=intramandibular, alpha=(ou2_intra@sqrt.alpha)^2, sigma=ou2_intra@sigma)
 
+  ouch_twoshifts <- ouch(trait, labrid$tree, regime=two_shifts, alpha=(ou3@sqrt.alpha)^2, sigma=ou3@sigma)
+	brownie_twoshifts <- brownie(trait, labrid$tree, regime=two_shifts, sigma=ou3@sigma)
+	wright_twoshifts <- wright(trait, labrid$tree, regime=two_shifts, alpha=(ou3@sqrt.alpha)^2, sigma=ou3@sigma)
 
 
+
+## Doing the likelihood optimization in C instead.  needs robustness testing, convergence conditions still
 #  ws2_phar <- wrightscape(trait, labrid$tree, regime=labrid$regimes, (ou2_phar@sqrt.alpha)^2, ou2_phar@sigma, theta=ou2_phar@theta[[1]])
 #  ws2_intra <- wrightscape(trait, labrid$tree, regime=intramandibular, (ou2_intra@sqrt.alpha)^2, ou2_intra@sigma, theta=ou2_intra@theta[[1]])
+#  ws2_twoshifts <- wrightscape(trait, labrid$tree, regime=intramandibular, (ou3@sqrt.alpha)^2, ou3@sigma, theta=ou3@theta[[1]])
 
 
+
+## Do some modelchoice
 
 cpu <- 16
 nboot <- 160
