@@ -52,8 +52,7 @@ i <- 3
 
   ## Note that this will converge poorly with the .01, .01 starting conditions
   #  ou3 <- hansen(trait, labrid$tree, regime=two_shifts, .01, .01 )
-  loglik(ou3) 
-  loglik(ou2_phar)
+  loglik(ou3) - loglik(ou2_phar)
 
 
 ## Make this pretty using pmc and ape plot tools
@@ -80,15 +79,22 @@ social_plot(plt(), file="labrids.png", tag=tag)
   ouch_phar <- ouch(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
 	brownie_phar <- brownie(trait, labrid$tree, regime=labrid$regimes, sigma=ou2_phar@sigma)
 	wright_phar <- wright(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
-  
+  release_phar <- release_constraint(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
+
   ouch_intra <- ouch(trait, labrid$tree, regime=intramandibular, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
 	brownie_intra <- brownie(trait, labrid$tree, regime=intramandibular, sigma=ou2_intra@sigma)
 	wright_intra <- wright(trait, labrid$tree, regime=intramandibular, alpha=(ou2_intra@sqrt.alpha)^2, sigma=ou2_intra@sigma)
+  release_intra <- release_constraint(trait, labrid$tree, regime=intramandibular, alpha=(ou2_intra@sqrt.alpha)^2, sigma=ou2_intra@sigma)
 
   ouch_twoshifts <- ouch(trait, labrid$tree, regime=two_shifts, alpha=(ou3@sqrt.alpha)^2, sigma=ou3@sigma)
 	brownie_twoshifts <- brownie(trait, labrid$tree, regime=two_shifts, sigma=ou3@sigma)
 	wright_twoshifts <- wright(trait, labrid$tree, regime=two_shifts, alpha=(ou3@sqrt.alpha)^2, sigma=ou3@sigma)
+  release_twoshifts <- release_constraint(trait, labrid$tree, regime=two_shifts, alpha=(ou3@sqrt.alpha)^2, sigma=ou3@sigma)
+ 
+ loglik(wright_twoshifts)-loglik(wright_intra)
 
+ # Can we do better?
+ wright_twoshifts_ <- wright(trait, labrid$tree, regime=two_shifts, alpha=c(wright_intra$alpha, wright_intra$alpha[2]), sigma=c(wright_intra$sigma, wright_intra$sigma[2]))
 
 
 ## Doing the likelihood optimization in C instead.  needs robustness testing, convergence conditions still

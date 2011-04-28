@@ -9,7 +9,61 @@ update.multiOU <- function(model, data){
            brownie = brownie(data, model$tree, model$regimes,
                              model$sigma))
 }
+
+release_constraint <- function(data, tree, regimes, Xo=NULL, alpha=NULL,
+                               sigma=NULL, theta=NULL){
+# alpha varies by regime, theta and sigma are global
+# par is Xo, all alphas, theta, sigma
+  n_regimes <- length(levels(regimes))
+  par <- numeric(n_regimes+3)
+  if(is.null(Xo))
+    Xo <- mean(data, na.rm=TRUE) 
+  if(is.null(theta))
+    theta <- Xo 
+  par[1] <- Xo
+  if(length(alpha) == n_regimes){
+      par[2:(1+n_regimes)] <- alpha
+  } else {
+      par[2:(1+n_regimes)] <- rep(alpha, n_regimes)
+  }
+  par[(2+n_regimes)] <- sigma 
+  par[(3+n_regimes)] <- theta
+
+  lca <- lca_calc(tree)
+
+  # Likelihood as a function of optimizable parameters
+  f <- function(par){
+      Xo <- par[1]
+      alpha <- par[2:(1+n_regimes)]
+      sigma <- rep(par[2+n_regimes], n_regimes) 
+      theta <- rep(par[3+n_regimes], n_regimes) 
+      if (any(alpha < 0)){
+          llik <- -1e12
+      }
+      else if (any(sigma<0)){
+          llik <- -1e12
+      } else {
+          llik<-multiOU_lik_lca(data, tree, regimes, alpha=alpha,
+                                sigma=sigma, theta=theta, Xo=Xo, lca)
+      }
+      -llik
+  }
+  optim_output <- optim(par,f, control=list(maxit=5000)) 
+#    optim(par,f, method="L", lower=c(-Inf, rep(0,n_regimes), rep(-Inf, n_regimes), rep(0, n_regimes))) 
+  output <- list(data=data, tree=tree, regimes=regimes, 
+                 loglik=-optim_output$value, Xo=optim_output$par[1], 
+                 alpha=optim_output$par[2:(1+n_regimes)], 
+                 theta=optim_output$par[2+n_regimes],
+                 sigma=optim_output$par[3+n_regimes],
+                 optim_output=optim_output, submodel="wright",
+                 convergence=optim_output$convergence)
+  class(output) = "multiOU"
+  output
+}
+
+
 wright <- function(data, tree, regimes, Xo=NULL, alpha=1, sigma=1){
+# all are regime dependent
     # intialize a parameter vector to optimize: 
     # Xo, alpha, sigma, and the n_regime thetas
     n_regimes <- length(levels(regimes))
@@ -67,6 +121,8 @@ wright <- function(data, tree, regimes, Xo=NULL, alpha=1, sigma=1){
 
 # OUCH
 ouch <- function(data, tree, regimes, Xo=NULL, alpha=1, sigma=1){
+# alpha is fixed at ~zero, sigma is regime dependent, theta is global
+
     # intialize a parameter vector to optimize: 
     # Xo, alpha, sigma, and the n_regime thetas
     n_regimes <- length(levels(regimes))
