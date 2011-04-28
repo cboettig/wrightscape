@@ -18,10 +18,17 @@ diet_data[5] <- log(diet_data[5])
 labrid <- format_data(labrid_tree, diet_data, species_names=diet_data[,1],  regimes = 2)  
 
 # Select common ancestor of a Chlorurus and a Hipposcarus as the changepoint
-intramandibular <- paintBranches(mrcaOUCH(c("Chlorurus_sordidus", "Hipposcarus_longiceps"), labrid$tree), labrid$tree, c("other","intramandibular"))
+intra_ancestor <- mrcaOUCH(c("Chlorurus_sordidus", "Hipposcarus_longiceps"), labrid$tree)
+intramandibular <- paintBranches(intra_ancestor, labrid$tree, c("other","intramandibular"))
+
+# Select common ancestor for all parrot fish
+pharyngeal_ancestor<-mrcaOUCH(c("Bolbometopon_muricatum", "Sparisoma_radians"), labrid$tree)
+pharyngeal <- paintBranches(pharyngeal_ancestor, labrid$tree, c("other","pharyngeal"))
+
+two_shifts <- paintBranches(c(pharyngeal_ancestor, intra_ancestor), labrid$tree, c("wrasses", "pharyngeal", "intramandibular") )
 
 
-
+##  loop over traits 
 #for(i in 3:11){
 i <- 3
 
@@ -34,29 +41,24 @@ i <- 3
 	ou2_phar <- hansen(trait, labrid$tree, regime=labrid$regimes, .01, .01)
 	ou2_intra <- hansen(trait, labrid$tree, regime=intramandibular, .01, .01)
 
-
-## needs to be fixed, singular lik problems?
-  ouch_phar <- ouch(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
-	a <- simulate(ouch_phar)
-	# update(ouch_phar, a)
+  ou3 <- hansen(trait, labrid$tree, regime=two_shifts, .01, .01)
 
 
   ## Compare intramandibular and pharyngeal joint paintings
-  ws2_phar <- wrightscape(trait, labrid$tree, regime=labrid$regimes, (ou2_phar@sqrt.alpha)^2, ou2_phar@sigma, theta=ou2_phar@theta[[1]])
-  ws2_intra <- wrightscape(trait, labrid$tree, regime=intramandibular, (ou2_intra@sqrt.alpha)^2, ou2_intra@sigma, theta=ou2_intra@theta[[1]])
-
-  loglik(ws2_phar)
-  loglik(ws2_intra)
 
 #  pharyngeal vs intramnadibular regimes
-	brownie_test <- brownie(trait, labrid$tree, regime=labrid$regimes, sigma=ou2_phar@sigma)
-	wright_test <- wright(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
+  ouch_phar <- ouch(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
+	brownie_phar <- brownie(trait, labrid$tree, regime=labrid$regimes, sigma=ou2_phar@sigma)
+	wright_phar <- wright(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
 
+  ouch_intra <- ouch(trait, labrid$tree, regime=intramandibular, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
 	brownie_intra <- brownie(trait, labrid$tree, regime=intramandibular, sigma=ou2_intra@sigma)
 	wright_intra <- wright(trait, labrid$tree, regime=intramandibular, alpha=(ou2_intra@sqrt.alpha)^2, sigma=ou2_intra@sigma)
 
 
 
+#  ws2_phar <- wrightscape(trait, labrid$tree, regime=labrid$regimes, (ou2_phar@sqrt.alpha)^2, ou2_phar@sigma, theta=ou2_phar@theta[[1]])
+#  ws2_intra <- wrightscape(trait, labrid$tree, regime=intramandibular, (ou2_intra@sqrt.alpha)^2, ou2_intra@sigma, theta=ou2_intra@theta[[1]])
 
 
 
