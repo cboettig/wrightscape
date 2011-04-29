@@ -57,16 +57,16 @@ i <- 3
 
 ## Make this pretty using pmc and ape plot tools
 plt <- function(){
-phylo_phar <- convert(ou2_phar)
-phylo_intra <- convert(ou2_intra)
-phylo_twoshifts <- convert(ou3)
-ou3 <- hansen(trait, labrid$tree, regime=two_shifts, ou2_phar@sqrt.alpha, sigma=ou2_phar@sigma )
-par(mfrow=c(1,3))
-plot(phylo_phar, edge.color = treepalette(phylo_phar), edge.width=2, cex=1.0, show.tip.label=FALSE)
-plot(phylo_intra, edge.color = treepalette(phylo_intra), edge.width=2, cex=1.0, show.tip.label=FALSE)
-plot(phylo_twoshifts, edge.color = treepalette(phylo_twoshifts), edge.width=2, cex=1.0, show.tip.label=FALSE)
+  phylo_phar <- convert(ou2_phar)
+  phylo_intra <- convert(ou2_intra)
+  phylo_twoshifts <- convert(ou3)
+  ou3 <- hansen(trait, labrid$tree, regime=two_shifts, ou2_phar@sqrt.alpha, sigma=ou2_phar@sigma )
+  par(mfrow=c(1,3))
+  plot(phylo_phar, edge.color = treepalette(phylo_phar), edge.width=2, cex=1.0, show.tip.label=FALSE)
+  plot(phylo_intra, edge.color = treepalette(phylo_intra), edge.width=2, cex=1.0, show.tip.label=FALSE)
+  plot(phylo_twoshifts, edge.color = treepalette(phylo_twoshifts), edge.width=2, cex=1.0, show.tip.label=FALSE)
 }
-social_plot(plt(), file="labrids.png", tag=tag)
+#social_plot(plt(), file="labrids.png", tag=tag)
 
 
 #plot(labrid$tree, regimes=two_shifts)
@@ -91,10 +91,15 @@ social_plot(plt(), file="labrids.png", tag=tag)
 	wright_twoshifts <- wright(trait, labrid$tree, regime=two_shifts, alpha=(ou3@sqrt.alpha)^2, sigma=ou3@sigma)
   release_twoshifts <- release_constraint(trait, labrid$tree, regime=two_shifts, alpha=(ou3@sqrt.alpha)^2, sigma=ou3@sigma)
  
- loglik(wright_twoshifts)-loglik(wright_intra)
+  loglik(wright_twoshifts)-loglik(wright_intra)
+
+save("labrids.Rdat")
+
+
+d <- table(loglik(release_phar), loglik(release_intra), loglik(release_twoshifts))
 
  # Can we do better?
- wright_twoshifts_ <- wright(trait, labrid$tree, regime=two_shifts, alpha=c(wright_intra$alpha, wright_intra$alpha[2]), sigma=c(wright_intra$sigma, wright_intra$sigma[2]))
+# wright_twoshifts_ <- wright(trait, labrid$tree, regime=two_shifts, alpha=c(wright_intra$alpha, wright_intra$alpha[2]), sigma=c(wright_intra$sigma, wright_intra$sigma[2]))
 
 
 ## Doing the likelihood optimization in C instead.  needs robustness testing, convergence conditions still
