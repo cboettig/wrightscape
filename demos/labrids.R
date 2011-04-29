@@ -28,28 +28,46 @@ corrected_data[["LP"]] <- log(corrected_data[["LP"]])/3
 # ratios are fine as they are
 
 
-labrid_ape <- treedata(labrid_tree, corrected_data, corrected_data[,1])
-
-# fix the data type to be numeric!!!!!
-Y <- matrix(as.numeric(labrid_ape$data[,3:11]), ncol=9)
-colnames(Y) <- colnames(labrid_ape$data[,3:11])
-rownames(Y) <- labrid_ape$data[,1]
-
-
-x <-  Y[,5]
-rownames(x) <- rownames(Y)
+## We'll perform Revell's regression on all size/mass (non-ratio) traits
+# 
+size_col <- 5
+cols_to_size_correct <- c(3:4,6:8)
+ape <- treedata(labrid_tree, corrected_data, corrected_data[,1])
+# Annoying formating to get a labeled matrix with numerics, not characters
+Y <- matrix(as.numeric(ape$data[,cols_to_size_correct]), ncol=length(cols_to_size_correct))
+colnames(Y) <- colnames(ape$data[,cols_to_size_correct])
+rownames(Y) <- ape$data[,1] 
+x <-  Y[,size_col]
+names(x) <- rownames(Y)
 
 require(RevellExtensions)
 out <- phyl.resid(labrid_ape$phy,x, Y)
+## phyl.resid changes order of species listing!
+
+#Could duplicate one column and change the others, and merge by that.  OR just use by="row.names"
+resid <- data.frame(out$resid, rownames(out$resid))
+colnames(resid) <- c("gape_cor", "prot_cor", "AM_cor", "SH_cor", "LP_cor", "Species")
+test <- merge(ape$data, resid)
+# The above is a good double-check on the order 
+
+traits <- merge(ape$data, out$resid, by="row.names")
+# columns that are transformed now have gape.x for untransformed, gape.y for transformed.  
+
+## Merge sanity test
+#head(test)
+#head(traits)
+
+
 
 # format data gets regimes from column specified in "regimes" (e.g. this is a column id, not a # of regimes)
 # This also converts the tree and data into ouch format
-labrid <- format_data(labrid_tree, corrected_data, species_names=corrected_data[,1],  regimes = 2)  
+
+## Could just hand it all traits, but these are just the tranformed and size-corrected ones
+labrid <- format_data(labrid_tree, traits[c(6,10:17)], species_names=traits[,1],  regimes = 3)  
 names(labrid$data)
 
 
-
-
+## PAINTING REGIMES: Having taken care of traits, we paint on the 3 regime models.  
 # Select common ancestor of a Chlorurus and a Hipposcarus as the changepoint
 intra_ancestor <- mrcaOUCH(c("Chlorurus_sordidus", "Hipposcarus_longiceps"), labrid$tree)
 intramandibular <- paintBranches(intra_ancestor, labrid$tree, c("other","intramandibular"))
@@ -69,9 +87,7 @@ names(two_shifts) <- names(intramandibular)
 
 
 
-i <- 3
-
-cpu <- 16
+cpu <- 9
 nboot <- 160
 sfInit(parallel=TRUE, cpu=cpu)
 sfExportAll()
@@ -81,7 +97,7 @@ sfLibrary(pmc)
 # try only for these, or try for all traits
 #c(3,4,5,9,10,11)
 
-sfSapply(3:11, function(i){
+sfSapply(1:9, function(i){
 	trait_name <- names(labrid$data)[i]	
 	trait <- labrid$data[i]
 
