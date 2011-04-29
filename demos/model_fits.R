@@ -50,7 +50,8 @@ sfLibrary(pmc)
 # try only for these, or try for all traits
 #c(3,4,5,9,10,11)
 
-#sapply(c(3), function(i){
+
+dummy <- function(i){
 	trait_name <- names(labrid$data)[i]	
 	trait <- labrid$data[i]
 
@@ -109,7 +110,8 @@ sfLibrary(pmc)
 #  barplot(results, xlim=c(0, 80), col=c("thistle", "khaki", "pink","palegreen"), horiz=TRUE, beside=TRUE)
   social_plot(barplot(t(results), xlim=c(0, 80), col=c("thistle", "khaki", "palegreen"), horiz=TRUE, beside=TRUE, main=trait_name), tag=tag, comment=trait_name)
 
-#})
+}
+sapply(c(3:11), function(i) try(dummy(i)) )
 
 
 
