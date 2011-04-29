@@ -40,7 +40,7 @@ names(two_shifts) <- names(intramandibular)
 #for(i in 3:11){
 i <- 3
 
-cpu <- 16
+cpu <- 2
 nboot <- 160
 sfInit(parallel=TRUE, cpu=cpu)
 sfExportAll()
@@ -50,14 +50,14 @@ sfLibrary(pmc)
 # try only for these, or try for all traits
 #c(3,4,5,9,10,11)
 
-sfSapply(3:11, function(i){
+#sapply(c(3), function(i){
 	trait_name <- names(labrid$data)[i]	
 	trait <- labrid$data[i]
 
 	bm <- brown(trait, labrid$tree)
 	ou1 <- hansen(trait, labrid$tree, regime=labrid$noregimes, .01, .01)
 	ou2_phar <- hansen(trait, labrid$tree, regime=labrid$regimes, .01, .01)
-  ou2_intra <- hansen(trait, labrid$tree, regime=intramandibular, .01, .01)
+	ou2_intra <- hansen(trait, labrid$tree, regime=intramandibular, .01, .01)
   ou3 <- hansen(trait, labrid$tree, regime=two_shifts, ou2_phar@sqrt.alpha, sigma=ou2_phar@sigma )
 
   ## Note that this will converge poorly with the .01, .01 starting conditions
@@ -109,7 +109,7 @@ sfSapply(3:11, function(i){
 #  barplot(results, xlim=c(0, 80), col=c("thistle", "khaki", "pink","palegreen"), horiz=TRUE, beside=TRUE)
   social_plot(barplot(t(results), xlim=c(0, 80), col=c("thistle", "khaki", "palegreen"), horiz=TRUE, beside=TRUE, main=trait_name), tag=tag, comment=trait_name)
 
-}
+#})
 
 
 
@@ -135,6 +135,7 @@ plt <- function(){
   plot(phylo_intra, edge.color = treepalette(phylo_intra), edge.width=2, cex=1.0, show.tip.label=FALSE)
   plot(phylo_twoshifts, edge.color = treepalette(phylo_twoshifts), edge.width=2, cex=1.0, show.tip.label=FALSE)
 }
+
 #social_plot(plt(), file="labrids.png", tag=tag)
 
 
