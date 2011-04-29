@@ -106,9 +106,9 @@ social_plot(plt(), file="labrids.png", tag=tag)
 
 ## Do some modelchoice
 
-cpu <- 16
-nboot <- 160
-sfInit(parallel=TRUE, cpu=cpu)
+cpu <- 1
+nboot <- 2
+sfInit(parallel=F, cpu=cpu)
 sfExportAll()
 sfLibrary(wrightscape)  # need all this just to export wrightscape?
 sfLibrary(pmc)
