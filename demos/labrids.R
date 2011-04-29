@@ -41,7 +41,7 @@ x <-  Y[,size_col]
 names(x) <- rownames(Y)
 
 require(RevellExtensions)
-out <- phyl.resid(labrid_ape$phy,x, Y)
+out <- phyl.resid(ape$phy,x, Y)
 ## phyl.resid changes order of species listing!
 
 #Could duplicate one column and change the others, and merge by that.  OR just use by="row.names"
@@ -86,16 +86,6 @@ two_shifts <- as.factor(as.character(two_shifts))
 names(two_shifts) <- names(intramandibular)
 
 
-
-cpu <- 9
-nboot <- 160
-sfInit(parallel=TRUE, cpu=cpu)
-sfExportAll()
-sfLibrary(wrightscape)  # need all this just to export wrightscape?
-sfLibrary(pmc)
-
-# try only for these, or try for all traits
-#c(3,4,5,9,10,11)
 
 dummy <- function(i){
 	trait_name <- names(labrid$data)[i]	
@@ -156,6 +146,15 @@ dummy <- function(i){
 #  barplot(results, xlim=c(0, 80), col=c("thistle", "khaki", "pink","palegreen"), horiz=TRUE, beside=TRUE)
   social_plot(barplot(t(results), xlim=c(0, 80), col=c("thistle", "khaki", "palegreen"), horiz=TRUE, beside=TRUE, main=trait_name), tag=tag, comment=trait_name)
 }
+
+cpu <- 9
+nboot <- 160
+sfInit(parallel=TRUE, cpu=cpu)
+sfExportAll()
+sfLibrary(wrightscape)  # need all this just to export wrightscape?
+sfLibrary(pmc)
+sfLibrary(socialR)
+
 
 sfSapply(1:9, function(i) try(dummy(i)) )
 
