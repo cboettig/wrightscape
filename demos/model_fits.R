@@ -40,7 +40,17 @@ names(two_shifts) <- names(intramandibular)
 #for(i in 3:11){
 i <- 3
 
-#sfSapply(c(3,4,5,9,10,11), function(i){
+cpu <- 16
+nboot <- 160
+sfInit(parallel=TRUE, cpu=cpu)
+sfExportAll()
+sfLibrary(wrightscape)  # need all this just to export wrightscape?
+sfLibrary(pmc)
+
+# try only for these, or try for all traits
+#c(3,4,5,9,10,11)
+
+sfSapply(3:11, function(i){
 	trait_name <- names(labrid$data)[i]	
 	trait <- labrid$data[i]
 
@@ -52,7 +62,66 @@ i <- 3
 
   ## Note that this will converge poorly with the .01, .01 starting conditions
   #  ou3 <- hansen(trait, labrid$tree, regime=two_shifts, .01, .01 )
-  loglik(ou3) - loglik(ou2_phar)
+  #  loglik(ou3) - loglik(ou2_phar)
+
+
+
+  ## Compare intramandibular and pharyngeal joint paintings
+  ##  Note that we use the more restricted estimates from ouch to seed the search
+
+#  pharyngeal vs intramadibular regimes
+
+  ouch_phar <- ouch(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
+	brownie_phar <- brownie(trait, labrid$tree, regime=labrid$regimes, sigma=ou2_phar@sigma)
+	wright_phar <- wright(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
+  release_phar <- release_constraint(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
+
+  ouch_intra <- ouch(trait, labrid$tree, regime=intramandibular, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
+	brownie_intra <- brownie(trait, labrid$tree, regime=intramandibular, sigma=ou2_intra@sigma)
+	wright_intra <- wright(trait, labrid$tree, regime=intramandibular, alpha=(ou2_intra@sqrt.alpha)^2, sigma=ou2_intra@sigma)
+  release_intra <- release_constraint(trait, labrid$tree, regime=intramandibular, alpha=(ou2_intra@sqrt.alpha)^2, sigma=ou2_intra@sigma)
+
+  ouch_twoshifts <- ouch(trait, labrid$tree, regime=two_shifts, alpha=(ou3@sqrt.alpha)^2, sigma=ou3@sigma)
+	brownie_twoshifts <- brownie(trait, labrid$tree, regime=two_shifts, sigma=ou3@sigma)
+	wright_twoshifts <- wright(trait, labrid$tree, regime=two_shifts, alpha=(ou3@sqrt.alpha)^2, sigma=ou3@sigma)
+  release_twoshifts <- release_constraint(trait, labrid$tree, regime=two_shifts, alpha=(ou3@sqrt.alpha)^2, sigma=ou3@sigma)
+ 
+  loglik(wright_twoshifts)-loglik(wright_intra)
+
+
+  results <- matrix(NA, nrow=4, ncol=3, dimnames = list(c("ouch", "brownie", "release", "wright"), c("phar", "intra", "twoshifts")))
+
+  results[1,1] <- loglik(ouch_phar)
+	results[2,1] <- loglik(brownie_phar)
+  results[3,1] <- loglik(release_phar)
+	results[4,1] <- loglik(wright_phar)
+
+  results[1,2] <- loglik(ouch_intra )
+	results[2,2] <- loglik(brownie_intra )
+  results[3,2] <- loglik(release_intra)
+	results[4,2] <- loglik(wright_intra )
+
+  results[1,3] <- loglik(ouch_twoshifts )
+	results[2,3] <- loglik(brownie_twoshifts)
+  results[3,3] <- loglik(release_twoshifts)
+	results[4,3] <- loglik(wright_twoshifts)
+
+#  barplot(results, xlim=c(0, 80), col=c("thistle", "khaki", "pink","palegreen"), horiz=TRUE, beside=TRUE)
+  social_plot(barplot(t(results), xlim=c(0, 80), col=c("thistle", "khaki", "palegreen"), horiz=TRUE, beside=TRUE, main=trait_name), tag=tag, comment=trait_name)
+
+}
+
+
+
+
+ # Can we do better?
+# wright_twoshifts_ <- wright(trait, labrid$tree, regime=two_shifts, alpha=c(wright_intra$alpha, wright_intra$alpha[2]), sigma=c(wright_intra$sigma, wright_intra$sigma[2]))
+
+
+## Doing the likelihood optimization in C instead.  needs robustness testing, convergence conditions still
+#  ws2_phar <- wrightscape(trait, labrid$tree, regime=labrid$regimes, (ou2_phar@sqrt.alpha)^2, ou2_phar@sigma, theta=ou2_phar@theta[[1]])
+#  ws2_intra <- wrightscape(trait, labrid$tree, regime=intramandibular, (ou2_intra@sqrt.alpha)^2, ou2_intra@sigma, theta=ou2_intra@theta[[1]])
+#  ws2_twoshifts <- wrightscape(trait, labrid$tree, regime=intramandibular, (ou3@sqrt.alpha)^2, ou3@sigma, theta=ou3@theta[[1]])
 
 
 ## Make this pretty using pmc and ape plot tools
@@ -72,58 +141,13 @@ plt <- function(){
 #plot(labrid$tree, regimes=two_shifts)
 
 
-  ## Compare intramandibular and pharyngeal joint paintings
-  ##  Note that we use the more restricted estimates from ouch to seed the search
-
-#  pharyngeal vs intramadibular regimes
-  ouch_phar <- ouch(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
-	brownie_phar <- brownie(trait, labrid$tree, regime=labrid$regimes, sigma=ou2_phar@sigma)
-	wright_phar <- wright(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
-  release_phar <- release_constraint(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
-
-  ouch_intra <- ouch(trait, labrid$tree, regime=intramandibular, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
-	brownie_intra <- brownie(trait, labrid$tree, regime=intramandibular, sigma=ou2_intra@sigma)
-	wright_intra <- wright(trait, labrid$tree, regime=intramandibular, alpha=(ou2_intra@sqrt.alpha)^2, sigma=ou2_intra@sigma)
-  release_intra <- release_constraint(trait, labrid$tree, regime=intramandibular, alpha=(ou2_intra@sqrt.alpha)^2, sigma=ou2_intra@sigma)
-
-  ouch_twoshifts <- ouch(trait, labrid$tree, regime=two_shifts, alpha=(ou3@sqrt.alpha)^2, sigma=ou3@sigma)
-	brownie_twoshifts <- brownie(trait, labrid$tree, regime=two_shifts, sigma=ou3@sigma)
-	wright_twoshifts <- wright(trait, labrid$tree, regime=two_shifts, alpha=(ou3@sqrt.alpha)^2, sigma=ou3@sigma)
-  release_twoshifts <- release_constraint(trait, labrid$tree, regime=two_shifts, alpha=(ou3@sqrt.alpha)^2, sigma=ou3@sigma)
- 
-  loglik(wright_twoshifts)-loglik(wright_intra)
-
-save("labrids.Rdat")
-
-
-d <- table(loglik(release_phar), loglik(release_intra), loglik(release_twoshifts))
-
- # Can we do better?
-# wright_twoshifts_ <- wright(trait, labrid$tree, regime=two_shifts, alpha=c(wright_intra$alpha, wright_intra$alpha[2]), sigma=c(wright_intra$sigma, wright_intra$sigma[2]))
-
-
-## Doing the likelihood optimization in C instead.  needs robustness testing, convergence conditions still
-#  ws2_phar <- wrightscape(trait, labrid$tree, regime=labrid$regimes, (ou2_phar@sqrt.alpha)^2, ou2_phar@sigma, theta=ou2_phar@theta[[1]])
-#  ws2_intra <- wrightscape(trait, labrid$tree, regime=intramandibular, (ou2_intra@sqrt.alpha)^2, ou2_intra@sigma, theta=ou2_intra@theta[[1]])
-#  ws2_twoshifts <- wrightscape(trait, labrid$tree, regime=intramandibular, (ou3@sqrt.alpha)^2, ou3@sigma, theta=ou3@theta[[1]])
-
-
-
 ## Do some modelchoice
-
-cpu <- 16
-nboot <- 160
-sfInit(parallel=TRUE, cpu=cpu)
-sfExportAll()
-sfLibrary(wrightscape)  # need all this just to export wrightscape?
-sfLibrary(pmc)
-
-out <- montecarlotest(brownie_phar, release_phar, cpu=cpu,nboot=nboot, GetPar=F) 
-social_plot(plot(out), tag="phylogenetics wrightscape labrids", comment="brownie vs release on pharyngeal shift pt, trait = gape")
-out2 <- montecarlotest(release_phar, release_intra, cpu=cpu,nboot=nboot, GetPar=F) 
-social_plot(plot(out2), tag="phylogenetics wrightscape labrids", comment="release on pharyngeal vs intramandibular shift, trait=gape")
-out3 <- montecarlotest(release_intra, release_twoshifts, cpu=cpu,nboot=nboot, GetPar=F) 
-social_plot(plot(out3), tag="phylogenetics wrightscape labrids", comment="release on pharyngeal vs intramandibular shift, trait=gape")
+#out <- montecarlotest(brownie_phar, release_phar, cpu=cpu,nboot=nboot, GetPar=F) 
+#social_plot(plot(out), tag="phylogenetics wrightscape labrids", comment="brownie vs release on pharyngeal shift pt, trait = gape")
+#out2 <- montecarlotest(release_phar, release_intra, cpu=cpu,nboot=nboot, GetPar=F) 
+#social_plot(plot(out2), tag="phylogenetics wrightscape labrids", comment="release on pharyngeal vs intramandibular shift, trait=gape")
+#out3 <- montecarlotest(release_intra, release_twoshifts, cpu=cpu,nboot=nboot, GetPar=F) 
+#social_plot(plot(out3), tag="phylogenetics wrightscape labrids", comment="release on pharyngeal vs intramandibular shift, trait=gape")
 
 
 
