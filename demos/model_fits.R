@@ -106,19 +106,19 @@ social_plot(plt(), file="labrids.png", tag=tag)
 
 ## Do some modelchoice
 
-cpu <- 1
-nboot <- 2
+cpu <- 16
+nboot <- 160
 sfInit(parallel=F, cpu=cpu)
 sfExportAll()
 sfLibrary(wrightscape)  # need all this just to export wrightscape?
 sfLibrary(pmc)
 
-out <- montecarlotest(brownie_phar, release_phar, cpu=cpu,nboot=nboot) 
-social_plot(plot(out), tag="phylogenetics wrightscape labrids", comment="brownie vs release on pharyngeal shift pt, trait = gape", GetPar=F)
-out2 <- montecarlotest(release_phar, release_intra, cpu=cpu,nboot=nboot) 
-social_plot(plot(out2), tag="phylogenetics wrightscape labrids", comment="release on pharyngeal vs intramandibular shift, trait=gape", GetPar=F)
-out3 <- montecarlotest(release_intra, release_twoshifts, cpu=cpu,nboot=nboot) 
-social_plot(plot(out3), tag="phylogenetics wrightscape labrids", comment="release on pharyngeal vs intramandibular shift, trait=gape", GetPar=F)
+out <- montecarlotest(brownie_phar, release_phar, cpu=cpu,nboot=nboot, GetPar=F) 
+social_plot(plot(out), tag="phylogenetics wrightscape labrids", comment="brownie vs release on pharyngeal shift pt, trait = gape")
+out2 <- montecarlotest(release_phar, release_intra, cpu=cpu,nboot=nboot, GetPar=F) 
+social_plot(plot(out2), tag="phylogenetics wrightscape labrids", comment="release on pharyngeal vs intramandibular shift, trait=gape")
+out3 <- montecarlotest(release_intra, release_twoshifts, cpu=cpu,nboot=nboot, GetPar=F) 
+social_plot(plot(out3), tag="phylogenetics wrightscape labrids", comment="release on pharyngeal vs intramandibular shift, trait=gape")
 
 
 
