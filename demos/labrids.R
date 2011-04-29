@@ -127,21 +127,22 @@ dummy <- function(i){
 
 
   results <- matrix(NA, nrow=4, ncol=3, dimnames = list(c("ouch", "brownie", "release", "wright"), c("phar", "intra", "twoshifts")))
+  f<-loglik.multiOU 
 
-  results[1,1] <- loglik(ouch_phar)
-	results[2,1] <- loglik(brownie_phar)
-  results[3,1] <- loglik(release_phar)
-	results[4,1] <- loglik(wright_phar)
+  results[1,1] <- f(ouch_phar)
+	results[2,1] <- f(brownie_phar)
+  results[3,1] <- f(release_phar)
+	results[4,1] <- f(wright_phar)
 
-  results[1,2] <- loglik(ouch_intra )
-	results[2,2] <- loglik(brownie_intra )
-  results[3,2] <- loglik(release_intra)
-	results[4,2] <- loglik(wright_intra )
+  results[1,2] <- f(ouch_intra )
+	results[2,2] <- f(brownie_intra )
+  results[3,2] <- f(release_intra)
+	results[4,2] <- f(wright_intra )
 
-  results[1,3] <- loglik(ouch_twoshifts )
-	results[2,3] <- loglik(brownie_twoshifts)
-  results[3,3] <- loglik(release_twoshifts)
-	results[4,3] <- loglik(wright_twoshifts)
+  results[1,3] <- f(ouch_twoshifts )
+	results[2,3] <- f(brownie_twoshifts)
+  results[3,3] <- f(release_twoshifts)
+	results[4,3] <- f(wright_twoshifts)
 
 #  barplot(results, xlim=c(0, 80), col=c("thistle", "khaki", "pink","palegreen"), horiz=TRUE, beside=TRUE)
   social_plot(barplot(t(results), xlim=c(0, 80), col=c("thistle", "khaki", "palegreen"), horiz=TRUE, beside=TRUE, main=trait_name), tag=tag, comment=trait_name)
