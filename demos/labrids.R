@@ -8,15 +8,47 @@ tag="phylogenetics wrightscape labrids"
 # This data has not been released
 path = "../data/labrids/"
 labrid_tree <- read.nexus(paste(path, "labrid_tree.nex", sep=""))
-fin_data <-read.csv(paste(path,"labrid.csv", sep=""))
+#fin_data <-read.csv(paste(path,"labrid.csv", sep=""))
 diet_data <- read.csv(paste(path,"labriddata_parrotfish.csv", sep=""))
 
-# size correct length and weight by body mass
-for(i in c(3,4,6,7,8)){
-	diet_data[i] <- diet_data[i]/diet_data[5]
-}
-diet_data[5] <- log(diet_data[5]) 
-labrid <- format_data(labrid_tree, diet_data, species_names=diet_data[,1],  regimes = 2)  
+corrected_data <- diet_data
+
+# Use the simple names from Price et al 2010
+traitnames <- c("Species", "group", "gape", "prot", "bodymass", "AM", "SH", "LP", "close", "open", "kt")
+names(corrected_data) <- traitnames
+
+# Lengths are log transformed 
+corrected_data[["gape"]] <- log(corrected_data[["gape"]])
+corrected_data[["prot"]] <- log(corrected_data[["prot"]])
+#masses are log(cube-root) transformed
+corrected_data[["bodymass"]] <- log(corrected_data[["bodymass"]])/3
+corrected_data[["AM"]] <- log(corrected_data[["AM"]])/3
+corrected_data[["SH"]] <- log(corrected_data[["SH"]])/3
+corrected_data[["LP"]] <- log(corrected_data[["LP"]])/3
+# ratios are fine as they are
+
+
+labrid_ape <- treedata(labrid_tree, corrected_data, corrected_data[,1])
+
+# fix the data type to be numeric!!!!!
+Y <- matrix(as.numeric(labrid_ape$data[,3:11]), ncol=9)
+colnames(Y) <- colnames(labrid_ape$data[,3:11])
+rownames(Y) <- labrid_ape$data[,1]
+
+
+x <-  Y[,5]
+rownames(x) <- rownames(Y)
+
+require(RevellExtensions)
+out <- phyl.resid(labrid_ape$phy,x, Y)
+
+# format data gets regimes from column specified in "regimes" (e.g. this is a column id, not a # of regimes)
+# This also converts the tree and data into ouch format
+labrid <- format_data(labrid_tree, corrected_data, species_names=corrected_data[,1],  regimes = 2)  
+names(labrid$data)
+
+
+
 
 # Select common ancestor of a Chlorurus and a Hipposcarus as the changepoint
 intra_ancestor <- mrcaOUCH(c("Chlorurus_sordidus", "Hipposcarus_longiceps"), labrid$tree)
@@ -26,6 +58,7 @@ intramandibular <- paintBranches(intra_ancestor, labrid$tree, c("other","intrama
 pharyngeal_ancestor<-mrcaOUCH(c("Bolbometopon_muricatum", "Sparisoma_radians"), labrid$tree)
 pharyngeal <- paintBranches(pharyngeal_ancestor, labrid$tree, c("other","pharyngeal"))
 
+## A third painting involves shifts at both points
 two_shifts <- paintBranches(c(pharyngeal_ancestor, intra_ancestor), labrid$tree, c("wrasses", "pharyngeal", "intramandibular") )
 
 ## This leaves the branch on which the second transition occurs unspecified (fourth regime).  
@@ -36,8 +69,6 @@ names(two_shifts) <- names(intramandibular)
 
 
 
-##  loop over traits 
-#for(i in 3:11){
 i <- 3
 
 cpu <- 16
