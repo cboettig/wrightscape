@@ -260,6 +260,8 @@ void calc_lik (const double *Xo, const double alpha[], const double theta[],
                  const double branch_length[], const double traits[], 
                  int *n_nodes, int lca_matrix[], double *llik)
 {
+	gsl_set_error_handler_off ();
+
 	int i,j,ki, kj;
 	int n_tips = (*n_nodes+1)/2;
 	double *X_EX = (double *) malloc(n_tips * sizeof(double));
