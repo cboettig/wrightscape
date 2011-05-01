@@ -87,9 +87,18 @@ names(two_shifts) <- names(intramandibular)
 
 
 
+models <- list(brown, hansen, ouch, brownie, wright, release_constraint)
+regimes <-  list(labrid$noregimes, pharyngeal, intramandibular, two_shifts)
+traits <- labrid$data
+
+#models[[i]](
+
+
+
 dummy <- function(i){
 	trait_name <- names(labrid$data)[i]	
 	trait <- labrid$data[i]
+
 
 	bm <- brown(trait, labrid$tree)
 	ou1 <- hansen(trait, labrid$tree, regime=labrid$noregimes, .01, .01)
@@ -107,45 +116,75 @@ dummy <- function(i){
   ##  Note that we use the more restricted estimates from ouch to seed the search
 
 #  pharyngeal vs intramadibular regimes
+  ouch_phar <- ouch(trait, labrid$tree, regime=labrid$regimes, 
+                    alpha=(ou2_phar@ sqrt.alpha)^2, sigma=ou2_phar@sigma)
+	brownie_phar <- brownie(trait, labrid$tree, regime=labrid$regimes,
+                          sigma=ou2_phar@sigma)
+	wright_phar <- wright(trait, labrid$tree, regime=labrid$regimes,
+                        alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
+  release_phar <- release_constraint(trait, labrid$tree, regime=labrid$regimes,
+                                     alpha=(ou2_phar@sqrt.alpha)^2,
+                                     sigma=ou2_phar@sigma)
 
-  ouch_phar <- ouch(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
-	brownie_phar <- brownie(trait, labrid$tree, regime=labrid$regimes, sigma=ou2_phar@sigma)
-	wright_phar <- wright(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
-  release_phar <- release_constraint(trait, labrid$tree, regime=labrid$regimes, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
+  ouch_intra <- ouch(trait, labrid$tree, regime=intramandibular,
+                     alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
+	brownie_intra <- brownie(trait, labrid$tree, regime=intramandibular,
+                           sigma=ou2_intra@sigma)
+	wright_intra <- wright(trait, labrid$tree, regime=intramandibular,
+                         alpha=(ou2_intra@sqrt.alpha)^2, sigma=ou2_intra@sigma)
+  release_intra <- release_constraint(trait, labrid$tree,
+                                      regime=intramandibular, 
+                                      alpha=(ou2_intra@sqrt.alpha)^2, 
+                                      sigma=ou2_intra@sigma)
 
-  ouch_intra <- ouch(trait, labrid$tree, regime=intramandibular, alpha=(ou2_phar@sqrt.alpha)^2, sigma=ou2_phar@sigma)
-	brownie_intra <- brownie(trait, labrid$tree, regime=intramandibular, sigma=ou2_intra@sigma)
-	wright_intra <- wright(trait, labrid$tree, regime=intramandibular, alpha=(ou2_intra@sqrt.alpha)^2, sigma=ou2_intra@sigma)
-  release_intra <- release_constraint(trait, labrid$tree, regime=intramandibular, alpha=(ou2_intra@sqrt.alpha)^2, sigma=ou2_intra@sigma)
+  ouch_twoshifts <- ouch(trait, labrid$tree, regime=two_shifts,
+                        alpha=(ou3@sqrt.alpha)^2, sigma=ou3@sigma)
+	brownie_twoshifts <- brownie(trait, labrid$tree, regime=two_shifts,
+                               sigma=ou3@sigma)
+	wright_twoshifts <- wright(trait, labrid$tree, regime=two_shifts,
+                              alpha=(ou3@sqrt.alpha)^2, sigma=ou3@sigma)
+  release_twoshifts <- release_constraint(trait, labrid$tree,
+                                          regime=two_shifts, 
+                                          alpha=(ou3@sqrt.alpha)^2,
+                                          sigma=ou3@sigma) 
 
-  ouch_twoshifts <- ouch(trait, labrid$tree, regime=two_shifts, alpha=(ou3@sqrt.alpha)^2, sigma=ou3@sigma)
-	brownie_twoshifts <- brownie(trait, labrid$tree, regime=two_shifts, sigma=ou3@sigma)
-	wright_twoshifts <- wright(trait, labrid$tree, regime=two_shifts, alpha=(ou3@sqrt.alpha)^2, sigma=ou3@sigma)
-  release_twoshifts <- release_constraint(trait, labrid$tree, regime=two_shifts, alpha=(ou3@sqrt.alpha)^2, sigma=ou3@sigma)
- 
+
+
+
   loglik(wright_twoshifts)-loglik(wright_intra)
 
 
   results <- matrix(NA, nrow=4, ncol=3, dimnames = list(c("ouch", "brownie", "release", "wright"), c("phar", "intra", "twoshifts")))
-  f<-loglik.multiOU 
 
-  results[1,1] <- f(ouch_phar)
-	results[2,1] <- f(brownie_phar)
-  results[3,1] <- f(release_phar)
-	results[4,1] <- f(wright_phar)
+  results[1,1] <- loglik(ouch_phar)
+	results[2,1] <- loglik(brownie_phar)
+  results[3,1] <- loglik(release_phar)
+	results[4,1] <- loglik(wright_phar)
 
-  results[1,2] <- f(ouch_intra )
-	results[2,2] <- f(brownie_intra )
-  results[3,2] <- f(release_intra)
-	results[4,2] <- f(wright_intra )
+  results[1,2] <- loglik(ouch_intra )
+	results[2,2] <- loglik(brownie_intra )
+  results[3,2] <- loglik(release_intra)
+	results[4,2] <- loglik(wright_intra )
 
-  results[1,3] <- f(ouch_twoshifts )
-	results[2,3] <- f(brownie_twoshifts)
-  results[3,3] <- f(release_twoshifts)
-	results[4,3] <- f(wright_twoshifts)
+  results[1,3] <- loglik(ouch_twoshifts )
+	results[2,3] <- loglik(brownie_twoshifts)
+  results[3,3] <- loglik(release_twoshifts)
+	results[4,3] <- loglik(wright_twoshifts)
+
 
 #  barplot(results, xlim=c(0, 80), col=c("thistle", "khaki", "pink","palegreen"), horiz=TRUE, beside=TRUE)
   social_plot(barplot(t(results), xlim=c(0, 80), col=c("thistle", "khaki", "palegreen"), horiz=TRUE, beside=TRUE, main=trait_name), tag=tag, comment=trait_name)
+
+
+
+# specify a regime
+# function of a model m
+  n_regimes <- length(levels(m$regimes))
+  n_traits <- length(getParameters(m)) # -1 # -1 if one is for convergence
+  parameters <- matrix(NA, ncol=n_traits, nrow=n_regimes)
+  parameters[i,j] <- getParameters(brownie_phar) 
+
+
 }
 
 cpu <- 9
