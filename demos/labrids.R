@@ -11,84 +11,79 @@ labrid_tree <- read.nexus(paste(path, "labrid_tree.nex", sep=""))
 #fin_data <-read.csv(paste(path,"labrid.csv", sep=""))
 diet_data <- read.csv(paste(path,"labriddata_parrotfish.csv", sep=""))
 
-corrected_data <- diet_data
+source("correct_labrid_data.R")
+source("paint_labrid_regimes.R")
+source("loop_models_traits_regimes.R")
 
-# Use the simple names from Price et al 2010
-traitnames <- c("Species", "group", "gape", "prot", "bodymass", "AM", "SH", "LP", "close", "open", "kt")
-names(corrected_data) <- traitnames
+model_list <- list("brown", "hansen", "ouch", "brownie", "wright", "release_constraint")
+regime_list <-  list(pharyngeal=pharyngeal, intramandibular=intramandibular, two_shifts=two_shifts)
 
-# Lengths are log transformed 
-corrected_data[["gape"]] <- log(corrected_data[["gape"]])
-corrected_data[["prot"]] <- log(corrected_data[["prot"]])
-#masses are log(cube-root) transformed
-corrected_data[["bodymass"]] <- log(corrected_data[["bodymass"]])/3
-corrected_data[["AM"]] <- log(corrected_data[["AM"]])/3
-corrected_data[["SH"]] <- log(corrected_data[["SH"]])/3
-corrected_data[["LP"]] <- log(corrected_data[["LP"]])/3
-# ratios are fine as they are
-
-## Nice geiger function to drop unmatched tips/data
-## but returns data as a matrix, and as data includes character names it converts all data to factors! 
-ape <- treedata(labrid_tree, corrected_data[,3:11], corrected_data[,1])
-
-require(RevellExtensions)
-ape$data["bodysize"]
-out <- phyl.resid(ape$phy, ape$data[,"bodymass"], ape$data[,c("gape", "prot","AM", "SH", "LP")] )
-## phyl.resid changes order of species listing. Merge for a set of uncorrected and corrected traits.  
-traits <- merge(ape$data, out$resid, by="row.names")
-# columns that are transformed now have gape.x for untransformed, gape.y for transformed.  
-
-
-# format data gets regimes from column specified in "regimes" (e.g. this is a column id, not a # of regimes)
-# This also converts the tree and data into ouch format
-## Could just hand it all traits, but these are just the tranformed and size-corrected ones
-labrid <- format_data(labrid_tree, traits[,2:length(traits)], species_names=traits[,1])  
-#names(labrid$data)
-
-
-## PAINTING REGIMES: Having taken care of traits, we paint on the 3 regime models.  
-# Select common ancestor of a Chlorurus and a Hipposcarus as the changepoint
-intra_ancestor <- mrcaOUCH(c("Chlorurus_sordidus", "Hipposcarus_longiceps"), labrid$tree)
-intramandibular <- paintBranches(intra_ancestor, labrid$tree, c("other","intramandibular"))
-
-# Select common ancestor for all parrot fish
-pharyngeal_ancestor<-mrcaOUCH(c("Bolbometopon_muricatum", "Sparisoma_radians"), labrid$tree)
-pharyngeal <- paintBranches(pharyngeal_ancestor, labrid$tree, c("other","pharyngeal"))
-
-## A third painting involves shifts at both points
-two_shifts <- paintBranches(c(pharyngeal_ancestor, intra_ancestor), labrid$tree, c("wrasses", "pharyngeal", "intramandibular") )
-
-## This leaves the branch on which the second transition occurs unspecified (fourth regime).  
-## We have to fix this manually
-two_shifts[as.numeric(intra_ancestor)] <- "intramandibular"
-two_shifts <- as.factor(as.character(two_shifts))
-names(two_shifts) <- names(intramandibular)
+#labrid_results <- results(model_list, labrid$data[1:3], regime_list, labrid$tree)
 
 
 
-models <- list("brown", "hansen", "ouch", "brownie", "wright", "release_constraint")
-regimes <-  list(labrid$noregimes, pharyngeal, intramandibular, two_shifts)
+test <- results(model_list[c(1,2,6)], labrid$data[1:3], regime_list, labrid$tree)
 
-#models[[i]](
 
-i<-1
-j<-1
-k<-1
-init_alpha <- 0.01
-init_sigma <- 0.01
 
-fit <- function(model, traits, regimes, tree, init_alpha=0.01, init_sigma=0.01){
-  switch(model,
-         brown = brown(traits, tree),
-         hansen = hansen(traits, tree, regimes, init_alpha, init_sigma),
-         ouch = ouch(traits, tree, regimes, init_alpha, init_sigma),
-         brownie = brownie(traits, tree, regimes, init_alpha, init_sigma),
-         wright = wright(traits, tree, regimes, init_alpha, init_sigma),
-         release_constraint = release_constraint(traits, regimes, init_alpha, init_sigma))
+#argument is: (traits,regime,model) i.e. (j,k,i)
+
+j <- 1
+llik_matrix <- function(model, regime){
+  M <- matrix(NA, nrow=length(regime), ncol=length(model)) 
+  for(i in 1:length(model)){
+    for(k in 1:length(regime)){
+      a <- labrid_results[[j]][[k]][[i]]
+      if (is(a, "try-error")){
+        M[k,i] <- NA
+      } else if(is(a, "hasentree") | is(a, "browntree")){
+        M[k,i] <- a@loglik
+      } else {
+        M[k,i] <- loglik(a)
+      }
+    }
+    rownames(M) <- regime
+    colnames(M) <- model
+  }
+  M
 }
-m <- fit(models[[i]], labrid$data[j], regimes[[k]], tree=labrid$tree)
 
 
+
+#gape <- llik_matrix(model_list, names(regime_list))
+gape <- llik_matrix(model_list[c(1,2,6)], names(regime_list))
+
+barplot(gape, col=c("thistle", "khaki", "palegreen"), horiz=TRUE, 
+        beside=TRUE, main="gape")
+social_plot(barplot(gape, col=c("thistle", "khaki", "palegreen"), horiz=TRUE, 
+        beside=TRUE, main="gape"), tag=tag, comment=trait_name)
+
+
+
+alpha_matrix <- function(model, nregimes){
+  M <- matrix(NA, nrow=length(regime), ncol=length(model)) 
+  for(i in 1:length(model)){
+      a <- labrid_results[[j]][[k]][[i]]
+    for(k in 1:nregimes){
+      if (is(a, "try-error")){
+        M[k,i] <- NA
+      } else if(is(a, "hasentree") | is(a, "browntree")){
+        M[k,i] <- a@alpha
+      } else {
+        M[k,i] <- a$alpha[k]
+      }
+    }
+    colnames(M) <- model
+  }
+  M
+}
+j <- 1; k <- 3
+gape_alpha <- alpha_matrix(model_list[c(1,2,6)], names(regime_list))
+
+barplot(gape_alpha, col=c("thistle", "khaki", "palegreen"), horiz=TRUE, 
+        beside=TRUE, main="gape")
+social_plot(barplot(gape_alpha, col=c("thistle", "khaki", "palegreen"), horiz=TRUE, 
+        beside=TRUE, main="gape"), tag=tag, comment=trait_name)
 
 
 
@@ -102,7 +97,6 @@ dummy <- function(i){
 	trait <- labrid$data[i]
 
 
-	bm <- brown(trait, labrid$tree)
 	ou1 <- hansen(trait, labrid$tree, regime=labrid$noregimes, .01, .01)
 	ou2_phar <- hansen(trait, labrid$tree, regime=labrid$regimes, .01, .01)
   ou2_intra <- hansen(trait, labrid$tree, regime=intramandibular, .01, .01)

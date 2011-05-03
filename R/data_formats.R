@@ -144,13 +144,16 @@ message("traits ouch-formatted as numeric")
 
 
 	if(regimes > 1){	
-		R <- compute_regimes(tree, traits, species_names, regimes) 
+		R <- compute_regimes(tree, traits, species_names, regimes)
+    nr <- R$noregimes
 	} else {
 		regimes= as.factor(rep(" ", length=tree@nnodes))
 		names(regimes) <- tree@nodes 
 		R <- list(regimes=regimes) 
+    nr <- R$regimes
 	}
-	list(tree=tree, data=dataIn, regimes=R$regimes, noregimes=R$noregimes)
+
+	list(tree=tree, data=dataIn, regimes=R$regimes, noregimes=nr)
 } 
 
 

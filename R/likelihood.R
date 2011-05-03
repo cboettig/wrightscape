@@ -10,8 +10,8 @@ update.multiOU <- function(model, data){
                              model$sigma))
 }
 
-release_constraint <- function(data, tree, regimes, Xo=NULL, alpha=NULL,
-                               sigma=NULL, theta=NULL){
+release_constraint <- function(data, tree, regimes, alpha=NULL,
+                               sigma=NULL, theta=NULL, Xo=NULL){
 # alpha varies by regime, theta and sigma are global
 # par is Xo, all alphas, theta, sigma
   n_regimes <- length(levels(regimes))
@@ -26,8 +26,8 @@ release_constraint <- function(data, tree, regimes, Xo=NULL, alpha=NULL,
   } else {
       par[2:(1+n_regimes)] <- rep(alpha, n_regimes)
   }
-  par[(2+n_regimes)] <- sigma 
-  par[(3+n_regimes)] <- theta
+  par[2+n_regimes] <- sigma 
+  par[3+n_regimes] <- theta
 
   lca <- lca_calc(tree)
 
@@ -62,7 +62,7 @@ release_constraint <- function(data, tree, regimes, Xo=NULL, alpha=NULL,
 }
 
 
-wright <- function(data, tree, regimes, Xo=NULL, alpha=1, sigma=1){
+wright <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL){
 # all are regime dependent
     # intialize a parameter vector to optimize: 
     # Xo, alpha, sigma, and the n_regime thetas
@@ -120,7 +120,7 @@ wright <- function(data, tree, regimes, Xo=NULL, alpha=1, sigma=1){
 
 
 # OUCH
-ouch <- function(data, tree, regimes, Xo=NULL, alpha=1, sigma=1){
+ouch <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL){
 # alpha is fixed at ~zero, sigma is regime dependent, theta is global
 
     # intialize a parameter vector to optimize: 
