@@ -18,11 +18,11 @@ source("loop_models_traits_regimes.R")
 model_list <- list("brown", "hansen", "ouch", "brownie", "wright", "release_constraint")
 regime_list <-  list(pharyngeal=pharyngeal, intramandibular=intramandibular, two_shifts=two_shifts)
 
-#labrid_results <- results(model_list, labrid$data[1:3], regime_list, labrid$tree)
-
-
-
 test <- results(model_list[c(1,2,6)], labrid$data[1:3], regime_list, labrid$tree)
+labrid_resluts <- test
+
+
+#labrid_results <- results(model_list, labrid$data[1:3], regime_list, labrid$tree)
 
 
 
@@ -54,36 +54,45 @@ llik_matrix <- function(model, regime){
 gape <- llik_matrix(model_list[c(1,2,6)], names(regime_list))
 
 barplot(gape, col=c("thistle", "khaki", "palegreen"), horiz=TRUE, 
-        beside=TRUE, main="gape")
+        beside=TRUE, main="gape", legend=TRUE)
+
+
 social_plot(barplot(gape, col=c("thistle", "khaki", "palegreen"), horiz=TRUE, 
         beside=TRUE, main="gape"), tag=tag, comment=trait_name)
 
 
 
-alpha_matrix <- function(model, nregimes){
-  M <- matrix(NA, nrow=length(regime), ncol=length(model)) 
+alpha_matrix <- function(model, regime_list, regime_k, trait_i){
+  i <- trait_i
+  k <- regime_k
+  regime <- regime_list[[k]]
+  nregimes <- length(levels(regime))
+  M <- matrix(NA, nrow=nregimes, ncol=length(model)) 
   for(i in 1:length(model)){
       a <- labrid_results[[j]][[k]][[i]]
     for(k in 1:nregimes){
-      if (is(a, "try-error")){
+      if (is(a, "try-error") | is(a, "browntree")){
         M[k,i] <- NA
-      } else if(is(a, "hasentree") | is(a, "browntree")){
+      } else if(is(a, "hasentree")){
         M[k,i] <- a@alpha
-      } else {
+      } else if(is(a, "multiOU")) {
         M[k,i] <- a$alpha[k]
       }
     }
     colnames(M) <- model
+    rownames(M) <- levels(regime)
   }
   M
 }
 j <- 1; k <- 3
-gape_alpha <- alpha_matrix(model_list[c(1,2,6)], names(regime_list))
+gape_alpha <- alpha_matrix(model_list[c(1,2,6)], regime_list=regime_list, regime_k=3, trait=1)
 
 barplot(gape_alpha, col=c("thistle", "khaki", "palegreen"), horiz=TRUE, 
-        beside=TRUE, main="gape")
-social_plot(barplot(gape_alpha, col=c("thistle", "khaki", "palegreen"), horiz=TRUE, 
-        beside=TRUE, main="gape"), tag=tag, comment=trait_name)
+        beside=TRUE, main="gape", legend=TRUE)
+
+
+
+social_plot(barplot(gape_alpha, col=c("thistle", "khaki", "palegreen"), horiz=TRUE, beside=TRUE, main="gape"), tag=tag, comment=trait_name)
 
 
 
