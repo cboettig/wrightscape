@@ -27,44 +27,23 @@ corrected_data[["SH"]] <- log(corrected_data[["SH"]])/3
 corrected_data[["LP"]] <- log(corrected_data[["LP"]])/3
 # ratios are fine as they are
 
-
-## We'll perform Revell's regression on all size/mass (non-ratio) traits
-# 
-size_col <- 5
-cols_to_size_correct <- c(3:4,6:8)
-ape <- treedata(labrid_tree, corrected_data, corrected_data[,1])
-# Annoying formating to get a labeled matrix with numerics, not characters
-Y <- matrix(as.numeric(ape$data[,cols_to_size_correct]), ncol=length(cols_to_size_correct))
-colnames(Y) <- colnames(ape$data[,cols_to_size_correct])
-rownames(Y) <- ape$data[,1] 
-x <-  Y[,size_col]
-names(x) <- rownames(Y)
+## Nice geiger function to drop unmatched tips/data
+## but returns data as a matrix, and as data includes character names it converts all data to factors! 
+ape <- treedata(labrid_tree, corrected_data[,3:11], corrected_data[,1])
 
 require(RevellExtensions)
-out <- phyl.resid(ape$phy,x, Y)
-## phyl.resid changes order of species listing!
-
-#Could duplicate one column and change the others, and merge by that.  OR just use by="row.names"
-resid <- data.frame(out$resid, rownames(out$resid))
-colnames(resid) <- c("gape_cor", "prot_cor", "AM_cor", "SH_cor", "LP_cor", "Species")
-test <- merge(ape$data, resid)
-# The above is a good double-check on the order 
-
+ape$data["bodysize"]
+out <- phyl.resid(ape$phy, ape$data[,"bodymass"], ape$data[,c("gape", "prot","AM", "SH", "LP")] )
+## phyl.resid changes order of species listing. Merge for a set of uncorrected and corrected traits.  
 traits <- merge(ape$data, out$resid, by="row.names")
 # columns that are transformed now have gape.x for untransformed, gape.y for transformed.  
-
-## Merge sanity test
-#head(test)
-#head(traits)
-
 
 
 # format data gets regimes from column specified in "regimes" (e.g. this is a column id, not a # of regimes)
 # This also converts the tree and data into ouch format
-
 ## Could just hand it all traits, but these are just the tranformed and size-corrected ones
-labrid <- format_data(labrid_tree, traits[c(6,10:17)], species_names=traits[,1],  regimes = 3)  
-names(labrid$data)
+labrid <- format_data(labrid_tree, traits[,2:length(traits)], species_names=traits[,1])  
+#names(labrid$data)
 
 
 ## PAINTING REGIMES: Having taken care of traits, we paint on the 3 regime models.  
@@ -87,11 +66,34 @@ names(two_shifts) <- names(intramandibular)
 
 
 
-models <- list(brown, hansen, ouch, brownie, wright, release_constraint)
+models <- list("brown", "hansen", "ouch", "brownie", "wright", "release_constraint")
 regimes <-  list(labrid$noregimes, pharyngeal, intramandibular, two_shifts)
-traits <- labrid$data
 
 #models[[i]](
+
+i<-1
+j<-1
+k<-1
+init_alpha <- 0.01
+init_sigma <- 0.01
+
+fit <- function(model, traits, regimes, tree, init_alpha=0.01, init_sigma=0.01){
+  switch(model,
+         brown = brown(traits, tree),
+         hansen = hansen(traits, tree, regimes, init_alpha, init_sigma),
+         ouch = ouch(traits, tree, regimes, init_alpha, init_sigma),
+         brownie = brownie(traits, tree, regimes, init_alpha, init_sigma),
+         wright = wright(traits, tree, regimes, init_alpha, init_sigma),
+         release_constraint = release_constraint(traits, regimes, init_alpha, init_sigma))
+}
+m <- fit(models[[i]], labrid$data[j], regimes[[k]], tree=labrid$tree)
+
+
+
+
+
+
+
 
 
 
