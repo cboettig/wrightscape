@@ -18,9 +18,13 @@ source("loop_models_traits_regimes.R")
 model_list <- list("brown", "hansen", "ouch", "brownie", "wright", "release_constraint")
 regime_list <-  list(pharyngeal=pharyngeal, intramandibular=intramandibular, two_shifts=two_shifts)
 
-test <- results(model_list[c(1,2,6)], labrid$data[1:3], regime_list, labrid$tree)
 labrid_resluts <- test
 
+test <- results(model_list[c(1,2,4,6)], labrid$data[10:13], regime_list, labrid$tree)
+labrid_resluts <- test
+
+mm <- llik_matrix(model_list[c(1,2,4,6)], names(regime_list), j=1)
+barplot(mm, col=c("thistle", "khaki", "palegreen"), horiz=TRUE, beside=TRUE, legend=TRUE)
 
 #labrid_results <- results(model_list, labrid$data[1:3], regime_list, labrid$tree)
 
@@ -28,8 +32,7 @@ labrid_resluts <- test
 
 #argument is: (traits,regime,model) i.e. (j,k,i)
 
-j <- 1
-llik_matrix <- function(model, regime){
+llik_matrix <- function(model, regime, j){
   M <- matrix(NA, nrow=length(regime), ncol=length(model)) 
   for(i in 1:length(model)){
     for(k in 1:length(regime)){
@@ -50,15 +53,18 @@ llik_matrix <- function(model, regime){
 
 
 
-#gape <- llik_matrix(model_list, names(regime_list))
-gape <- llik_matrix(model_list[c(1,2,6)], names(regime_list))
+for(i in 1:length(labrid_results)){
+mm <- llik_matrix(model_list, names(regime_list), j=i)
+png(paste(i,".png"))
+barplot(mm, col=c("thistle", "khaki", "palegreen"), horiz=TRUE, 
+        beside=TRUE, legend=TRUE)
+dev.off()
+}
 
+png("gape.png")
 barplot(gape, col=c("thistle", "khaki", "palegreen"), horiz=TRUE, 
-        beside=TRUE, main="gape", legend=TRUE)
-
-
-social_plot(barplot(gape, col=c("thistle", "khaki", "palegreen"), horiz=TRUE, 
-        beside=TRUE, main="gape"), tag=tag, comment=trait_name)
+        beside=TRUE, main="gape", legend=TRUE, xlim=c(-90,-65))
+dev.off()
 
 
 
@@ -72,9 +78,10 @@ alpha_matrix <- function(model, regime_list, regime_k, trait_i){
       a <- labrid_results[[j]][[k]][[i]]
     for(k in 1:nregimes){
       if (is(a, "try-error") | is(a, "browntree")){
+        print(class(a))
         M[k,i] <- NA
-      } else if(is(a, "hasentree")){
-        M[k,i] <- a@alpha
+      } else if(is(a, "hansentree")){
+        M[k,i] <- (a@sqrt.alpha)^2
       } else if(is(a, "multiOU")) {
         M[k,i] <- a$alpha[k]
       }
@@ -85,14 +92,16 @@ alpha_matrix <- function(model, regime_list, regime_k, trait_i){
   M
 }
 j <- 1; k <- 3
-gape_alpha <- alpha_matrix(model_list[c(1,2,6)], regime_list=regime_list, regime_k=3, trait=1)
 
+for(j in 1:3){
+gape_alpha <- alpha_matrix(model_list[c(1,2,6)], regime_list=regime_list, regime_k=3, trait=j)
+
+png(paste(j,"_alpha.png", sep=""))
 barplot(gape_alpha, col=c("thistle", "khaki", "palegreen"), horiz=TRUE, 
         beside=TRUE, main="gape", legend=TRUE)
+dev.off()
+}
 
-
-
-social_plot(barplot(gape_alpha, col=c("thistle", "khaki", "palegreen"), horiz=TRUE, beside=TRUE, main="gape"), tag=tag, comment=trait_name)
 
 
 
