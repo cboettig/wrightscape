@@ -12,8 +12,8 @@ fit <- function(model, traits, regimes, tree, alpha=0.1, sigma=0.1){
 
 
 
-results <- function(models, traits, regimes, tree){ 
-  lapply(1:length(traits), function(j){
+fit_all <- function(models, traits, regimes, tree){ 
+  fits <- lapply(1:length(traits), function(j){
     lapply(1:length(regimes), function(k){
       ## The loop over models will use a for loop so it 
       ## can try alpha/sgima values from earlier models
@@ -26,24 +26,97 @@ results <- function(models, traits, regimes, tree){
         } else if (models[[i]]=="ou1"){
           out[[i]] <- hansen(traits[j], tree,  regime=labrid$noregimes,
                              .01, .01)
+
+
+        ## Simple hansen model
         } else if(models[[i]]=="hansen"){
           out[[i]] <- try( fit(models[[i]], traits[j], regimes[[k]],
                                tree=tree) )
-        } else {
-          print(paste("model = ", models[[i]], "trait = ", names(traits[j]),
-                regime=names(regimes[[k]])))
-          out[[i]] <- try( fit(models[[i]], traits[j], regimes[[k]],
-                               tree=tree, alpha=(out[[2]]@sqrt.alpha)^2,
-                               sigma=out[[2]]@sigma))
 
-          ## attempt previous result as starting conditions
+        ##   
+        } else {
+          ## Reporting, optional
+#          print(paste("model = ", models[[i]], "trait = ", names(traits[j]),
+#                      "regime=", names(regimes[k])))
+          ## use hansen to start with good parameters 
+          hansen <- try(fit("hansen", traits[j], regimes[[k]], tree=tree))
+          ## hansen will sometimes give very large or negative 
+
+          ## Fit one of the generalized models using the initial guess from hansen
+          out[[i]] <- try( fit(models[[i]], traits[j], regimes[[k]],
+                               tree=tree, alpha=(min(10, hansen@sqrt.alpha^2)),
+                               sigma=hansen@sigma))
+          ## If errors, attempt default starting conditions 
           if(is(out[[i]], "try-error")){
+            out[[i]] <- try( fit(models[[i]], traits[j], regimes[[k]],
+                               tree=tree, alpha=0.01,
+                               sigma=0.01))
           }
         }
       }
-      out
+      out  
     })
   })
+  list(fits=fits, models=models, traits=traits, regimes=regimes, tree=tree)
+}
+
+
+llik_matrix <- function(results, k = 1){
+
+  models <- results$models
+  regimes <- names(results$regimes)
+  traits <- names(results$traits)
+
+  M <- matrix(NA, nrow=length(traits), ncol=length(models)) 
+  for(i in 1:length(models)){
+    for(j in 1:length(traits)){
+      a <- results$fit[[j]][[k]][[i]]
+      if (is(a, "try-error")){
+        M[j,i] <- NA
+      } else if(is(a, "hasentree") | is(a, "browntree")){
+        M[j,i] <- a@loglik
+      } else if(is(a, "multiOU")){
+        M[j,i] <- loglik(a)
+      }
+    }
+    rownames(M) <- traits
+    colnames(M) <- models
+  }
+  M
+}
+
+
+alpha_matrix <- function(results, trait_id, k = 1){
+  k <- 1
+  j <- trait_id 
+  models <- results$models
+  paintings <- names(results$regimes)
+  traits <- names(results$traits)
+
+  groups <- levels(results$regimes[[k]])
+  n_groups <- length(groups)
+
+  M <- matrix(NA, nrow=n_groups, ncol=length(models)) 
+  for(i in 1:length(models)){
+      a <- results$fit[[j]][[k]][[i]]
+    for(m in 1:n_groups){
+      if (is(a, "try-error") | is(a, "browntree")){
+        print(class(a))
+        M[m,i] <- NA
+      } else if(is(a, "hansentree")){
+        M[m,i] <- (a@sqrt.alpha)^2
+      } else if(is(a, "multiOU")) {
+        if(a$submodel != "brownie"){
+        M[m,i] <- a$alpha[m]
+        } else {
+         M[m,i] <- NA
+        }
+      }
+    }
+    colnames(M) <- models
+    rownames(M) <- groups
+  }
+  M
 }
 
 

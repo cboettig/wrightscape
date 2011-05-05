@@ -11,6 +11,7 @@ labrid_tree <- read.nexus(paste(path, "labrid_tree.nex", sep=""))
 #fin_data <-read.csv(paste(path,"labrid.csv", sep=""))
 diet_data <- read.csv(paste(path,"labriddata_parrotfish.csv", sep=""))
 
+## Unfortunately this "phylogenetically accurate" size correction assumes 
 source("correct_labrid_data.R")
 source("paint_labrid_regimes.R")
 source("loop_models_traits_regimes.R")
@@ -18,10 +19,8 @@ source("loop_models_traits_regimes.R")
 model_list <- list("brown", "hansen", "ouch", "brownie", "wright", "release_constraint")
 regime_list <-  list(pharyngeal=pharyngeal, intramandibular=intramandibular, two_shifts=two_shifts)
 
-labrid_resluts <- test
 
 test <- results(model_list[c(1,2,4,6)], labrid$data[10:13], regime_list, labrid$tree)
-labrid_resluts <- test
 
 mm <- llik_matrix(model_list[c(1,2,4,6)], names(regime_list), j=1)
 barplot(mm, col=c("thistle", "khaki", "palegreen"), horiz=TRUE, beside=TRUE, legend=TRUE)
@@ -32,11 +31,15 @@ barplot(mm, col=c("thistle", "khaki", "palegreen"), horiz=TRUE, beside=TRUE, leg
 
 #argument is: (traits,regime,model) i.e. (j,k,i)
 
-llik_matrix <- function(model, regime, j){
-  M <- matrix(NA, nrow=length(regime), ncol=length(model)) 
-  for(i in 1:length(model)){
-    for(k in 1:length(regime)){
-      a <- labrid_results[[j]][[k]][[i]]
+llik_matrix <- function(models, regimes, j, results){
+# 
+# models: a list of models (character vector)
+# regimes: a list of regimes (character vector)
+
+  M <- matrix(NA, nrow=length(regimes), ncol=length(models)) 
+  for(i in 1:length(models)){
+    for(k in 1:length(regimes)){
+      a <- results[[j]][[k]][[i]]
       if (is(a, "try-error")){
         M[k,i] <- NA
       } else if(is(a, "hasentree") | is(a, "browntree")){
@@ -45,8 +48,8 @@ llik_matrix <- function(model, regime, j){
         M[k,i] <- loglik(a)
       }
     }
-    rownames(M) <- regime
-    colnames(M) <- model
+    rownames(M) <- regimes
+    colnames(M) <- models
   }
   M
 }

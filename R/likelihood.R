@@ -55,7 +55,7 @@ release_constraint <- function(data, tree, regimes, alpha=NULL,
                  alpha=optim_output$par[2:(1+n_regimes)], 
                  theta=optim_output$par[2+n_regimes],
                  sigma=optim_output$par[3+n_regimes],
-                 optim_output=optim_output, submodel="wright",
+                 optim_output=optim_output, submodel="release_constraint",
                  convergence=optim_output$convergence)
   class(output) = "multiOU"
   output
