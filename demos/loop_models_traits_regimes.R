@@ -61,28 +61,33 @@ fit_all <- function(models, traits, regimes, tree){
 }
 
 
-llik_matrix <- function(results, k = 1){
+llik_matrix <- function(results){
 
   models <- results$models
   regimes <- names(results$regimes)
   traits <- names(results$traits)
 
-  M <- matrix(NA, nrow=length(traits), ncol=length(models)) 
-  for(i in 1:length(models)){
-    for(j in 1:length(traits)){
-      a <- results$fit[[j]][[k]][[i]]
-      if (is(a, "try-error")){
-        M[j,i] <- NA
-      } else if(is(a, "hasentree") | is(a, "browntree")){
-        M[j,i] <- a@loglik
-      } else if(is(a, "multiOU")){
-        M[j,i] <- loglik(a)
+  all <- vector("list", length(traits))
+  for(j in 1:length(traits)){
+    M <- matrix(NA, nrow=length(regimes), ncol=length(models)) 
+    for(i in 1:length(models)){
+      for(k in 1:length(regimes)){
+        a <- results$fit[[j]][[k]][[i]]
+        if (is(a, "try-error")){
+          M[k,i] <- NA
+        } else if(is(a, "hansentree") | is(a, "browntree")){
+          M[k,i] <- a@loglik
+        } else if(is(a, "multiOU")){
+          M[k,i] <- loglik(a)
+        }
       }
+      rownames(M) <- regimes
+      colnames(M) <- models
     }
-    rownames(M) <- traits
-    colnames(M) <- models
+    all[[j]] <- M
   }
-  M
+  names(all) <- traits
+  all
 }
 
 
