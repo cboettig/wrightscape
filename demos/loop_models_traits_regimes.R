@@ -124,4 +124,36 @@ alpha_matrix <- function(results, trait_id, k = 1){
   M
 }
 
+alpha_traits <- function(results, release=TRUE){
+# 
+  k <- 1 # the regime index
+  groups <- levels(results$regimes[[k]])
+  n_groups <- length(groups)
+  if (release){
+    i <- match("release_constraint", results$models)
+  } else {
+    i <- match("wright", results$models)
+  }
+  M <- matrix(NA, ncol=n_groups, nrow=length(results$traits))
+  for(j in 1:length(results$traits)){
+    a <- results$fit[[j]][[k]][[i]]
+    M[j,] <- a$alpha
+  }
+  rownames(M) <- names(results$traits)
+  colnames(M) <- groups
+  M
+}
 
+
+conv<- function(results){
+for(j in 1:length(results$traits)){
+for(k in 1:length(results$regimes)){
+for(i in 1:length(results$models)){
+  a <- results$fit[[j]][[k]][[i]]
+  if (is(a, "multiOU"))
+    if (a$convergence != 0)
+      print(paste("trait ", names(results$traits)[j], 
+      "regime", names(results$regimes)[k], "model", 
+      results$models[i], "didn't converge"))
+}}}
+}

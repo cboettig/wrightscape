@@ -13,9 +13,11 @@ regime_list <-  list(intramandibular=intramandibular)
 test <- fit_all(model_list, labrid$data, regime_list, labrid$tree)
 
 likmat <- llik_matrix(test)
-alphamat <- alpha_matrix(test, trait=1)
 
 
+## Reorganize the data to list by ascending score
+## Rename models (with short, parameter-based names) 
+## rescale the data relative to weakest model 
 lliks <- vector("list", length=length(likmat))
 for(i in 1:length(likmat)){
   tmp <- likmat[[i]]
@@ -65,11 +67,20 @@ require(socialR)
 flickr(files="parrotfish*.png", tag=tag)
 
 
+release_alphas <- alpha_traits(test) 
+
+png("release_alphas.png", width=480*2)
+ barplot(log(release_alphas[,1]/release_alphas[,2]))
+dev.off()
 
 
+wright_alphas <- alpha_traits(test, release=F) 
 
+png("wright_alphas.png", width=480*2)
+ barplot(log(wright_alphas[,1]/wright_alphas[,2]))
+dev.off()
 
-barplot(alphamat, col=1:2, horiz=TRUE, beside=TRUE, legend=TRUE)
+flickr(files="*alphas.png", tag=tag)
 
 
 
