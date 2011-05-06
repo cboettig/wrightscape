@@ -24,7 +24,7 @@ fit_all <- function(models, traits, regimes, tree){
             out[[i]] <- brown(traits[j], tree)
         } else if (models[[i]]=="ou1"){
           out[[i]] <- hansen(traits[j], tree,  regime=labrid$noregimes,
-                             .01, .01, control=list(maxit=5000))
+                             .01, .01, maxit=5000)
 
 
         ## Simple hansen model
@@ -39,7 +39,7 @@ fit_all <- function(models, traits, regimes, tree){
 #                      "regime=", names(regimes[k])))
           ## use hansen to start with good parameters 
           hansen <- try(fit("hansen", traits[j], regimes[[k]], tree=tree,
-                            control=list(maxit=5000)))
+                            maxit=5000))
           ## hansen will sometimes give very large or negative 
 
           ## Fit one of the generalized models using the initial guess from hansen
@@ -92,7 +92,71 @@ llik_matrix <- function(results){
 }
 
 
+
+sort_lik <- function(likmat, model_names = c("bm", "ou", "theta",
+                      "sigma", "gen", "alpha")){
+## Takes output of llik_matrix and:
+## Reorganize the data to list by ascending score
+## Rename models (with short, parameter-based names) 
+## rescale the data relative to weakest model 
+lliks <- vector("list", length=length(likmat))
+for(i in 1:length(likmat)){
+  tmp <- likmat[[i]]
+  names(tmp) <- model_names
+  tmp <- sort(tmp)
+  shift <- tmp[1] 
+  for(j in 1:length(tmp)){
+    print(tmp[j])
+    tmp[j] <- tmp[j]-shift
+    print(tmp[j])
+  }
+  lliks[[i]] <- tmp
+  print(tmp)
+}
+names(lliks) <- names(likmat)
+lliks
+}
+
+
+alpha_traits <- function(results, model_name="release_constraint"){
+# Takes the output of fit_all and grabs alpha values for specified model
+  k <- 1 # the regime index
+  groups <- levels(results$regimes[[k]])
+  n_groups <- length(groups)
+  i <- match(model_name, results$models)
+  M <- matrix(NA, ncol=n_groups, nrow=length(results$traits))
+  for(j in 1:length(results$traits)){
+    a <- results$fit[[j]][[k]][[i]]
+    M[j,] <- a$alpha
+  }
+  rownames(M) <- names(results$traits)
+  colnames(M) <- groups
+  M
+}
+
+
+conv<- function(results){
+## Takes the output of fit_all and reports which ones didn't converge
+  for(j in 1:length(results$traits)){
+    for(k in 1:length(results$regimes)){
+      for(i in 1:length(results$models)){
+        a <- results$fit[[j]][[k]][[i]]
+        if (is(a, "multiOU"))
+          if (a$convergence != 0)
+            print(paste("trait ", names(results$traits)[j], 
+            ", regime ", names(results$regimes)[k], ", model ", 
+            results$models[i], " didn't converge", sep=""))
+      }
+    }
+  }
+}
+
+
+
+
+
 alpha_matrix <- function(results, trait_id, k = 1){
+## Takes the output of fit_all and computs the matrix of alphas 
   k <- 1
   j <- trait_id 
   models <- results$models
@@ -125,36 +189,5 @@ alpha_matrix <- function(results, trait_id, k = 1){
   M
 }
 
-alpha_traits <- function(results, release=TRUE){
-# 
-  k <- 1 # the regime index
-  groups <- levels(results$regimes[[k]])
-  n_groups <- length(groups)
-  if (release){
-    i <- match("release_constraint", results$models)
-  } else {
-    i <- match("wright", results$models)
-  }
-  M <- matrix(NA, ncol=n_groups, nrow=length(results$traits))
-  for(j in 1:length(results$traits)){
-    a <- results$fit[[j]][[k]][[i]]
-    M[j,] <- a$alpha
-  }
-  rownames(M) <- names(results$traits)
-  colnames(M) <- groups
-  M
-}
 
 
-conv<- function(results){
-for(j in 1:length(results$traits)){
-for(k in 1:length(results$regimes)){
-for(i in 1:length(results$models)){
-  a <- results$fit[[j]][[k]][[i]]
-  if (is(a, "multiOU"))
-    if (a$convergence != 0)
-      print(paste("trait ", names(results$traits)[j], 
-      ", regime ", names(results$regimes)[k], ", model ", 
-      results$models[i], " didn't converge", sep=""))
-}}}
-}

@@ -11,29 +11,18 @@ model_list <- list("brown", "hansen", "ouch", "brownie", "wright", "release_cons
 regime_list <-  list(intramandibular=intramandibular)
 
 test <- fit_all(model_list, labrid$data, regime_list, labrid$tree)
+conv(test)
 
+
+
+## Summary matrices
 likmat <- llik_matrix(test)
+lliks <- sort_lik(likmat)
+release_alphas <- alpha_traits(test) 
+wright_alphas <- alpha_traits(test, model_name="wright") 
 
 
-## Reorganize the data to list by ascending score
-## Rename models (with short, parameter-based names) 
-## rescale the data relative to weakest model 
-lliks <- vector("list", length=length(likmat))
-for(i in 1:length(likmat)){
-  tmp <- likmat[[i]]
-  names(tmp) <-c("bm", "ou", "theta", "sigma", "gen", "alpha")
-  tmp <- sort(tmp)
-  shift <- tmp[1] 
-  for(j in 1:length(tmp)){
-    print(tmp[j])
-    tmp[j] <- tmp[j]-shift
-    print(tmp[j])
-  }
-  lliks[[i]] <- tmp
-  print(tmp)
-}
-names(lliks) <- names(likmat)
-
+#### Plots
 
 # Body mass, ratios 
 png("parrotfish_ratios.png", width=480*1.5, height=480*1.5)
@@ -63,27 +52,27 @@ for(i in c(1,2,10,11)){
   barplot(lliks[[i]], horiz=T, main=names(lliks)[i])
 }
 dev.off()
-require(socialR)
-flickr(files="parrotfish*.png", tag=tag)
 
-
-release_alphas <- alpha_traits(test) 
 
 png("release_alphas.png", width=480*2)
  barplot(log(release_alphas[,1]/release_alphas[,2]))
 dev.off()
 
 
-wright_alphas <- alpha_traits(test, release=F) 
-
 png("wright_alphas.png", width=480*2)
  barplot(log(wright_alphas[,1]/wright_alphas[,2]))
 dev.off()
 
-flickr(files="*alphas.png", tag=tag)
+#flickr(files="parrotfish*.png", tag=tag)
+#flickr(files="*alphas.png", tag=tag)
 
 
-conv(test)
+
+
+
+
+
+
 ## sometimes hansen returns a silly large value of alpha, which will break the generalized likelihood function (too stiff)
  #h <- fit("hansen", labrid$data[13], intramandibular, labrid$tree, .01, .01)
  # w <- fit("release_constraint", labrid$data[13], intramandibular, labrid$tree, h@sqrt.alpha^2, h@sigma)

@@ -120,7 +120,7 @@ wright <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL, ...){
 
 
 # OUCH
-ouch <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL){
+ouch <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL, ...){
 # alpha is fixed at ~zero, sigma is regime dependent, theta is global
 
     # intialize a parameter vector to optimize: 
