@@ -16,6 +16,7 @@ test <- fit_all(model_list[c(4,5,6)], labrid$data[10:11], regime_list, labrid$tr
 
 conv(test)
 
+test$fits[[1]][[1]][[3]]$optim_output$par
 
 
 ## Summary matrices
