@@ -11,7 +11,7 @@ update.multiOU <- function(model, data){
 }
 
 release_constraint <- function(data, tree, regimes, alpha=NULL,
-                               sigma=NULL, theta=NULL, Xo=NULL){
+                               sigma=NULL, theta=NULL, Xo=NULL, ...){
 # alpha varies by regime, theta and sigma are global
 # par is Xo, all alphas, theta, sigma
   n_regimes <- length(levels(regimes))
@@ -48,7 +48,7 @@ release_constraint <- function(data, tree, regimes, alpha=NULL,
       }
       -llik
   }
-  optim_output <- optim(par,f, control=list(maxit=5000)) 
+  optim_output <- optim(par,f, ...) 
 #    optim(par,f, method="L", lower=c(-Inf, rep(0,n_regimes), rep(-Inf, n_regimes), rep(0, n_regimes))) 
   output <- list(data=data, tree=tree, regimes=regimes, 
                  loglik=-optim_output$value, Xo=optim_output$par[1], 
@@ -62,7 +62,7 @@ release_constraint <- function(data, tree, regimes, alpha=NULL,
 }
 
 
-wright <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL){
+wright <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL, ...){
 # all are regime dependent
     # intialize a parameter vector to optimize: 
     # Xo, alpha, sigma, and the n_regime thetas
@@ -103,7 +103,7 @@ wright <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL){
         }
         -llik
     }
-    optim_output <- optim(par,f, control=list(maxit=5000)) 
+    optim_output <- optim(par,f, ...) 
 #    optim(par,f, method="L", lower=c(-Inf, rep(0,n_regimes), rep(-Inf, n_regimes), rep(0, n_regimes))) 
     output <- list(data=data, tree=tree, regimes=regimes, 
                    loglik=-optim_output$value, Xo=optim_output$par[1], 
@@ -127,6 +127,13 @@ ouch <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL){
     # Xo, alpha, sigma, and the n_regime thetas
     n_regimes <- length(levels(regimes))
     par <- numeric(3+n_regimes)
+
+    if(length(alpha) > 1){
+      alpha <- alpha[1]
+    }
+    if(length(sigma) > 1){
+      sigma <- sigma[1]
+    }
 
     # Some starting conditions
     if(is.null(Xo)) Xo <- mean(data, na.rm=TRUE) 
@@ -153,7 +160,7 @@ ouch <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL){
         }
         -llik
     }
-    optim_output <- optim(par,f, control=list(maxit=5000)) 
+    optim_output <- optim(par,f, ...) 
     output <- list(data=data, tree=tree, regimes=regimes, 
                    loglik=-optim_output$value, Xo=optim_output$par[1], 
                    alpha=optim_output$par[2], 
@@ -167,7 +174,7 @@ ouch <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL){
 }
 
 # Brownie
-brownie <- function(data, tree, regimes, sigma=1){ 
+brownie <- function(data, tree, regimes, sigma=1, ...){ 
 
     # intialize a parameter vector to optimize: 
     # Xo, followed by the n_regime sigmas
@@ -191,7 +198,7 @@ brownie <- function(data, tree, regimes, sigma=1){
         llik <- multiOU_lik_lca(data, tree, regimes, alpha=alpha, sigma=sigma, theta=theta, Xo=Xo, lca)
         -llik
     }
-    optim_output <- optim(pars,f, control=list(maxit=5000)) 
+    optim_output <- optim(pars,f, ...) 
 #    optim(par,f, method="L", lower=c(-Inf, rep(0,n_regimes), rep(-Inf, n_regimes), rep(0, n_regimes))) 
     output <- list(data=data, tree=tree, regimes=regimes, 
                    loglik=-optim_output$value, Xo=optim_output$par[1], 
@@ -336,6 +343,7 @@ multiOU_lik <- function(data, tree, regimes, alpha=NULL, sigma=NULL, theta=NULL,
 	if(length(alpha) == 1){ alpha <- rep(alpha, n_regimes) }
 	if(is.null(theta)) { theta <- rep(Xo, n_regimes) }
 	if(length(sigma) == 1) { sigma <- rep(sigma, n_regimes) }
+
 	levels(regimes) <- 1:n_regimes
 	regimes <- as.integer(regimes)-1  # convert to C-style indexing
 

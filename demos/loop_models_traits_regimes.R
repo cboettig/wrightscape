@@ -1,15 +1,14 @@
 # loop_models_traits_regimes.R
 
-fit <- function(model, traits, regimes, tree, alpha=0.1, sigma=0.1){
+fit <- function(model, traits, regimes, tree, alpha=0.1, sigma=0.1, ...){
   switch(model,
-   hansen =   hansen(traits, tree, regimes, alpha, sigma),
-   ouch =       ouch(traits, tree, regimes, alpha, sigma),
-   brownie = brownie(traits, tree, regimes, sigma=sigma),
-   wright =   wright(traits, tree, regimes, alpha=alpha, sigma=sigma),
+   hansen =   hansen(traits, tree, regimes, alpha, sigma, ...),
+   ouch =       ouch(traits, tree, regimes, alpha, sigma, ...),
+   brownie = brownie(traits, tree, regimes, sigma=sigma, ...),
+   wright =   wright(traits, tree, regimes, alpha=alpha, sigma=sigma, ...),
    release_constraint = 
-  release_constraint(traits, tree, regimes, alpha=alpha, sigma=sigma))
+  release_constraint(traits, tree, regimes, alpha=alpha, sigma=sigma, ...))
 }
-
 
 
 fit_all <- function(models, traits, regimes, tree){ 
@@ -25,13 +24,13 @@ fit_all <- function(models, traits, regimes, tree){
             out[[i]] <- brown(traits[j], tree)
         } else if (models[[i]]=="ou1"){
           out[[i]] <- hansen(traits[j], tree,  regime=labrid$noregimes,
-                             .01, .01)
+                             .01, .01, control=list(maxit=5000))
 
 
         ## Simple hansen model
         } else if(models[[i]]=="hansen"){
           out[[i]] <- try( fit(models[[i]], traits[j], regimes[[k]],
-                               tree=tree) )
+                               tree=tree, .01, .01, control=list(maxit=5000)) )
 
         ##   
         } else {
@@ -39,18 +38,20 @@ fit_all <- function(models, traits, regimes, tree){
 #          print(paste("model = ", models[[i]], "trait = ", names(traits[j]),
 #                      "regime=", names(regimes[k])))
           ## use hansen to start with good parameters 
-          hansen <- try(fit("hansen", traits[j], regimes[[k]], tree=tree))
+          hansen <- try(fit("hansen", traits[j], regimes[[k]], tree=tree,
+                            control=list(maxit=5000)))
           ## hansen will sometimes give very large or negative 
 
           ## Fit one of the generalized models using the initial guess from hansen
           out[[i]] <- try( fit(models[[i]], traits[j], regimes[[k]],
-                               tree=tree, alpha=(min(10, hansen@sqrt.alpha^2)),
-                               sigma=hansen@sigma))
+                               tree=tree, alpha=c(0.1,5),
+#(min(10, hansen@sqrt.alpha^2)),
+                               sigma=hansen@sigma, control=list(maxit=5000)))
           ## If errors, attempt default starting conditions 
           if(is(out[[i]], "try-error")){
             out[[i]] <- try( fit(models[[i]], traits[j], regimes[[k]],
                                tree=tree, alpha=0.01,
-                               sigma=0.01))
+                               sigma=0.01, control=list(maxit=5000)))
           }
         }
       }
@@ -153,7 +154,7 @@ for(i in 1:length(results$models)){
   if (is(a, "multiOU"))
     if (a$convergence != 0)
       print(paste("trait ", names(results$traits)[j], 
-      "regime", names(results$regimes)[k], "model", 
-      results$models[i], "didn't converge"))
+      ", regime ", names(results$regimes)[k], ", model ", 
+      results$models[i], " didn't converge", sep=""))
 }}}
 }

@@ -83,7 +83,7 @@ dev.off()
 flickr(files="*alphas.png", tag=tag)
 
 
-
+conv(test)
 ## sometimes hansen returns a silly large value of alpha, which will break the generalized likelihood function (too stiff)
  #h <- fit("hansen", labrid$data[13], intramandibular, labrid$tree, .01, .01)
  # w <- fit("release_constraint", labrid$data[13], intramandibular, labrid$tree, h@sqrt.alpha^2, h@sigma)
