@@ -37,16 +37,19 @@ fit_all <- function(models, traits, regimes, tree){
           ## Reporting, optional
 #          print(paste("model = ", models[[i]], "trait = ", names(traits[j]),
 #                      "regime=", names(regimes[k])))
+
+
           ## use hansen to start with good parameters 
           hansen <- try(fit("hansen", traits[j], regimes[[k]], tree=tree,
                             maxit=5000))
-          ## hansen will sometimes give very large or negative 
+
 
           ## Fit one of the generalized models using the initial guess from hansen
           out[[i]] <- try( fit(models[[i]], traits[j], regimes[[k]],
                                tree=tree, alpha=c(0.1,5),
 #(min(10, hansen@sqrt.alpha^2)),
-                               sigma=hansen@sigma, control=list(maxit=5000)))
+                               sigma=hansen@sigma, method ="SANN" ))
+
           ## If errors, attempt default starting conditions 
           if(is(out[[i]], "try-error")){
             out[[i]] <- try( fit(models[[i]], traits[j], regimes[[k]],

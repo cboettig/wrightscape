@@ -10,7 +10,10 @@ source("loop_models_traits_regimes.R")
 model_list <- list("brown", "hansen", "ouch", "brownie", "wright", "release_constraint")
 regime_list <-  list(intramandibular=intramandibular)
 
-test <- fit_all(model_list, labrid$data, regime_list, labrid$tree)
+#test <- fit_all(model_list, labrid$data, regime_list, labrid$tree)
+
+test <- fit_all(model_list[c(4,5,6)], labrid$data[10:11], regime_list, labrid$tree)
+
 conv(test)
 
 
