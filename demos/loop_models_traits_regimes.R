@@ -47,9 +47,8 @@ fit_all <- function(models, traits, regimes, tree){
           ## Fit one of the generalized models using the initial guess from hansen
           out[[i]] <- try( fit(models[[i]], traits[j], regimes[[k]],
                                tree=tree, alpha=c(5,.01),
-#(min(10, hansen@sqrt.alpha^2)),
                                sigma=hansen@sigma, method ="SANN",
-                               control=list(maxit=50000,temp=15,tmax=20)))
+                               control=list(maxit=80000,temp=15,tmax=20)))
 
           ## If errors, attempt default starting conditions 
           if(is(out[[i]], "try-error")){

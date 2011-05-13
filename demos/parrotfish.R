@@ -12,7 +12,7 @@ regime_list <-  list(intramandibular=intramandibular)
 
 #test <- fit_all(model_list, labrid$data, regime_list, labrid$tree)
 
-test <- fit_all(model_list[c(4,5,6)], labrid$data[10:11], regime_list, labrid$tree)
+test <- fit_all(model_list, labrid$data, regime_list, labrid$tree)
 
 conv(test)
 
@@ -67,8 +67,8 @@ png("wright_alphas.png", width=480*2)
  barplot(log(wright_alphas[,1]/wright_alphas[,2]))
 dev.off()
 
-#flickr(files="parrotfish*.png", tag=tag)
-#flickr(files="*alphas.png", tag=tag)
+flickr(files="parrotfish*.png", tag=tag)
+flickr(files="*alphas.png", tag=tag)
 
 
 
