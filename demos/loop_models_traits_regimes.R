@@ -12,7 +12,11 @@ fit <- function(model, traits, regimes, tree, alpha=0.1, sigma=0.1, ...){
 
 
 fit_all <- function(models, traits, regimes, tree){ 
-  fits <- lapply(1:length(traits), function(j){
+  require(snowfall)
+  sfInit(parallel=TRUE, cpu=16)
+  sfLibrary(wrightscape)
+  sfExportAll()
+  fits <- sfLapply(1:length(traits), function(j){
     lapply(1:length(regimes), function(k){
       ## The loop over models will use a for loop so it 
       ## can try alpha/sgima values from earlier models
