@@ -13,7 +13,7 @@ fit <- function(model, traits, regimes, tree, alpha=0.1, sigma=0.1, ...){
 
 fit_all <- function(models, traits, regimes, tree){ 
   require(snowfall)
-  sfInit(parallel=TRUE, cpu=16)
+  sfInit(parallel=TRUE, cpu=2)
   sfLibrary(wrightscape)
   sfExportAll()
   fits <- sfLapply(1:length(traits), function(j){
