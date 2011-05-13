@@ -11,8 +11,9 @@ model_list <- list("brown", "hansen", "ouch", "brownie", "wright", "release_cons
 regime_list <-  list(intramandibular=intramandibular)
 
 
-test <- fit_all(model_list[4:6], labrid$data[10:13], regime_list, labrid$tree)
-
+test <- fit_all(model_list[3:6], labrid$data, regime_list,
+                labrid$tree, cpu=16)
+save(list=ls(), file="parrotfish.Rdat")
 conv(test)
 
 #test$fits[[1]][[1]][[3]]$optim_output$par
@@ -20,7 +21,7 @@ conv(test)
 
 ## Summary matrices
 likmat <- llik_matrix(test)
-lliks <- sort_lik(likmat, c("sigma", "gen", "alpha"))
+lliks <- sort_lik(likmat, c("theta", "sigma", "gen", "alpha"))
 
 
 #### Plots

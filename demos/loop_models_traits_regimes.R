@@ -11,9 +11,9 @@ fit <- function(model, traits, regimes, tree, alpha=0.1, sigma=0.1, ...){
 }
 
 
-fit_all <- function(models, traits, regimes, tree){ 
+fit_all <- function(models, traits, regimes, tree, cpu=cpu){ 
   require(snowfall)
-  sfInit(parallel=TRUE, cpu=2)
+  sfInit(parallel=TRUE, cpu=cpu)
   sfLibrary(wrightscape)
   sfExportAll()
   fits <- sfLapply(1:length(traits), function(j){
@@ -87,7 +87,7 @@ llik_matrix <- function(results){
         } else if(is(a, "hansentree") | is(a, "browntree")){
           M[k,i] <- a@loglik
         } else if(is(a, "multiOU")){
-          M[k,i] <- loglik(a)
+          M[k,i] <- loglik.multiOU(a)
         }
       }
       rownames(M) <- regimes
