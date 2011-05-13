@@ -12,18 +12,16 @@ regime_list <-  list(intramandibular=intramandibular)
 
 #test <- fit_all(model_list, labrid$data, regime_list, labrid$tree)
 
-test <- fit_all(model_list, labrid$data, regime_list, labrid$tree)
+test <- fit_all(model_list[4:6], labrid$data, regime_list, labrid$tree)
 
 conv(test)
 
-test$fits[[1]][[1]][[3]]$optim_output$par
+#test$fits[[1]][[1]][[3]]$optim_output$par
 
 
 ## Summary matrices
 likmat <- llik_matrix(test)
-lliks <- sort_lik(likmat)
-release_alphas <- alpha_traits(test) 
-wright_alphas <- alpha_traits(test, model_name="wright") 
+lliks <- sort_lik(likmat, c("sigma", "gen", "alpha"))
 
 
 #### Plots
@@ -56,6 +54,15 @@ for(i in c(1,2,10,11)){
   barplot(lliks[[i]], horiz=T, main=names(lliks)[i])
 }
 dev.off()
+
+
+
+release_alphas <- alpha_traits(test) 
+wright_alphas <- alpha_traits(test, model_name="wright") 
+
+
+
+
 
 
 png("release_alphas.png", width=480*2)
