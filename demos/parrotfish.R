@@ -12,11 +12,11 @@ regime_list <-  list(intramandibular=intramandibular)
 
 #test <- fit_all(model_list, labrid$data, regime_list, labrid$tree)
 
-test <- fit_all(model_list, labrid$data, regime_list, labrid$tree)
+test <- fit_all(model_list[4:6], labrid$data[10:13], regime_list, labrid$tree)
 
 conv(test)
 
-test$fits[[1]][[1]][[3]]$optim_output$par
+#test$fits[[1]][[1]][[3]]$optim_output$par
 
 
 ## Summary matrices
