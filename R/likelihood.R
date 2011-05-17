@@ -366,3 +366,7 @@ multiOU_lik <- function(data, tree, regimes, alpha=NULL, sigma=NULL, theta=NULL,
 	class(output) <- "multiOU"
 	output
 }
+
+
+
+
