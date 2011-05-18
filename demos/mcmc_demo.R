@@ -3,9 +3,9 @@ require(wrightscape)
 require(socialR)
 tags <- c("phylogenetics mcmcmc parrotfish")
 source("parrotfish_data.R")
-#sfInit(parallel=T, cpu=2)
-#sfLibrary(wrightscape)
-#sfExportAll()
+sfInit(parallel=T, cpu=4)
+sfLibrary(wrightscape)
+sfExportAll()
 
 o <- general_mcmc(labrid$data[1], labrid$tree, intramandibular,
                   alpha=2, sigma=2, MaxTime=1e6, indep=1e3)
