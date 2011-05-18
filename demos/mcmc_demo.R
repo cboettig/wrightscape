@@ -8,7 +8,7 @@ sfLibrary(wrightscape)
 sfExportAll()
 
 o <- general_mcmc(labrid$data[1], labrid$tree, intramandibular,
-                  alpha=2, sigma=2, MaxTime=1e5, indep=1e2)
+                  alpha=2, sigma=2, MaxTime=1e5, indep=1e1, stepsizes=.2)
 
 png("convergenceTemp.png")
   burnin <- 1:1e4
@@ -18,7 +18,7 @@ png("convergenceTemp.png")
   lines(o[[4]][-burnin,1], col="red")
 dev.off()
 
-social_report(file="convergenceTemp.png", tag=tags)
+social_report(file="convergenceTemp.png", tag=tags, comment="MaxTime=1e5, indep=1e1, stepsizes=.2")
 
 social_plot(hist(o[[1]][,2]), tag=tags)
 
