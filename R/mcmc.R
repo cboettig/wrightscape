@@ -49,7 +49,7 @@ mcmcmc_fn <- function(pars, loglik, prior, MaxTime=1e3, indep=100, stepsizes=.02
 
   for(s in 1:(MaxTime/indep)){
   # Evolve chains independently for "indep" time steps
-    out <- lapply(1:n_chains, 
+    out <- sfLapply(1:n_chains, 
             function(i){
               out <- matrix(NA, ncol=n_pars+1, nrow=indep)
               for(t in 1:indep){

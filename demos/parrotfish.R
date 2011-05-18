@@ -2,7 +2,7 @@
 require(wrightscape)
 require(pmc)
 require(socialR)
-tag="phylogenetics wrightscape labrids"
+tag="phylogenetics wrightscape labrids serious_SANN"
 
 source("parrotfish_data.R")
 source("loop_models_traits_regimes.R")
