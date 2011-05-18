@@ -3,6 +3,6 @@ export(wrightscape, simulate_wrightscape, simulate.wrighttree, update.wrighttree
 
 export(multiOU_lik, ouch, brownie, wright, release_constraint, update.multiOU, simulate.multiOU, loglik.multiOU, getParameters.multiOU)
 
-export(ws_mcmc)
+export(ws_mcmc, general_mcmc)
 
 import(pmc)
