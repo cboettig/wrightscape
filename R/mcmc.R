@@ -19,8 +19,8 @@ mcmc_fn <- function(pars, loglik, prior, MaxTime=1e3, stepsizes=.02, ...){
     Pi <- loglik(pars)+prior(pars)
     history[t,] <- c(Pi, pars)
     proposed <- step_fn(pars, stepsizes)
-    # Hastings ratio
-    if (loglik(proposed)+prior(proposed) - Pi > runif(1) )
+    alpha <- exp(loglik(proposed)+prior(proposed) - Pi)
+  if (alpha > runif(1) )
       pars <- proposed
   }
   history
@@ -56,7 +56,8 @@ mcmcmc_fn <- function(pars, loglik, prior, MaxTime=1e3, indep=100, stepsizes=.02
                 Pi <- loglik(pars[[i]]) + prior(pars[[i]])
                 out[t,] <- c(Pi, pars[[i]]) # more simply could print this step
                 proposed <- step_fn(pars[[i]], stepsizes)
-                if ( beta(i) * ( loglik(proposed)+prior(proposed) - Pi ) > runif(1) )
+                alpha <- exp( beta(i) * ( loglik(proposed)+prior(proposed) - Pi ) )
+                if ( alpha  > runif(1) )
                   pars[[i]] <- proposed
               }
               out
