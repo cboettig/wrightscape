@@ -1,6 +1,6 @@
 #multiou can try and take lca as a parameter option rather than calculating each time, for efficiency
 
-step_fn <- function(pars, stepsizes = .1){
+step_fn <- function(pars, stepsizes = .02){
 # Sequential random updating 
   j <- sample(1:length(pars), 1)
   pars[j] <- rnorm(1, pars[j], stepsizes)
@@ -13,12 +13,12 @@ Q <- function(pars, proposed){
 #    alpha <- loglik(pars) + prior(pars) + Q(pars, proposed) - loglik(proposed) - prior(proposed) - Q(proposed, pars)
 }
 
-mcmc_fn <- function(pars, loglik, prior, MaxTime=1e3, ...){
+mcmc_fn <- function(pars, loglik, prior, MaxTime=1e3, stepsizes=.02, ...){
   history <- matrix(NA, nrow=MaxTime, ncol=(1+length(pars)))
   for(t in 1:MaxTime){
     Pi <- loglik(pars)+prior(pars)
     history[t,] <- c(Pi, pars)
-    proposed <- step_fn(pars)
+    proposed <- step_fn(pars, stepsizes)
     # Hastings ratio
     if (loglik(proposed)+prior(proposed) - Pi > runif(1) )
       pars <- proposed
@@ -31,7 +31,7 @@ beta <- function(i, Delta_T=1){
 }
 
 
-mcmcmc_fn <- function(pars, loglik, prior, MaxTime=1e3, indep=100, ...){
+mcmcmc_fn <- function(pars, loglik, prior, MaxTime=1e3, indep=100, stepsizes=.02, ...){
 # Metropolis Coupled Markov Chain Monte Carlo
 # Args:
 #   pars: a list of length n_chains, with elements that pars[[i]] that can be passed to loglik
@@ -55,7 +55,7 @@ mcmcmc_fn <- function(pars, loglik, prior, MaxTime=1e3, indep=100, ...){
               for(t in 1:indep){
                 Pi <- loglik(pars[[i]]) + prior(pars[[i]])
                 out[t,] <- c(Pi, pars[[i]]) # more simply could print this step
-                proposed <- step_fn(pars[[i]])
+                proposed <- step_fn(pars[[i]], stepsizes)
                 if ( beta(i) * ( loglik(proposed)+prior(proposed) - Pi ) > runif(1) )
                   pars[[i]] <- proposed
               }
