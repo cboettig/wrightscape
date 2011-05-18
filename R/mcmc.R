@@ -160,7 +160,7 @@ general_prior <- function(pars){
 }
 
 
-general_mcmc <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL, prior=general_prior, MaxTime, indep=MaxTime/100, ...){
+general_mcmc <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL, prior=general_prior, MaxTime, indep=100, stepsizes=.1, ...){
 # all are regime dependent
     # intialize a parameter vector to optimize: 
     # Xo, alpha, sigma, and the n_regime thetas
@@ -206,7 +206,8 @@ general_mcmc <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL, prior=g
 
 
     pars <- list(par, par2, par3, par4)
-    mcmcmc_fn(pars,f, prior, MaxTime=MaxTime, ...) 
+    mcmcmc_fn(pars,f, prior, MaxTime=MaxTime, indep=indep,
+              stepsizes=stepsizes, ...) 
 }
 
 
