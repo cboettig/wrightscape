@@ -21,21 +21,25 @@ test <- wright(data=labrid$data["gape.y"], tree=labrid$tree,
                   regimes=intramandibular, alpha = .1, sigma = .1)
 
 ## fit with SANN options above
-#brownie <- do.call(brownie, brownie_input)
+brownie <- do.call(brownie, brownie_input)
 gm <- do.call(wright, fit_input)
-ouch <- do.call(ouch, fit_input) # my implementation if hansen
+my_thetas <- do.call(ouch, fit_input) # my implementation if hansen
+aaron_thetas <- do.call(hasen, fit_input) # my implementation if hansen
+alphas <- do.call(release_constraint, fit_input) # my implementation if hansen
 
 
-save(list=ls(), file="parrotfish_gape.Rdat") #bit o checkpting
-tweet("@cboettig Parrotfish run initialized")
 
-require(snowfall)
-sfInit(parallel=TRUE, cpu=16)
-sfLibrary(wrightscape)
-sfExportAll()
 
-ouch_vs_gm <- montecarlotest(ouch, gm, nboot=80, cpu=16)
-social_plot(plot(ouch_vs_gm), tag=tag)
+#save(list=ls(), file="parrotfish_gape.Rdat") #bit o checkpting
+#tweet("@cboettig Parrotfish run initialized")
+
+#require(snowfall)
+#sfInit(parallel=TRUE, cpu=16)
+#sfLibrary(wrightscape)
+s#fExportAll()
+
+#ouch_vs_gm <- montecarlotest(ouch, gm, nboot=80, cpu=16)
+#social_plot(plot(ouch_vs_gm), tag=tag)
 
 
 #brownie_vs_gm <- montecarlotest(brownie, gm, nboot=80, cpu=16)
