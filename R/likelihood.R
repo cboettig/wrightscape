@@ -15,17 +15,25 @@ concat_lists <- function(a, b){
 #multiou can try and take lca as a parameter option rather than calculating each time, for efficiency
 update.multiOU <- function(model, data){
     switch(model$submodel,
-           wright = wright(data=data, tree=model$tree, regimes=model$regimes,
-                           Xo=model$Xo, alpha=model$alpha, sigma=model$sigma),
-           ouch = ouch(data=data, tree=model$tree, regimes=model$regimes,
-                       Xo=model$Xo, alpha=model$alpha, sigma=model$sigma),
-           brownie = brownie(data=data, tree=model$tree,
-                             regimes=model$regimes, sigma=model$sigma),
-           release_constraint = 
-            do.call(release_constraint,concat_lists(
-              list(data=data, tree=model$tree,regimes=model$regimes, Xo=model$Xo, 
-                   alpha=model$alpha, sigma=model$sigma), 
-                   model$opts)))
+           wright = do.call(wright, 
+                            c(list(data=data, tree=model$tree, regimes=model$regimes,
+                                   Xo=model$Xo, alpha=model$alpha, sigma=model$sigma),
+                            model$opts))
+           ouch = do.call(ouch, 
+                          c(list(data=data, tree=model$tree, 
+                                 regimes=model$regimes, Xo=model$Xo, 
+                                 alpha=model$alpha, sigma=model$sigma),
+                          model$opts))
+           brownie = do.call(brownie, 
+                             c(list(data=data, tree=model$tree,
+                                    regimes=model$regimes, sigma=model$sigma),
+                             model$opts))
+           release_constraint =  
+            do.call(release_constraint, 
+                    c(list(data=data, tree=model$tree,
+                           regimes=model$regimes, Xo=model$Xo, 
+                           alpha=model$alpha, sigma=model$sigma), 
+                    model$opts)))
            
 }
 
@@ -87,6 +95,9 @@ release_constraint <- function(data, tree, regimes, alpha=NULL,
 
 
 wright <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL, ...){
+  opts <- list(...)
+
+
 # all are regime dependent
     # intialize a parameter vector to optimize: 
     # Xo, alpha, sigma, and the n_regime thetas
@@ -135,7 +146,7 @@ wright <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL, ...){
                    theta=optim_output$par[(2+2*n_regimes):(1+3*n_regimes)],
                    sigma=optim_output$par[(2+n_regimes):(1+2*n_regimes)],
                    optim_output=optim_output, submodel="wright",
-                   convergence=optim_output$convergence)
+                   convergence=optim_output$convergence, opts=opts)
     class(output) = "multiOU"
     output
 }
@@ -145,6 +156,8 @@ wright <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL, ...){
 
 # OUCH
 ouch <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL, ...){
+  opts <- list(...)
+
 # alpha is fixed at ~zero, sigma is regime dependent, theta is global
 
     # intialize a parameter vector to optimize: 
@@ -192,13 +205,14 @@ ouch <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL, ...){
                    sigma=optim_output$par[3],
                    optim_output=optim_output,
                    submodel="ouch",
-                   convergence=optim_output$convergence)
+                   convergence=optim_output$convergence, opts=opts)
     class(output) = "multiOU"
     output
 }
 
 # Brownie
 brownie <- function(data, tree, regimes, sigma=1, ...){ 
+  opts <- list(...)
 
     # intialize a parameter vector to optimize: 
     # Xo, followed by the n_regime sigmas
@@ -231,7 +245,7 @@ brownie <- function(data, tree, regimes, sigma=1, ...){
                    sigma=optim_output$par[2:(1+n_regimes)],
                    optim_output=optim_output,
                    submodel="brownie",
-                   convergence=optim_output$convergence)
+                   convergence=optim_output$convergence, opts=opts)
     class(output) = "multiOU"
     output
 }
