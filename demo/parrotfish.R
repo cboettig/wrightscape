@@ -11,7 +11,7 @@ model_list <- list("brown", "hansen", "ouch", "brownie", "wright", "release_cons
 regime_list <-  list(intramandibular=intramandibular)
 
 # close, open, kt, gape, and then SH.y as a control 
-test <- fit_all(model_list[3:6], labrid$data[c(7:10,13)], regime_list,
+test <- fit_all(model_list, labrid$data, regime_list,
                 labrid$tree, cpu=16)
 save(list=ls(), file="parrotfish.Rdat")
 conv(test)
@@ -24,7 +24,14 @@ likmat <- llik_matrix(test)
 lliks <- sort_lik(likmat, c("theta", "sigma", "gen", "alpha"))
 
 
-#### Plots
+#### Plots of Likelihood
+# Body mass, gape,pro 
+png("parrotfish_keytraits.png", width=480*1.5, height=480*1.5)
+par(mfrow=c(2,2))
+for(i in c(3, 10,11,12)){
+  barplot(lliks[[i]], horiz=T, main=names(lliks)[i])
+}
+dev.off()
 
 # Body mass, ratios 
 png("parrotfish_ratios.png", width=480*1.5, height=480*1.5)

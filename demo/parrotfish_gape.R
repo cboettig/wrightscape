@@ -21,12 +21,13 @@ test <- wright(data=labrid$data["gape.y"], tree=labrid$tree,
                   regimes=intramandibular, alpha = .1, sigma = .1)
 
 ## fit with SANN options above
-brownie <- do.call(brownie, brownie_input)
+bm2 <- do.call(brownie, brownie_input)
 gm <- do.call(wright, fit_input)
 my_thetas <- do.call(ouch, fit_input) # my implementation if hansen
-aaron_thetas <- do.call(hasen, fit_input) # my implementation if hansen
+aaron_thetas <- hansen(data=labrid$data["gape.y"], tree=labrid$tree,
+                  regimes=intramandibular, sqrt.alpha=.1, sigma = .1) # ouch won't do SANN
 alphas <- do.call(release_constraint, fit_input) # my implementation if hansen
-
+bm <- brown(data=labrid$data["gape.y"], tree=labrid$tree)
 
 
 
