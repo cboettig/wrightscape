@@ -18,16 +18,16 @@ update.multiOU <- function(model, data){
            wright = do.call(wright, 
                             c(list(data=data, tree=model$tree, regimes=model$regimes,
                                    Xo=model$Xo, alpha=model$alpha, sigma=model$sigma),
-                            model$opts))
+                            model$opts)),
            ouch = do.call(ouch, 
                           c(list(data=data, tree=model$tree, 
                                  regimes=model$regimes, Xo=model$Xo, 
                                  alpha=model$alpha, sigma=model$sigma),
-                          model$opts))
+                          model$opts)),
            brownie = do.call(brownie, 
                              c(list(data=data, tree=model$tree,
                                     regimes=model$regimes, sigma=model$sigma),
-                             model$opts))
+                             model$opts)),
            release_constraint =  
             do.call(release_constraint, 
                     c(list(data=data, tree=model$tree,
