@@ -2,7 +2,7 @@
 require(wrightscape)
 require(pmc)
 require(socialR)
-tag="phylogenetics wrightscape labrids serious_SANN"
+tag="phylogenetics wrightscape labrids"
 
 source("parrotfish_data.R")
 source("loop_models_traits_regimes.R")
@@ -10,8 +10,8 @@ source("loop_models_traits_regimes.R")
 model_list <- list("brown", "hansen", "ouch", "brownie", "wright", "release_constraint")
 regime_list <-  list(intramandibular=intramandibular)
 
-
-test <- fit_all(model_list[3:6], labrid$data, regime_list,
+# close, open, kt, gape, and then SH.y as a control 
+test <- fit_all(model_list[3:6], labrid$data[c(7:10,13)], regime_list,
                 labrid$tree, cpu=16)
 save(list=ls(), file="parrotfish.Rdat")
 conv(test)

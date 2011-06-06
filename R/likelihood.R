@@ -1,17 +1,40 @@
-#multiou can try and take lca as a parameter option rather than calculating each time, for efficiency
+# silly function we need to pass arguments as options 
+concat_lists <- function(a, b){
+  n_a <- length(a)
+  n_b <- length(b)
 
+  out <- vector("list", length=n_a + n_b)
+  for(i in 1:n_a)
+    out[[i]] <- a[[i]]
+  for(i in 1:n_b)
+    out[[i+n_a]] <- b[[i]]
+  names(out) <- c(names(a), names(b))
+  out
+}
+
+#multiou can try and take lca as a parameter option rather than calculating each time, for efficiency
 update.multiOU <- function(model, data){
     switch(model$submodel,
-           wright = wright(data, model$tree, model$regimes,
-                           model$Xo, model$alpha, model$sigma),
-           ouch = ouch(data, model$tree, model$regimes,
+           wright = wright(data=data, tree=model$tree, regimes=model$regimes,
+                           Xo=model$Xo, alpha=model$alpha, sigma=model$sigma),
+           ouch = ouch(data=data, tree=model$tree, regimes=model$regimes,
                        Xo=model$Xo, alpha=model$alpha, sigma=model$sigma),
-           brownie = brownie(data, model$tree, model$regimes,
-                             model$sigma))
+           brownie = brownie(data=data, tree=model$tree,
+                             regimes=model$regimes, sigma=model$sigma),
+           release_constraint = 
+            do.call(release_constraint,concat_lists(
+              list(data=data, tree=model$tree,regimes=model$regimes, Xo=model$Xo, 
+                   alpha=model$alpha, sigma=model$sigma), 
+                   model$opts)))
+           
 }
 
 release_constraint <- function(data, tree, regimes, alpha=NULL,
                                sigma=NULL, theta=NULL, Xo=NULL, ...){
+
+  opts <- list(...)
+           
+
 # alpha varies by regime, theta and sigma are global
 # par is Xo, all alphas, theta, sigma
   n_regimes <- length(levels(regimes))
@@ -56,7 +79,8 @@ release_constraint <- function(data, tree, regimes, alpha=NULL,
                  theta=optim_output$par[2+n_regimes],
                  sigma=optim_output$par[3+n_regimes],
                  optim_output=optim_output, submodel="release_constraint",
-                 convergence=optim_output$convergence)
+                 convergence=optim_output$convergence,
+                 opts=opts)
   class(output) = "multiOU"
   output
 }
