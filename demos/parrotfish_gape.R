@@ -21,8 +21,9 @@ test <- wright(data=labrid$data["gape.y"], tree=labrid$tree,
                   regimes=intramandibular, alpha = .1, sigma = .1)
 
 ## fit with SANN options above
-brownie <- do.call(brownie, brownie_input)
+#brownie <- do.call(brownie, brownie_input)
 gm <- do.call(wright, fit_input)
+ouch <- do.call(ouch, fit_input) # my implementation if hansen
 
 
 save(list=ls(), file="parrotfish_gape.Rdat") #bit o checkpting
@@ -33,11 +34,14 @@ sfInit(parallel=TRUE, cpu=16)
 sfLibrary(wrightscape)
 sfExportAll()
 
-brownie_vs_gm <- montecarlotest(brownie, gm, nboot=80, cpu=16)
-save(list=ls(), file="parrotfish_gape.Rdat")
-social_plot(plot(brownie_vs_gm), tag=tag)
+ouch_vs_gm <- montecarlotest(ouch, gm, nboot=80, cpu=16)
+social_plot(plot(ouch_vs_gm), tag=tag)
 
-#multi_peak_vs_gm montecarlotest(mulit_peak, gm, nboot=80, cpu=16)
+
+#brownie_vs_gm <- montecarlotest(brownie, gm, nboot=80, cpu=16)
+#social_plot(plot(brownie_vs_gm), tag=tag)
+
+#multi_peak_vs_gm montecarlotest(multi_peak, gm, nboot=80, cpu=16)
 #save(list=ls(), file="parrotfish_gape.Rdat")
 #social_plot(plot(multi_peak_vs_gm), tag=tag)
 
