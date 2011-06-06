@@ -12,23 +12,33 @@ regime_list <-  list(intramandibular=intramandibular)
 fit_input <- list(data=labrid$data["gape.y"], tree=labrid$tree,
                   regimes=intramandibular, alpha = .1, sigma = .1,
                   method ="SANN", control=list(maxit=80000,temp=25,tmax=50))
+brownie_input <- list(data=labrid$data["gape.y"], tree=labrid$tree,
+                  regimes=intramandibular, sigma = .1,
+                  method ="SANN", control=list(maxit=80000,temp=25,tmax=50))
 
+# superfast, but not nec max w/o SANN
 test <- wright(data=labrid$data["gape.y"], tree=labrid$tree,
                   regimes=intramandibular, alpha = .1, sigma = .1)
 
-
-rc <- do.call(release_constraint,fit_input)
+## fit with SANN options above
+brownie <- do.call(brownie, brownie_input)
 gm <- do.call(wright, fit_input)
-multi_peak <- do.call(hansen, fit_input)
-bm <- do.call(bm, fit_input)
-brownie <- do.call(brownie, fit_input)
 
 
 save(list=ls(), file="parrotfish_gape.Rdat") #bit o checkpting
+tweet("@cboettig Parrotfish run initialized")
+
+require(snowfall)
+sfInit(parallel=TRUE, cpu=16)
+sfLibrary(wrightscape)
+sfExportAll()
+
 brownie_vs_gm <- montecarlotest(brownie, gm, nboot=80, cpu=16)
 save(list=ls(), file="parrotfish_gape.Rdat")
-multi_peak_vs_gm montecarlotest(mulit_peak, gm, nboot=80, cpu=16)
-save(list=ls(), file="parrotfish_gape.Rdat")
+social_plot(plot(brownie_vs_gm), tag=tag)
 
+#multi_peak_vs_gm montecarlotest(mulit_peak, gm, nboot=80, cpu=16)
+#save(list=ls(), file="parrotfish_gape.Rdat")
+#social_plot(plot(multi_peak_vs_gm), tag=tag)
 
 
