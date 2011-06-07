@@ -1,23 +1,13 @@
-# silly function we need to pass arguments as options 
-concat_lists <- function(a, b){
-  n_a <- length(a)
-  n_b <- length(b)
 
-  out <- vector("list", length=n_a + n_b)
-  for(i in 1:n_a)
-    out[[i]] <- a[[i]]
-  for(i in 1:n_b)
-    out[[i+n_a]] <- b[[i]]
-  names(out) <- c(names(a), names(b))
-  out
-}
 
 #multiou can try and take lca as a parameter option rather than calculating each time, for efficiency
 update.multiOU <- function(model, data){
     switch(model$submodel,
            wright = do.call(wright, 
-                            c(list(data=data, tree=model$tree, regimes=model$regimes,
-                                   Xo=model$Xo, alpha=model$alpha, sigma=model$sigma),
+                            c(list(data=data, tree=model$tree,
+                                   regimes=model$regimes,
+                                   Xo=model$Xo, alpha=model$alpha, 
+                                  sigma=model$sigma, theta=model$theta),
                             model$opts)),
            ouch = do.call(ouch, 
                           c(list(data=data, tree=model$tree, 
@@ -32,17 +22,42 @@ update.multiOU <- function(model, data){
             do.call(release_constraint, 
                     c(list(data=data, tree=model$tree,
                            regimes=model$regimes, Xo=model$Xo, 
-                           alpha=model$alpha, sigma=model$sigma), 
+                           alpha=model$alpha, sigma=model$sigma,
+                           theta=model$theta), 
                     model$opts)))
            
 }
 
+
+# Likelihood as a function of optimizable parameters
+llik.release = function(data, tree, regimes, lca=NULL){
+# returns a likelihood funciton of pars: {Xo, alpha, sigma, theta}
+  n_regimes <- length(levels(regimes))
+  if(is.null(lca))
+    lca <- lca_calc(tree)
+  f <- function(par){
+      Xo <- par[1]
+      alpha <- par[2:(1+n_regimes)]
+      sigma <- rep(par[2+n_regimes], n_regimes) 
+      theta <- rep(par[3+n_regimes], n_regimes) 
+      if (any(alpha < 0)){
+          llik <- -Inf
+      }
+      else if (any(sigma<0)){
+          llik <- -Inf
+      } else {
+          llik<-multiOU_lik_lca(data, tree, regimes, alpha=alpha,
+                                sigma=sigma, theta=theta, Xo=Xo, lca)
+      }
+      -llik
+  }
+  f
+}
+
+
 release_constraint <- function(data, tree, regimes, alpha=NULL,
                                sigma=NULL, theta=NULL, Xo=NULL, ...){
-
   opts <- list(...)
-           
-
 # alpha varies by regime, theta and sigma are global
 # par is Xo, all alphas, theta, sigma
   n_regimes <- length(levels(regimes))
@@ -62,30 +77,18 @@ release_constraint <- function(data, tree, regimes, alpha=NULL,
 
   lca <- lca_calc(tree)
 
-  # Likelihood as a function of optimizable parameters
-  f <- function(par){
-      Xo <- par[1]
-      alpha <- par[2:(1+n_regimes)]
-      sigma <- rep(par[2+n_regimes], n_regimes) 
-      theta <- rep(par[3+n_regimes], n_regimes) 
-      if (any(alpha < 0)){
-          llik <- -1e12
-      }
-      else if (any(sigma<0)){
-          llik <- -1e12
-      } else {
-          llik<-multiOU_lik_lca(data, tree, regimes, alpha=alpha,
-                                sigma=sigma, theta=theta, Xo=Xo, lca)
-      }
-      -llik
-  }
+  f <- llik.release(data, tree, regimes, lca)
+  print(par)
+  print(paste("starting loglik = ", -f(par)))
+
+
   optim_output <- optim(par,f, ...) 
 #    optim(par,f, method="L", lower=c(-Inf, rep(0,n_regimes), rep(-Inf, n_regimes), rep(0, n_regimes))) 
   output <- list(data=data, tree=tree, regimes=regimes, 
                  loglik=-optim_output$value, Xo=optim_output$par[1], 
                  alpha=optim_output$par[2:(1+n_regimes)], 
-                 theta=optim_output$par[2+n_regimes],
-                 sigma=optim_output$par[3+n_regimes],
+                 sigma=optim_output$par[2+n_regimes],
+                 theta=optim_output$par[3+n_regimes],
                  optim_output=optim_output, submodel="release_constraint",
                  convergence=optim_output$convergence,
                  opts=opts)
@@ -94,57 +97,87 @@ release_constraint <- function(data, tree, regimes, alpha=NULL,
 }
 
 
-wright <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL, ...){
+
+
+
+# Likelihood as a function of optimizable parameters
+llik.wright <- function(data, tree, regimes, lca=NULL){
+  n_regimes <- length(levels(regimes))
+
+  if(is.null(lca))
+    lca <- lca_calc(tree)
+  f <- function(par){
+    Xo <- par[1]
+    alpha <- par[2:(1+n_regimes)]
+    sigma <- par[(2+n_regimes):(1+2*n_regimes)]
+    theta <- par[(2+2*n_regimes):(1+3*n_regimes)] 
+    if (any(alpha < 0)){
+        llik <- -Inf
+    }
+    else if (any(sigma<0)){
+        llik <- -Inf
+    } else {
+        llik<-multiOU_lik_lca(data, tree, regimes, alpha=alpha,
+                              sigma=sigma, theta=theta, Xo=Xo, lca)
+    }
+    -llik
+  }
+  f
+}
+
+
+wright <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL, theta=NULL, ...){
   opts <- list(...)
 
 
-# all are regime dependent
+    # all are regime dependent
     # intialize a parameter vector to optimize: 
-    # Xo, alpha, sigma, and the n_regime thetas
+    # par = {Xo, alphas, sigmas, thetas}
     n_regimes <- length(levels(regimes))
     par <- numeric(1+3*n_regimes)
 
-    # Some starting conditions
+    # Create par vector from the given starting conditions 
+    # (or guess if not given)
+
+    ## Specify the indices of each. Xo is always 1
+    alpha_i <- 2:(1+n_regimes) 
+    sigma_i <- (2+n_regimes):(1+2*n_regimes)
+    theta_i <- (2+2*n_regimes):(1+3*n_regimes)
+
     if(is.null(Xo)) Xo <- mean(data, na.rm=TRUE) 
     par[1] <- Xo
     if(length(alpha) == n_regimes){
-        par[2:(1+n_regimes)] <- alpha
+        par[alpha_i] <- alpha
     } else {
-        par[2:(1+n_regimes)] <- rep(alpha, n_regimes)
+        par[alpha_i] <- rep(alpha, n_regimes)
     }
     if(length(sigma) == n_regimes){
-        par[(2+n_regimes):(1+2*n_regimes)] <- sigma 
+        par[sigma_i] <- sigma 
     } else {
-        par[(2+n_regimes):(1+2*n_regimes)] <- rep(sigma, n_regimes)
+        par[sigma_i] <- rep(sigma, n_regimes)
+    } 
+    if(is.null(theta)){
+      par[theta_i] <- rep(Xo, n_regimes)
+    } else if(length(theta) == n_regimes){
+       par[theta_i] <- theta
+    } else {
+      par[theta_i] <- rep(theta, n_regimes)
     }
-    par[(2+2*n_regimes):(1+3*n_regimes)] <- rep(Xo, n_regimes)
-
     lca <- lca_calc(tree)
-
     # Likelihood as a function of optimizable parameters
-    f <- function(par){
-        Xo <- par[1]
-        alpha <- par[2:(1+n_regimes)]
-        sigma <- par[(2+n_regimes):(1+2*n_regimes)]
-        theta <- par[(2+2*n_regimes):(1+3*n_regimes)] 
-        if (any(alpha < 0)){
-            llik <- -1e12
-        }
-        else if (any(sigma<0)){
-            llik <- -1e12
-        } else {
-            llik<-multiOU_lik_lca(data, tree, regimes, alpha=alpha,
-                                  sigma=sigma, theta=theta, Xo=Xo, lca)
-        }
-        -llik
-    }
+    f <- llik.wright(data, tree, regimes, lca)
+
+    print(par)
+    print(paste("starting loglik = ", -f(par)))
+
+
     optim_output <- optim(par,f, ...) 
 #    optim(par,f, method="L", lower=c(-Inf, rep(0,n_regimes), rep(-Inf, n_regimes), rep(0, n_regimes))) 
     output <- list(data=data, tree=tree, regimes=regimes, 
                    loglik=-optim_output$value, Xo=optim_output$par[1], 
-                   alpha=optim_output$par[2:(1+n_regimes)], 
-                   theta=optim_output$par[(2+2*n_regimes):(1+3*n_regimes)],
-                   sigma=optim_output$par[(2+n_regimes):(1+2*n_regimes)],
+                   alpha=optim_output$par[alpha_i], 
+                   sigma=optim_output$par[sigma_i],
+                   theta=optim_output$par[theta_i],
                    optim_output=optim_output, submodel="wright",
                    convergence=optim_output$convergence, opts=opts)
     class(output) = "multiOU"
@@ -211,6 +244,7 @@ ouch <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL, ...){
 }
 
 # Brownie
+# should take Xo
 brownie <- function(data, tree, regimes, sigma=1, ...){ 
   opts <- list(...)
 
@@ -231,9 +265,14 @@ brownie <- function(data, tree, regimes, sigma=1, ...){
     f <- function(pars){
         Xo <- pars[1]
         sigma <- pars[2:(1+n_regimes)] # everything else
-        alpha <- rep(1e-12, n_regimes) 
+        alpha <- rep(1e-12, n_regimes) ## all alphas approx 0
         theta <- rep(Xo, n_regimes)
-        llik <- multiOU_lik_lca(data, tree, regimes, alpha=alpha, sigma=sigma, theta=theta, Xo=Xo, lca)
+        if (any(sigma<0)){
+            llik <- -Inf
+        } else {
+        llik <- multiOU_lik_lca(data, tree, regimes, alpha=alpha, sigma=sigma,
+                                theta=theta, Xo=Xo, lca)
+        }
         -llik
     }
     optim_output <- optim(pars,f, ...) 
@@ -281,7 +320,7 @@ lca_calc <- function(tree){
     lca[[4]]
 }
 
-
+## .C calls should do some error checking on the length of inputs maybe, to avoid crashes when given inappropriate calls
 multiOU_lik_lca <- function(data, tree, regimes, alpha=NULL, sigma=NULL, theta=NULL, Xo=NULL, lca){
 # A version of the multitype OU likelihood function that accepts the least 
 # common ancestor matrix as a parameter.  This may increase computational speed,

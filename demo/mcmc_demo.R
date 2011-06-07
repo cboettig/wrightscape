@@ -1,14 +1,14 @@
 # mcmc_demo.R
 require(wrightscape)
 require(socialR)
-tags <- c("phylogenetics mcmcmc parrotfish")
+tags <- c("phylogenetics parrotfish")
 source("parrotfish_data.R")
 sfInit(parallel=T, cpu=4)
 sfLibrary(wrightscape)
 sfExportAll()
 
 o <- general_mcmc(labrid$data['open'], labrid$tree, intramandibular,
-                  alpha=.1, sigma=.1, MaxTime=1e5, indep=1e2)
+                  alpha=.01, sigma=.01, MaxTime=1e6, indep=1e2)
 
 
 cold_chain <- o$chains[[1]]
