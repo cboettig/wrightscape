@@ -81,8 +81,9 @@ png("wright_alphas.png", width=480*2)
  barplot(log(wright_alphas[,1]/wright_alphas[,2]))
 dev.off()
 
-flickr(files="parrotfish*.png", tag=tag)
-flickr(files="*alphas.png", tag=tag)
+save(list=ls(all=TRUE), file="superSANN.Rdat")
+social_report(files="parrotfish*.png", tag=tag)
+social_report(files="*alphas.png", tag=tag)
 
 
 

@@ -7,11 +7,11 @@ sfInit(parallel=T, cpu=4)
 sfLibrary(wrightscape)
 sfExportAll()
 
-o <- general_mcmc(labrid$data['gape.y'], labrid$tree, intramandibular,
-                  alpha=.1, sigma=.1, MaxTime=1e6, indep=1e2)
+o <- general_mcmc(labrid$data['open'], labrid$tree, intramandibular,
+                  alpha=.1, sigma=.1, MaxTime=1e5, indep=1e2)
 
 
-cold_chain <- o[[1]]
+cold_chain <- o$chains[[1]]
 colnames(cold_chain) <- c("Pi", "Xo", "alpha1", "alpha2", "sigma1", "sigma2", "theta1", "theta2")
 
 
@@ -42,18 +42,19 @@ polygon(poste_sigma1, col=rgb(0,1,0,.5))
 polygon(poste_sigma2, col=rgb(0,0,1,.5))
 dev.off()
 
-social_report(file="posteriors.png", tag=tags)
+social_report(file="posteriors.png", tag=tags,
+comment=paste(c(names(o$myCall),">><<", o$myCall), collapse=" "))
 
-load("5732361327.Rdat")
 png("convergenceTemp.png")
-  burnin <- 1:1e4
-  plot(o[[4]][-burnin,1], type="l", col=rgb(1,0,0.3))
-  lines(o[[3]][-burnin,1], col=rgb(1,0,0.5))
-  lines(o[[2]][-burnin,1], col=rgb(1,0,0.8))
-  lines(o[[1]][-burnin,1])
+  burnin <- 1:5e3
+  plot(o$chains[[4]][-burnin,1], type="l", col=rgb(1,0,0.3))
+  lines(o$chains[[3]][-burnin,1], col=rgb(1,0,0.5))
+  lines(o$chains[[2]][-burnin,1], col=rgb(1,0,0.8))
+  lines(o$chains[[1]][-burnin,1])
 dev.off()
 
-social_report(file="convergenceTemp.png", tag=tags, comment=history(Inf))
+social_report(file="convergenceTemp.png", tag=tags,
+comment=paste(c(names(o$myCall),">><<", o$myCall), collapse=" "))
 
 
 
