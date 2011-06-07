@@ -125,6 +125,39 @@ names(lliks) <- names(likmat)
 lliks
 }
 
+theta_traits <- function(results, model_name="release_constraint"){
+# Takes the output of fit_all and grabs theta values for specified model
+  k <- 1 # the regime index
+  groups <- levels(results$regimes[[k]])
+  n_groups <- length(groups)
+  i <- match(model_name, results$models)
+  M <- matrix(NA, ncol=n_groups, nrow=length(results$traits))
+  for(j in 1:length(results$traits)){
+    a <- results$fit[[j]][[k]][[i]]
+    M[j,] <- a$theta
+  }
+  rownames(M) <- names(results$traits)
+  colnames(M) <- groups
+  M
+}
+
+
+sigma_traits <- function(results, model_name="release_constraint"){
+# Takes the output of fit_all and grabs sigma values for specified model
+  k <- 1 # the regime index
+  groups <- levels(results$regimes[[k]])
+  n_groups <- length(groups)
+  i <- match(model_name, results$models)
+  M <- matrix(NA, ncol=n_groups, nrow=length(results$traits))
+  for(j in 1:length(results$traits)){
+    a <- results$fit[[j]][[k]][[i]]
+    M[j,] <- a$sigma
+  }
+  rownames(M) <- names(results$traits)
+  colnames(M) <- groups
+  M
+}
+
 
 alpha_traits <- function(results, model_name="release_constraint"){
 # Takes the output of fit_all and grabs alpha values for specified model
