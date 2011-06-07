@@ -30,7 +30,6 @@ fit_all <- function(models, traits, regimes, tree, cpu=cpu){
           out[[i]] <- hansen(traits[j], tree,  regime=labrid$noregimes,
                              .01, .01, maxit=5000)
 
-
         ## Simple hansen model
         } else if(models[[i]]=="hansen"){
           out[[i]] <- try( fit(models[[i]], traits[j], regimes[[k]],
@@ -39,27 +38,25 @@ fit_all <- function(models, traits, regimes, tree, cpu=cpu){
         ##   
         } else {
           ## Reporting, optional
-#          print(paste("model = ", models[[i]], "trait = ", names(traits[j]),
-#                      "regime=", names(regimes[k])))
+          print(paste("model = ", models[[i]], "trait = ", names(traits[j]),
+                      "regime=", names(regimes[k])))
 
 
-          ## use hansen to start with good parameters 
-          hansen <- try(fit("hansen", traits[j], regimes[[k]], tree=tree,
-                            maxit=5000))
-
+          ## use brownian to initialize guess for sigma parameters 
+          brownian <- brown(traits[j], tree)
 
           ## Fit one of the generalized models using the initial guess from hansen
           out[[i]] <- try( fit(models[[i]], traits[j], regimes[[k]],
-                               tree=tree, alpha=c(5,.01),
-                               sigma=hansen@sigma, method ="SANN",
-                               control=list(maxit=800000,temp=25,tmax=200)))
+                               tree=tree, alpha=c(.01,.01),
+                               sigma=brownian@sigma, method ="SANN",
+                               control=list(maxit=800000,temp=40,tmax=200)))
 
           ## If errors, attempt default starting conditions 
           if(is(out[[i]], "try-error")){
             warning("first attempt to fit failed, trying another routine")
             out[[i]] <- try( fit(models[[i]], traits[j], regimes[[k]],
-                               tree=tree, alpha=0.01,
-                               sigma=0.01, control=list(maxit=5000)))
+                               tree=tree, alpha=1,
+                               sigma=1, control=list(maxit=5000)))
           }
         }
       }
@@ -107,22 +104,19 @@ sort_lik <- function(likmat, model_names = c("bm", "ou", "theta",
 ## Reorganize the data to list by ascending score
 ## Rename models (with short, parameter-based names) 
 ## rescale the data relative to weakest model 
-lliks <- vector("list", length=length(likmat))
-for(i in 1:length(likmat)){
-  tmp <- likmat[[i]]
-  names(tmp) <- model_names
-  tmp <- sort(tmp)
-  shift <- tmp[1] 
-  for(j in 1:length(tmp)){
-    print(tmp[j])
-    tmp[j] <- tmp[j]-shift
-    print(tmp[j])
+  lliks <- vector("list", length=length(likmat))
+  for(i in 1:length(likmat)){
+    names(likmat[[i]]) <- colnames(likmat[[i]])
+    tmp <- sort(likmat[[i]])
+    shift <- tmp[1]
+#    print(names(tmp[length(tmp)])
+    for(j in 1:length(tmp)){
+      tmp[j] <- tmp[j]-shift
+    }
+    lliks[[i]] <- tmp
   }
-  lliks[[i]] <- tmp
-  print(tmp)
-}
-names(lliks) <- names(likmat)
-lliks
+  names(lliks) <- names(likmat)
+  lliks
 }
 
 

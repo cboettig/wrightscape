@@ -7,7 +7,7 @@ sfInit(parallel=T, cpu=4)
 sfLibrary(wrightscape)
 sfExportAll()
 
-o <- general_mcmc(labrid$data['open'], labrid$tree, intramandibular,
+o <- general_mcmc(labrid$data['close'], labrid$tree, intramandibular,
                   alpha=.1, sigma=.1, MaxTime=1e5, indep=1e2)
 
 

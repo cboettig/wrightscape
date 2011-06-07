@@ -21,7 +21,7 @@ conv(test)
 
 ## Summary matrices
 likmat <- llik_matrix(test)
-lliks <- sort_lik(likmat, c("theta", "sigma", "gen", "alpha"))
+lliks <- sort_lik(likmat, c("brown", "hansen", "theta", "sigma", "gen", "alpha"))
 
 
 #### Plots of Likelihood
@@ -73,17 +73,18 @@ wright_alphas <- alpha_traits(test, model_name="wright")
 
 
 png("release_alphas.png", width=480*2)
- barplot(log(release_alphas[,1]/release_alphas[,2]))
+ barplot((release_alphas[,1]/release_alphas[,2]))
 dev.off()
 
 
 png("wright_alphas.png", width=480*2)
- barplot(log(wright_alphas[,1]/wright_alphas[,2]))
+ barplot((wright_alphas[,1]/wright_alphas[,2]))
 dev.off()
 
 save(list=ls(all=TRUE), file="superSANN.Rdat")
-social_report(files="parrotfish*.png", tag=tag)
-social_report(files="*alphas.png", tag=tag)
+social_report(file="parrotfish_keytraits.png", tag=tag)
+social_report(files="wright_alphas.png", tag=tag)
+social_report(files="release_alphas.png", tag=tag)
 
 
 
