@@ -45,7 +45,6 @@ dev.off()
 social_report(file="posteriors.png", tag=tags,
 comment=paste(c(names(o$myCall),">><<", o$myCall), collapse=" "))
 
-
 png("convergenceTemp.png")
   burnin <- 1:5e3
   plot(o$chains[[4]][-burnin,1], type="l", col=rgb(1,0,0.3))
