@@ -44,16 +44,16 @@ dev.off()
 
 social_report(file="posteriors.png", tag=tags)
 
-
+load("5732361327.Rdat")
 png("convergenceTemp.png")
-  burnin <- 1:1e5
+  burnin <- 1:1e4
   plot(o[[4]][-burnin,1], type="l", col=rgb(1,0,0.3))
   lines(o[[3]][-burnin,1], col=rgb(1,0,0.5))
   lines(o[[2]][-burnin,1], col=rgb(1,0,0.8))
   lines(o[[1]][-burnin,1])
 dev.off()
 
-social_report(file="convergenceTemp.png", tag=tags, comment="MaxTime=1e5, indep=1e1, stepsizes=.2")
+social_report(file="convergenceTemp.png", tag=tags, comment=history(Inf))
 
 
 
