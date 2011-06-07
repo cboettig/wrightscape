@@ -4,50 +4,30 @@ require(pmc)
 require(socialR)
 tag="phylogenetics wrightscape labrids"
 source("parrotfish_data.R")
-source("loop_models_traits_regimes.R")
 
-model_list <- list("brown", "hansen", "ouch", "brownie", "wright", "release_constraint")
-regime_list <-  list(intramandibular=intramandibular)
 
-fit_input <- list(data=labrid$data["gape.y"], tree=labrid$tree,
-                  regimes=intramandibular, alpha = .1, sigma = .1,
+general = list(alpha="indep", sigma="indep", theta="indep")
+rc = list(alpha="indep", sigma="global", theta="global")
+
+
+fit_input <- list(data=labrid$data["close"], tree=labrid$tree,
+                  regimes=intramandibular, model_spec=rc, 
+                  Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
                   method ="SANN", control=list(maxit=80000,temp=25,tmax=50))
-brownie_input <- list(data=labrid$data["gape.y"], tree=labrid$tree,
-                  regimes=intramandibular, sigma = .1,
-                  method ="SANN", control=list(maxit=80000,temp=25,tmax=50))
 
-# superfast, but not nec max w/o SANN
-test <- wright(data=labrid$data["gape.y"], tree=labrid$tree,
-                  regimes=intramandibular, alpha = .1, sigma = .1)
-
-## fit with SANN options above
-bm2 <- do.call(brownie, brownie_input)
-gm <- do.call(wright, fit_input)
-my_thetas <- do.call(ouch, fit_input) # my implementation if hansen
-aaron_thetas <- hansen(data=labrid$data["gape.y"], tree=labrid$tree,
-                  regimes=intramandibular, sqrt.alpha=.1, sigma = .1) # ouch won't do SANN
-alphas <- do.call(release_constraint, fit_input) # my implementation if hansen
-bm <- brown(data=labrid$data["gape.y"], tree=labrid$tree)
+rc_fit <- do.call(multiTypeOU, fit_input)
 
 
 
-#save(list=ls(), file="parrotfish_gape.Rdat") #bit o checkpting
-#tweet("@cboettig Parrotfish run initialized")
+save(list=ls(), file="parrotfish_gape.Rdat") #bit o checkpting
+tweet("@cboettig Parrotfish run initialized")
 
 #require(snowfall)
 #sfInit(parallel=TRUE, cpu=16)
 #sfLibrary(wrightscape)
-s#fExportAll()
+#fExportAll()
 
 #ouch_vs_gm <- montecarlotest(ouch, gm, nboot=80, cpu=16)
 #social_plot(plot(ouch_vs_gm), tag=tag)
-
-
-#brownie_vs_gm <- montecarlotest(brownie, gm, nboot=80, cpu=16)
-#social_plot(plot(brownie_vs_gm), tag=tag)
-
-#multi_peak_vs_gm montecarlotest(multi_peak, gm, nboot=80, cpu=16)
-#save(list=ls(), file="parrotfish_gape.Rdat")
-#social_plot(plot(multi_peak_vs_gm), tag=tag)
 
 
