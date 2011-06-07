@@ -8,17 +8,35 @@ source("../R/mcmc.R")
 
 tags <- c("phylogenetics parrotfish")
 source("parrotfish_data.R")
-sfInit(parallel=T, cpu=4)
+sfInit(parallel=T, cpu=2)
 sfLibrary(wrightscape)
 sfExportAll()
 
+# example with the rc model
 
+# check out priors, figure out priors!!
 o <- phylo_mcmc(labrid$data['open'], labrid$tree, intramandibular,
                   model_spec=list(alpha="indep", sigma="global", theta="global"),
-                  alpha=.01, sigma=.01, MaxTime=1e4, indep=1e2)
+                  alpha=.01, sigma=.01, MaxTime=1e5, indep=1e2, prior=function(x) 1)
 
 
 cold_chain <- o$chains[[1]]
+colnames(cold_chain) <- c("Pi", "Xo", "alpha1", "alpha2", "sigma", "theta")
+poste_alpha1 <- density(cold_chain[, "alpha1"])
+poste_alpha2 <- density(cold_chain[, "alpha2"])
+xlim <- c(min(poste_alpha1$x, poste_alpha2$x), max(poste_alpha1$x, poste_alpha2$x)) 
+ylim <- c(min(poste_alpha1$y, poste_alpha2$y), max(poste_alpha1$y, poste_alpha2$y)) 
+plot(poste_alpha2, xlab="alpha", main="Selection Strength", xlim=xlim, ylim=ylim)
+polygon(poste_alpha1, col=rgb(0,1,0,.5))
+polygon(poste_alpha2, col=rgb(0,0,1,.5))
+
+
+
+general <- phylo_mcmc(labrid$data['open'], labrid$tree, intramandibular,
+                  model_spec=list(alpha="indep", sigma="indep", theta="indep"),
+                  alpha=.01, sigma=.01, MaxTime=1e5, indep=1e2)
+
+is_general_model <- function(o){
 colnames(cold_chain) <- c("Pi", "Xo", "alpha1", "alpha2", "sigma1", "sigma2", "theta1", "theta2")
 
 
@@ -63,5 +81,6 @@ dev.off()
 social_report(file="convergenceTemp.png", tag=tags,
 comment=paste(c(names(o$myCall),">><<", o$myCall), collapse=" "))
 
-
+}
+is_general_model(general)
 
