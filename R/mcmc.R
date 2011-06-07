@@ -159,16 +159,59 @@ ws_mcmc <- function(data, tree, regimes, alpha=1,
 
 
 
+flat_prior_creator <- function(model_spec, n_regimes){
+  indices <- get_indices(model_spec, n_regimes)
+  prior<- function(pars){
+    sum(2*pars[indices$alpha_i]/pars[indices$sigma_i]^2)
+  }
+}
+
 general_prior <- function(pars){
 # Prior for regime-specific alpha, theta, sigma
   n_regimes <- (length(pars) - 1)/3
-
+## Is this really how you combine priors?  
   out <- dnorm(pars[1], 0, 1000, log=TRUE) +  # Xo prior -- 
   sum(dexp(pars[2:(1+n_regimes)], 1, log=TRUE)) +  # alpha prior -- 
   sum(dexp(pars[(2+n_regimes):(1+2*n_regimes)], 1, log=TRUE)) + # sigma prior -- 
   sum(dnorm(pars[(2+2*n_regimes):(1+3*n_regimes)], 0, 1000, log=TRUE)) # theta prior 
   out
 }
+
+
+## Should take number of chains as an option
+phylo_mcmc <- function(data, tree, regimes, model_spec =
+                       list(alpha="indep", sigma="indep", theta="indep"),
+                       Xo=NULL, alpha=1, sigma=1, 
+                       theta=NULL, prior=NULL, MaxTime, 
+                       indep=100, stepsizes=.1, ...){
+
+  myCall <- match.call()
+  
+  n_regimes <- length(levels(regimes))
+
+  if(is.null(prior))
+    prior <- flat_prior_creator(model_spec, n_regimes)
+
+  par <- setup_pars(data, tree, regimes, model_spec, Xo=Xo, 
+                    alpha=alpha, sigma=sigma, theta=theta)
+
+  f <- llik.closure(data, tree, regimes, model_spec)
+
+
+  ## Assemble starting points of the different chains
+  par2 <- par; par3 <- par
+  par2[2:(1+n_regimes)] = .001 # start with small alphas
+  par3[2:(1+n_regimes)] = 5 # start with large alphas
+  par4 <- sapply(rexp(length(par), 5), abs)
+  pars <- list(par, par2, par3, par4)
+
+  chains <- mcmcmc_fn(pars, f, prior, MaxTime=MaxTime, indep=indep,
+                      stepsizes=stepsizes, ...) 
+  list(chains=chains, myCall=myCall)
+}
+
+
+
 
 
 general_mcmc <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL, prior=general_prior, MaxTime, indep=100, stepsizes=.1, ...){
@@ -216,11 +259,9 @@ general_mcmc <- function(data, tree, regimes, alpha=1, sigma=1, Xo=NULL, prior=g
     par3[2:(1+n_regimes)] = 5 # start with large alphas
     par4 <- sapply(rexp(length(par), 5), abs)
 
-
     pars <- list(par, par2, par3, par4)
     chains <- mcmcmc_fn(pars,f, prior, MaxTime=MaxTime, indep=indep,
               stepsizes=stepsizes, ...) 
     list(chains=chains, myCall=myCall)
 }
-
 

@@ -7,8 +7,10 @@ sfInit(parallel=T, cpu=4)
 sfLibrary(wrightscape)
 sfExportAll()
 
-o <- general_mcmc(labrid$data['open'], labrid$tree, intramandibular,
-                  alpha=.01, sigma=.01, MaxTime=1e6, indep=1e2)
+
+o <- phylo_mcmc(labrid$data['open'], labrid$tree, intramandibular,
+                  model_spec=list(alpha="indep", sigma="global", theta="global"),
+                  alpha=.01, sigma=.01, MaxTime=1e4, indep=1e2)
 
 
 cold_chain <- o$chains[[1]]

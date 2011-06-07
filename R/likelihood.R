@@ -60,6 +60,9 @@ release_constraint <- function(data, tree, regimes, alpha=NULL,
   opts <- list(...)
 # alpha varies by regime, theta and sigma are global
 # par is Xo, all alphas, theta, sigma
+
+## Probably a much better way to handle this.  could also be functionalized...
+
   n_regimes <- length(levels(regimes))
   par <- numeric(n_regimes+3)
   if(is.null(Xo))
@@ -97,7 +100,80 @@ release_constraint <- function(data, tree, regimes, alpha=NULL,
 }
 
 
+######## Use these to define a generic model ######## 
+get_indices <- function(model_spec, n_regimes){
+# Examples
+#   ouch: get_indices(list(alpha="global", sigma="global", theta="indep"), 2)
+  alpha_start <- 2
+  alpha_i <-  switch(model_spec$alpha, 
+                     indep = alpha_start:(alpha_start+n_regimes-1), 
+                     global = rep(alpha_start, n_regimes),
+                     fixed = NA)
+  if(any(is.na(alpha_i))) 
+    sigma_start <- alpha_start
+  else 
+    sigma_start <- max(alpha_i)+1
+  sigma_i <-  switch(model_spec$sigma, 
+                     indep = sigma_start:(sigma_start+n_regimes-1),
+                     global = rep(sigma_start, n_regimes))
+  if(any(is.na(sigma_i)))
+    theta_start <- sigma_start
+  else
+    theta_start <- max(sigma_i)+1
+  theta_i <-  switch(model_spec$theta, 
+                     indep = theta_start:(theta_start+n_regimes-1), 
+                     global = rep(theta_start,n_regimes))
+  n <- max(theta_i)
+list(alpha_i=alpha_i, sigma_i=sigma_i, theta_i=theta_i, n=n)
+}
 
+
+setup_pars <- function(data, tree, regimes, model_spec, Xo=NULL, alpha=1, sigma=1, theta=NULL){
+  n_regimes <- length(levels(regimes))
+  indices <- get_indices(model_spec, n_regimes)
+  pars <- numeric(indices$n)
+  if(is.null(Xo)) 
+    Xo <- mean(data, na.rm=TRUE) # should use phylo mean, but need to convert tree to ape type
+  if(is.null(theta)) 
+    theta <- mean(data, na.rm=TRUE)
+  pars[1] <- Xo
+  if(!any(is.na(indices$alpha_i)))
+    pars[indices$alpha_i] <- alpha
+  pars[indices$sigma_i] <- sigma
+  pars[indices$theta_i] <- theta 
+  pars
+}
+
+
+
+llik.closure <- function(data, tree, regimes, model_spec, fixed=list(alpha=1e-12), neg_llik=FALSE){
+  n_regimes <- length(levels(regimes))
+  indices <- get_indices(model_spec, n_regimes)
+  lca <- lca_calc(tree)
+  f <- function(par){
+    Xo <- par[1]
+    if(any(is.na(indices$alpha_i)))
+      alpha <- rep(fixed$alpha, n_regimes)
+    else 
+      alpha <- par[indices$alpha_i]
+    sigma <- par[indices$sigma_i]
+    theta <- par[indices$theta_i] 
+    if (any(alpha < 0))
+        llik <- -Inf
+    else if (any(sigma<0))
+        llik <- -Inf
+    else 
+        llik<-multiOU_lik_lca(data, tree, regimes, alpha=alpha,
+                              sigma=sigma, theta=theta, Xo=Xo, lca)
+    if(neg_llik) # for optimizer routines
+      llik <- -llik
+    llik
+  }
+  f
+}
+ 
+
+ 
 
 
 # Likelihood as a function of optimizable parameters
