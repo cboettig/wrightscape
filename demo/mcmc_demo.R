@@ -1,6 +1,11 @@
 # mcmc_demo.R
 require(wrightscape)
 require(socialR)
+
+source("../R/likelihood.R")
+source("../R/mcmc.R")
+
+
 tags <- c("phylogenetics parrotfish")
 source("parrotfish_data.R")
 sfInit(parallel=T, cpu=4)
