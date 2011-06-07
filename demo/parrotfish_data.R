@@ -1,4 +1,5 @@
 # correct_labrid_data.R
+require(wrightscape)
 
 # This data has not been released
 path = "../data/labrids/"

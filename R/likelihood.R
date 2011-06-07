@@ -1,34 +1,23 @@
-#multiou can try and take lca as a parameter option rather than calculating each time, for efficiency
-update.multiOU <- function(model, data){
-    switch(model$submodel,
-           wright = do.call(wright, 
-                            c(list(data=data, tree=model$tree,
+#rename and replace old one when done testing
+new_update.multiOU <- function(model, data){
+  do.call(multiTypeOU, c(list(data=data, tree=model$tree,
                                    regimes=model$regimes,
+                                   model_spec=model$model_spec,
                                    Xo=model$Xo, alpha=model$alpha, 
                                   sigma=model$sigma, theta=model$theta),
-                            model$opts)),
-           ouch = do.call(ouch, 
-                          c(list(data=data, tree=model$tree, 
-                                 regimes=model$regimes, Xo=model$Xo, 
-                                 alpha=model$alpha, sigma=model$sigma),
-                          model$opts)),
-           brownie = do.call(brownie, 
-                             c(list(data=data, tree=model$tree,
-                                    regimes=model$regimes, sigma=model$sigma),
-                             model$opts)),
-           release_constraint =  
-            do.call(release_constraint, 
-                    c(list(data=data, tree=model$tree,
-                           regimes=model$regimes, Xo=model$Xo, 
-                           alpha=model$alpha, sigma=model$sigma,
-                           theta=model$theta), 
-                    model$opts)))
-           
+                            model$opts))
 }
 
-fit_model <- function(data, tree, regimes, model_spec =
+multiTypeOU <- function(data, tree, regimes, model_spec =
                        list(alpha="indep", sigma="indep", theta="indep"),
                        Xo=NULL, alpha=1, sigma=1, theta=NULL, ...){
+## Fits the generic multitype OU.  
+##
+## Details:  
+## Submodels such as brownie, and other unique models, can be created
+## by specifiying how parameters are treated under model_spec
+  opts=list(...)
+
   myCall <- match.call()
   n_regimes <- length(levels(regimes))
   par <- setup_pars(data, tree, regimes, model_spec, Xo=Xo, 
@@ -42,13 +31,15 @@ fit_model <- function(data, tree, regimes, model_spec =
                  alpha=optim_output$par[indices$alpha_i], 
                  sigma=optim_output$par[indices$sigma_i],
                  theta=optim_output$par[indices$theta_i],
-                 optim_output=optim_output, submodel="release_constraint",
+                 optim_output=optim_output, model_spec=model_spec,
                  convergence=optim_output$convergence,
                  opts=opts)
   class(output) = "multiOU"
   output
 
 }
+
+
 ######## Use these to define a generic model ######## 
 get_indices <- function(model_spec, n_regimes){
 # Examples
