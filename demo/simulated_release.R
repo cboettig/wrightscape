@@ -8,7 +8,7 @@ source("../R/mcmc.R")
 source("../R/likelihood.R")
 source("../R/prior_library.R")
 
-general = list(alpha="indep", sigma="indep", theta="indep")
+brownie = list(alpha="fixed", sigma="indep", theta="globa")
 rc = list(alpha="indep", sigma="global", theta="global")
 fit_input <- list(data=labrid$data["close"], tree=labrid$tree,
                   regimes=intramandibular, model_spec=rc, 
@@ -20,27 +20,24 @@ true$alpha <- c(.01, 20)
 true$sigma <- 10
 true$theta <- 0
 sim_trait <- simulate(true, seed=1)
-## Now we're up and running with fake data
 
+## Repeat against a standard Nelder-Mead vs SANN
+## Now we're up and running with fake data
 fit <- multiTypeOU(data=sim_trait, tree=labrid$tree,
                   regimes=intramandibular, model_spec=rc, 
-                  Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
-                  method ="SANN", control=list(maxit=80000,temp=25,tmax=50))
+                  Xo=NULL, alpha = .1, sigma = .1, theta=NULL) #,
+#                  method ="SANN", control=list(maxit=80000,temp=25,tmax=50))
 
-gen_fit <- multiTypeOU(data=sim_trait, tree=labrid$tree,
-                  regimes=intramandibular, model_spec=general, 
-                  Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
-                  method ="SANN", control=list(maxit=80000,temp=25,tmax=50))
-
-save(list=ls(), file="simtest.Rdat")
-
-
+brownie_fit <- multiTypeOU(data=sim_trait, tree=labrid$tree,
+                  regimes=intramandibular, model_spec=brownie, 
+                  Xo=NULL, alpha = .1, sigma = .1, theta=NULL)
+#,
+ #                 method ="SANN", control=list(maxit=80000,temp=25,tmax=50))
 require(pmc)
 sfInit(parallel=T, cpu=16)
 sfLibrary(wrightscape)
 sfExportAll()
-
-boots <- montecarlotest(fit, gen_fit, nboot=800, cpu=16, GetParNames=TRUE)
+boots <- montecarlotest(fit, gen_fit, nboot=80, cpu=16, GetParNames=TRUE)
 social_plot(plot(boots), tags="phylogenetics")
 
 

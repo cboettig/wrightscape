@@ -1,13 +1,3 @@
-#rename and replace old one when done testing
-update.multiOU <- function(model, data){
-  do.call(multiTypeOU, c(list(data=data, tree=model$tree,
-                                   regimes=model$regimes,
-                                   model_spec=model$model_spec,
-                                   Xo=model$Xo, alpha=model$alpha, 
-                                  sigma=model$sigma, theta=model$theta),
-                            model$opts))
-}
-
 multiTypeOU <- function(data, tree, regimes, model_spec =
                        list(alpha="indep", sigma="indep", theta="indep"),
                        Xo=NULL, alpha=1, sigma=1, theta=NULL, ...){
@@ -39,50 +29,33 @@ multiTypeOU <- function(data, tree, regimes, model_spec =
 
 }
 
-
-######## Use these to define a generic model ######## 
-get_indices <- function(model_spec, n_regimes){
-# Examples
-#   ouch: get_indices(list(alpha="global", sigma="global", theta="indep"), 2)
-  alpha_start <- 2
-  alpha_i <-  switch(model_spec$alpha, 
-                     indep = alpha_start:(alpha_start+n_regimes-1), 
-                     global = rep(alpha_start, n_regimes),
-                     fixed = NULL)
-  if(any(is.null(alpha_i))) 
-    sigma_start <- alpha_start
-  else 
-    sigma_start <- max(alpha_i)+1
-  sigma_i <-  switch(model_spec$sigma, 
-                     indep = sigma_start:(sigma_start+n_regimes-1),
-                     global = rep(sigma_start, n_regimes))
-  if(any(is.null(sigma_i)))
-    theta_start <- sigma_start
-  else
-    theta_start <- max(sigma_i)+1
-  theta_i <-  switch(model_spec$theta, 
-                     indep = theta_start:(theta_start+n_regimes-1), 
-                     global = rep(theta_start,n_regimes))
-  n <- max(theta_i)
-list(alpha_i=alpha_i, sigma_i=sigma_i, theta_i=theta_i, n=n)
-}
-
-
-setup_pars <- function(data, tree, regimes, model_spec, Xo=NULL, alpha=1, 
-                       sigma=1, theta=NULL){
+smart_multiType <- function(data, tree, regimes, model_spec =
+                       list(alpha="indep", sigma="indep", theta="indep"),
+                       Xo=NULL, alpha=1, sigma=1, theta=NULL, ...){
+## Fits the general multitype OU by seeding starting conditions from submodels
+  opts=list(...)
+  myCall <- match.call()
   n_regimes <- length(levels(regimes))
+
+  
+
+  par <- setup_pars(data, tree, regimes, model_spec, Xo=Xo, 
+                    alpha=alpha, sigma=sigma, theta=theta)
+  f <- llik.closure(data, tree, regimes, model_spec, neg=TRUE)
+  optim_output <- optim(par,f, ...) 
   indices <- get_indices(model_spec, n_regimes)
-  pars <- numeric(indices$n)
-  if(is.null(Xo)) # should use phylo mean, but need to convert tree to ape type
-    Xo <- mean(data, na.rm=TRUE) 
-  if(is.null(theta)) 
-    theta <- mean(data, na.rm=TRUE)
-  pars[1] <- Xo
-  if(!any(is.na(indices$alpha_i)))
-    pars[indices$alpha_i] <- alpha
-  pars[indices$sigma_i] <- sigma
-  pars[indices$theta_i] <- theta 
-  pars
+
+  output <- list(data=data, tree=tree, regimes=regimes, 
+                 loglik=-optim_output$value, Xo=optim_output$par[1], 
+                 alpha=optim_output$par[indices$alpha_i], 
+                 sigma=optim_output$par[indices$sigma_i],
+                 theta=optim_output$par[indices$theta_i],
+                 optim_output=optim_output, model_spec=model_spec,
+                 convergence=optim_output$convergence,
+                 opts=opts)
+  class(output) = "multiOU"
+  output
+
 }
 
 
@@ -114,7 +87,68 @@ llik.closure <- function(data, tree, regimes, model_spec, fixed=
   f
 }
  
+update.multiOU <- function(model, data){
+# Define the update method for this style of fit.  
+# Simulate, GetParNames, loglik methods all defined in wrightscape.R
+  do.call(multiTypeOU, c(list(data=data, tree=model$tree,
+                                   regimes=model$regimes,
+                                   model_spec=model$model_spec,
+                                   Xo=model$Xo, alpha=model$alpha, 
+                                  sigma=model$sigma, theta=model$theta),
+                            model$opts))
+}
 
+######## Helper functions to work with llik.closure indexing ######## 
+get_indices <- function(model_spec, n_regimes){
+# Get the indices of the parameter vector (thing passed to the likelihood routine)
+# that correspond to the different parameters.  Inverse of setup_pars function.  
+# Examples
+#   ouch: get_indices(list(alpha="global", sigma="global", theta="indep"), 2)
+  alpha_start <- 2
+  alpha_i <-  switch(model_spec$alpha, 
+                     indep = alpha_start:(alpha_start+n_regimes-1), 
+                     global = rep(alpha_start, n_regimes),
+                     fixed = NULL)
+  if(any(is.null(alpha_i))) 
+    sigma_start <- alpha_start
+  else 
+    sigma_start <- max(alpha_i)+1
+  sigma_i <-  switch(model_spec$sigma, 
+                     indep = sigma_start:(sigma_start+n_regimes-1),
+                     global = rep(sigma_start, n_regimes))
+  if(any(is.null(sigma_i)))
+    theta_start <- sigma_start
+  else
+    theta_start <- max(sigma_i)+1
+  theta_i <-  switch(model_spec$theta, 
+                     indep = theta_start:(theta_start+n_regimes-1), 
+                     global = rep(theta_start,n_regimes))
+  n <- max(theta_i)
+list(alpha_i=alpha_i, sigma_i=sigma_i, theta_i=theta_i, n=n)
+}
+
+###
+setup_pars <- function(data, tree, regimes, model_spec, Xo=NULL, alpha=1, 
+                       sigma=1, theta=NULL){
+## Create the parameter vector matching model_spec from specified alpha, theta, sigma
+## This is essentially the inverse function of get_indices
+  n_regimes <- length(levels(regimes))
+  indices <- get_indices(model_spec, n_regimes)
+  pars <- numeric(indices$n)
+  if(is.null(Xo)) # should use phylo mean, but need to convert tree to ape type
+    Xo <- mean(data, na.rm=TRUE) 
+  if(is.null(theta)) 
+    theta <- mean(data, na.rm=TRUE)
+  pars[1] <- Xo
+  if(!any(is.na(indices$alpha_i)))
+    pars[indices$alpha_i] <- alpha
+  pars[indices$sigma_i] <- sigma
+  pars[indices$theta_i] <- theta 
+  pars
+}
+
+
+## Wrappers for the C functions that actually calculate the likelihood #########
 
 lca_calc <- function(tree){
 # Calculates the last common ancestor matrix, which is used by the likelihood algorithm
