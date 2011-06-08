@@ -1,8 +1,13 @@
 useDynLib(wrightscape)
-export(wrightscape, simulate_wrightscape, simulate.wrighttree, update.wrighttree, loglik.wrighttree, getParameters.wrighttree, LR_bootstrap, pretty_plot, choose_model, fast_boot, format_data, plot.wrightboot, bootstrap.wrighttree)
+export(wrightscape,  LR_bootstrap, pretty_plot, choose_model, fast_boot, format_data, plot.wrightboot, bootstrap.wrighttree)
 
-export(update.multiOU, simulate.multiOU, loglik.multiOU, getParameters.multiOU, llik.release, llik.wright, multiTypeOU, smart_multiType)
+# methods.R
+export(update.multiOU, simulate.multiOU, loglik.multiOU, getParameters.multiOU, getParameters,simulate_wrightscape, simulate.wrighttree, update.wrighttree, loglik.wrighttree, getParameters.wrighttree) 
 
+# likelihood.R
+export(multiTypeOU, smart_multiType)
+
+# mcmc.R
 export(phylo_mcmc, general_prior, flat_prior_creator)
 
 import(pmc)

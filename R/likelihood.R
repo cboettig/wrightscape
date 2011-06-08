@@ -134,17 +134,7 @@ llik.closure <- function(data, tree, regimes, model_spec, fixed=
   }
   f
 }
- 
-update.multiOU <- function(model, data){
-# Define the update method for this style of fit.  
-# Simulate, GetParNames, loglik methods all defined in wrightscape.R
-  do.call(multiTypeOU, c(list(data=data, tree=model$tree,
-                                   regimes=model$regimes,
-                                   model_spec=model$model_spec,
-                                   Xo=model$Xo, alpha=model$alpha, 
-                                  sigma=model$sigma, theta=model$theta),
-                            model$opts))
-}
+
 
 ######## Helper functions to work with llik.closure indexing ######## 
 get_indices <- function(model_spec, n_regimes){

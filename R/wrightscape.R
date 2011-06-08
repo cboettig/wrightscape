@@ -1,30 +1,4 @@
 #wrightscape.R
-
-# update with new data
-update.wrighttree <- function(ws, data){
-	wrightscape(data=data, tree=ws$tree, regimes=ws$regimes, alpha=ws$alpha,
-              sigma=ws$sigma, theta=ws$theta, Xo=ws$Xo)
-}
-
-
-simulate.wrighttree <- function(ws, ...){
-	output <- simulate_wrightscape(tree=ws$tree, regimes=ws$regimes,
-                                   Xo=ws$Xo, alpha=ws$alpha,
-                                   theta=ws$theta, sigma=ws$sigma, ...)
-  output$rep.1
-}
-loglik.wrighttree <- function(ws) ws$loglik
-
-getParameters.wrighttree <- function(ws){
-    c(alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma, Xo=ws$Xo)
-#, converge=ws$convergence) 
-}
-
-simulate.multiOU <- simulate.wrighttree
-loglik.multiOU <- loglik.wrighttree
-getParameters.multiOU <- getParameters.wrighttree
-
-
 wrightscape <- function(data, tree, regimes, alpha=1, sigma=1, 
                         theta = NULL, Xo = NULL, use_siman=0){
 
