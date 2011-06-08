@@ -13,7 +13,7 @@ rc = list(alpha="indep", sigma="global", theta="global")
 fit_input <- list(data=labrid$data["close"], tree=labrid$tree,
                   regimes=intramandibular, model_spec=rc, 
                   Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
-                  method ="SANN", control=list(maxit=80000,temp=25,tmax=50))
+                  method ="SANN", control=list(maxit=80000,temp=50,tmax=50))
 true <- do.call(multiTypeOU, fit_input)
 true$Xo <- 1
 true$alpha <- c(.01, 20)
@@ -32,7 +32,7 @@ fit <- multiTypeOU(data=sim_trait, tree=labrid$tree,
 print(getParameters.multiOU(fit))
 print(fit$loglik)
 
-## Note that Nelder Mead sucks on all these cases
+## Note that Nelder Mead parameters suck, but likelihood is high!
 gen_fit <- smart_multiType(data=sim_trait, tree=labrid$tree,
                   regimes=intramandibular,Xo=NULL, alpha = .1,
                   sigma = .1, theta=NULL)
@@ -44,7 +44,7 @@ print(gen_fit$loglik)
 sann_fit <- smart_multiType(data=sim_trait, tree=labrid$tree,
                   regimes=intramandibular,Xo=NULL, alpha = .1,
                   sigma = .1, theta=NULL,
-                  method ="SANN", control=list(maxit=80000,temp=25,tmax=50))
+                  method ="SANN", control=list(maxit=80000,temp=50,tmax=50))
 
 print(getParameters.multiOU(sann_fit))
 print(sann_fit$loglik)
