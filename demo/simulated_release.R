@@ -43,44 +43,10 @@ boots <- montecarlotest(brownie_fit, fit, nboot=80, GetParNames=TRUE)
 social_plot(plot(boots), tags="phylogenetics")
 
 
-rownames(boots$test_par_dist) <- names(getParameters(fit))
-par_dist <- t(boots$test_par_dist)
-social_plot({
-poste_alpha1 <- density(par_dist[, "alpha1"])
-poste_alpha2 <- density(par_dist[, "alpha2"])
-xlim <- c(min(poste_alpha1$x, poste_alpha2$x), max(poste_alpha1$x, poste_alpha2$x)) 
-ylim <- c(min(poste_alpha1$y, poste_alpha2$y), max(poste_alpha1$y, poste_alpha2$y)) 
-plot(poste_alpha2, xlab="alpha", main="Selection Strength", xlim=xlim, ylim=ylim, cex=2, cex.lab=2, cex.main=2, cex.axis=2)
-polygon(poste_alpha1, col=rgb(0,1,0,.5))
-polygon(poste_alpha2, col=rgb(0,0,1,.5))
-}, file="parameter_boostraps.png", width=480, tag="phylogenetics")
-
-
-
-
-
-rownames(boots$null_par_dist) <- names(getParameters(brownie_fit))
-par_dist <- t(boots$null_par_dist)
-social_plot({
-poste_sigma1 <- density(par_dist[, "sigma1"])
-poste_sigma2 <- density(par_dist[, "sigma2"])
-xlim <- c(min(poste_sigma1$x, poste_sigma2$x), max(poste_sigma1$x, poste_sigma2$x)) 
-ylim <- c(min(poste_sigma1$y, poste_sigma2$y), max(poste_sigma1$y, poste_sigma2$y)) 
-plot(poste_sigma2, xlab="sigma", main="Diversification rate", xlim=xlim, ylim=ylim, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
-polygon(poste_sigma1, col=rgb(0,1,0,.5))
-polygon(poste_sigma2, col=rgb(0,0,1,.5))
-}, file="parameter_boostraps.png", width=480, tag="phylogenetics")
-
-
-
-
-
-
-
-
 
 ####### Plot the distributions
 finalplots <- function(boots){
+names(boots$test_par_dist) <- names(getParameters(boots$test))
 par_dist <- t(boots$test_par_dist) 
 
 social_plot({
@@ -111,7 +77,7 @@ polygon(poste_sigma2, col=rgb(0,0,1,.5))
 }, file="parameter_boostraps.png", width=3*480, tag="phylogenetics")
 
 
-
+names(boots$null_par_dist) <- names(getParameters(boots$null))
 par_dist <- t(boots$null_par_dist) 
 
 social_plot({
