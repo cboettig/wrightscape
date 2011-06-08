@@ -8,7 +8,7 @@ source("../R/mcmc.R")
 source("../R/likelihood.R")
 source("../R/prior_library.R")
 
-brownie = list(alpha="fixed", sigma="indep", theta="globa")
+brownie = list(alpha="fixed", sigma="indep", theta="global")
 rc = list(alpha="indep", sigma="global", theta="global")
 fit_input <- list(data=labrid$data["close"], tree=labrid$tree,
                   regimes=intramandibular, model_spec=rc, 
@@ -37,7 +37,7 @@ require(pmc)
 sfInit(parallel=T, cpu=16)
 sfLibrary(wrightscape)
 sfExportAll()
-boots <- montecarlotest(fit, gen_fit, nboot=80, cpu=16, GetParNames=TRUE)
+boots <- montecarlotest(brownie_fit, fit, nboot=80, cpu=16, GetParNames=TRUE)
 social_plot(plot(boots), tags="phylogenetics")
 
 
