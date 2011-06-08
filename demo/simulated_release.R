@@ -46,7 +46,6 @@ social_plot(plot(boots), tags="phylogenetics")
 
 ####### Plot the distributions
 finalplots <- function(boots){
-names(boots$test_par_dist) <- names(getParameters.multiOU(boots$test))
 par_dist <- t(boots$test_par_dist) 
 
 social_plot({
@@ -77,7 +76,6 @@ polygon(poste_sigma2, col=rgb(0,0,1,.5))
 }, file="parameter_boostraps.png", width=3*480, tag="phylogenetics")
 
 
-names(boots$null_par_dist) <- names(getParameters.multiOU(boots$null))
 par_dist <- t(boots$null_par_dist) 
 
 social_plot({
