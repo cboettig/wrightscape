@@ -167,7 +167,7 @@ setup_pars <- function(data, tree, regimes, model_spec, Xo=NULL, alpha=1,
   if(is.null(theta)) 
     theta <- mean(data, na.rm=TRUE)
   pars[1] <- Xo
-  if(!any(is.na(indices$alpha_i)))
+  if(!any(is.null(indices$alpha_i)))
     pars[indices$alpha_i] <- alpha
   pars[indices$sigma_i] <- sigma
   pars[indices$theta_i] <- theta 
