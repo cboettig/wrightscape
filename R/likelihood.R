@@ -33,11 +33,38 @@ smart_multiType <- function(data, tree, regimes, model_spec =
                        list(alpha="indep", sigma="indep", theta="indep"),
                        Xo=NULL, alpha=1, sigma=1, theta=NULL, ...){
 ## Fits the general multitype OU by seeding starting conditions from submodels
+## Update will repeat all this crap, so go easy on reps if using SANN 
   opts=list(...)
   myCall <- match.call()
   n_regimes <- length(levels(regimes))
 
-  
+  ## Should the guesses be propigated through?  currently not. 
+  alpha_spec = list(alpha="indep",  sigma="global", theta="global")   
+  par <- setup_pars(data, tree, regimes, alpha_spec, Xo=Xo, 
+                    alpha=alpha, sigma=sigma, theta=theta)
+  alpha_f <- llik.closure(data, tree, regimes, alpha_spec, neg=TRUE)
+  alpha_optim <- optim(par,alpha_f, ...) 
+  alpha_indices <- get_indices(alpha_spec, n_regimes)
+
+  sigma_spec = list(alpha="global", sigma="indep",  theta="global")   
+  par <- setup_pars(data, tree, regimes, sigma_spec, Xo=Xo, 
+                    alpha=alpha, sigma=sigma, theta=theta)
+  sigma_f <- llik.closure(data, tree, regimes, sigma_spec, neg=TRUE)
+  sigma_optim <- optim(par,sigma_f, ...) 
+  sigma_indices <- get_indices(sigma_spec, n_regimes)
+
+  theta_spec = list(alpha="global", sigma="global", theta="indep")   
+  par <- setup_pars(data, tree, regimes, theta_spec, Xo=Xo, 
+                    alpha=alpha, sigma=sigma, theta=theta)
+  theta_f <- llik.closure(data, tree, regimes, theta_spec, neg=TRUE)
+  theta_optim <- optim(par,theta_f, ...) 
+  theta_indices <- get_indices(theta_spec, n_regimes)
+
+
+  # get alpha guesses as the optimum alphas in the alpha model, etc
+  alpha <- alpha_optim$par[alpha_indices$alpha_i]
+  sigma <- sigma_optim$par[sigma_indices$sigma_i]
+  theta <- theta_optim$par[theta_indices$theta_i]
 
   par <- setup_pars(data, tree, regimes, model_spec, Xo=Xo, 
                     alpha=alpha, sigma=sigma, theta=theta)
