@@ -12,8 +12,7 @@ brownie = list(alpha="fixed", sigma="indep", theta="global")
 rc = list(alpha="indep", sigma="global", theta="global")
 fit_input <- list(data=labrid$data["close"], tree=labrid$tree,
                   regimes=intramandibular, model_spec=rc, 
-                  Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
-                  method ="SANN", control=list(maxit=80000,temp=25,tmax=50))
+                  Xo=NULL, alpha = .1, sigma = .1, theta=NULL)
 true <- do.call(multiTypeOU, fit_input)
 true$Xo <- 1
 true$alpha <- c(.01, 20)
@@ -33,15 +32,23 @@ brownie_fit <- multiTypeOU(data=sim_trait, tree=labrid$tree,
                   Xo=NULL, alpha = .1, sigma = .1, theta=NULL)
 #,
  #                 method ="SANN", control=list(maxit=80000,temp=25,tmax=50))
-require(pmc)
-sfInit(parallel=T, cpu=16)
-sfLibrary(wrightscape)
-sfExportAll()
-boots <- montecarlotest(brownie_fit, fit, nboot=80, cpu=16, GetParNames=TRUE)
-social_plot(plot(boots), tags="phylogenetics")
+
+print(getParameters.multiOU(brownie_fit))
+
+#simulate(brownie_fit) -> X
+
+#update(brownie_fit, simulate(brownie_fit))
+
+#require(pmc)
+#sfInit(parallel=F)
+#sfLibrary(wrightscape)
+#sfExportAll()
+#boots <- montecarlotest(brownie_fit, fit, nboot=80, cpu=16, GetParNames=FALSE)
+#social_plot(plot(boots), tags="phylogenetics")
 
 
 ####### Plot the distributions
+function(boots){
 rownames(boots$test_par_dist) <- names(getParameters(gen_fit))
 par_dist <- t(boots$test_par_dist) 
 
@@ -88,7 +95,7 @@ polygon(poste_alpha2, col=rgb(0,0,1,.5))
 
 
 
-
+}
 
 
 

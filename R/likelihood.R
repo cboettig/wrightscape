@@ -66,6 +66,12 @@ smart_multiType <- function(data, tree, regimes, model_spec =
   sigma <- sigma_optim$par[sigma_indices$sigma_i]
   theta <- theta_optim$par[theta_indices$theta_i]
 
+
+  print(paste("alpha: ", alpha))
+  print(paste("sigma: ", sigma))
+  print(paste("theta: ", theta))
+
+
   par <- setup_pars(data, tree, regimes, model_spec, Xo=Xo, 
                     alpha=alpha, sigma=sigma, theta=theta)
   f <- llik.closure(data, tree, regimes, model_spec, neg=TRUE)
