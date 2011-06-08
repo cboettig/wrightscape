@@ -8,7 +8,7 @@ source("../R/mcmc.R")
 source("../R/likelihood.R")
 source("../R/prior_library.R")
 
-brownie = list(alpha="fixed", sigma="indep", theta="global")
+brownie = list(alpha="global", sigma="indep", theta="global")
 rc = list(alpha="indep", sigma="global", theta="global")
 fit_input <- list(data=labrid$data["close"], tree=labrid$tree,
                   regimes=intramandibular, model_spec=rc, 
@@ -35,16 +35,49 @@ brownie_fit <- multiTypeOU(data=sim_trait, tree=labrid$tree,
 
 print(getParameters.multiOU(brownie_fit))
 
-#simulate(brownie_fit) -> X
 
-#update(brownie_fit, simulate(brownie_fit))
+require(pmc)
+sfInit(parallel=T, cpu=16)
+sfLibrary(wrightscape)
+sfExportAll()
+boots <- montecarlotest(brownie_fit, fit, nboot=80, cpu=16, GetParNames=TRUE)
+social_plot(plot(boots), tags="phylogenetics")
 
-#require(pmc)
-#sfInit(parallel=F)
-#sfLibrary(wrightscape)
-#sfExportAll()
-#boots <- montecarlotest(brownie_fit, fit, nboot=80, cpu=16, GetParNames=FALSE)
-#social_plot(plot(boots), tags="phylogenetics")
+
+rownames(boots$test_par_dist) <- names(getParameters(fit))
+par_dist <- t(boots$test_par_dist)
+social_plot({
+poste_alpha1 <- density(par_dist[, "alpha1"])
+poste_alpha2 <- density(par_dist[, "alpha2"])
+xlim <- c(min(poste_alpha1$x, poste_alpha2$x), max(poste_alpha1$x, poste_alpha2$x)) 
+ylim <- c(min(poste_alpha1$y, poste_alpha2$y), max(poste_alpha1$y, poste_alpha2$y)) 
+plot(poste_alpha2, xlab="alpha", main="Selection Strength", xlim=xlim, ylim=ylim, cex=2, cex.lab=2, cex.main=2, cex.axis=2)
+polygon(poste_alpha1, col=rgb(0,1,0,.5))
+polygon(poste_alpha2, col=rgb(0,0,1,.5))
+}, file="parameter_boostraps.png", width=480, tag="phylogenetics")
+
+
+
+
+
+rownames(boots$null_par_dist) <- names(getParameters(fit))
+par_dist <- t(boots$null_par_dist)
+social_plot({
+poste_alpha1 <- density(par_dist[, "alpha1"])
+poste_alpha2 <- density(par_dist[, "alpha2"])
+xlim <- c(min(poste_alpha1$x, poste_alpha2$x), max(poste_alpha1$x, poste_alpha2$x)) 
+ylim <- c(min(poste_alpha1$y, poste_alpha2$y), max(poste_alpha1$y, poste_alpha2$y)) 
+plot(poste_alpha2, xlab="alpha", main="Selection Strength", xlim=xlim, ylim=ylim, cex=2, cex.lab=2, cex.main=2, cex.axis=2)
+polygon(poste_alpha1, col=rgb(0,1,0,.5))
+polygon(poste_alpha2, col=rgb(0,0,1,.5))
+}, file="parameter_boostraps.png", width=480, tag="phylogenetics")
+
+
+
+
+
+
+
 
 
 ####### Plot the distributions
@@ -79,24 +112,7 @@ polygon(poste_sigma1, col=rgb(0,1,0,.5))
 polygon(poste_sigma2, col=rgb(0,0,1,.5))
 }, file="parameter_boostraps.png", width=3*480, tag="phylogenetics")
 
-
-rownames(boots$null_par_dist) <- names(getParameters(fit))
-par_dist <- t(boots$null_par_dist)
-social_plot({
-poste_alpha1 <- density(par_dist[, "alpha1"])
-poste_alpha2 <- density(par_dist[, "alpha2"])
-xlim <- c(min(poste_alpha1$x, poste_alpha2$x), max(poste_alpha1$x, poste_alpha2$x)) 
-ylim <- c(min(poste_alpha1$y, poste_alpha2$y), max(poste_alpha1$y, poste_alpha2$y)) 
-plot(poste_alpha2, xlab="alpha", main="Selection Strength", xlim=xlim, ylim=ylim, cex=2, cex.lab=2, cex.main=2, cex.axis=2)
-polygon(poste_alpha1, col=rgb(0,1,0,.5))
-polygon(poste_alpha2, col=rgb(0,0,1,.5))
-}, file="parameter_boostraps.png", width=480, tag="phylogenetics")
-
-
-
-
 }
-
 
 
 
