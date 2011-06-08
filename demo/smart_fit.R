@@ -28,8 +28,8 @@ fit <- multiTypeOU(data=sim_trait, tree=labrid$tree,
                   Xo=NULL, alpha = .1, sigma = .1, theta=NULL) 
 
 gen_fit <- smart_multiType(data=sim_trait, tree=labrid$tree,
-                  regimes=intramandibular, model_spec=brownie, 
-                  Xo=NULL, alpha = .1, sigma = .1, theta=NULL)
+                  regimes=intramandibular,Xo=NULL, alpha = .1,
+                  sigma = .1, theta=NULL)
 require(pmc)
 sfInit(parallel=T, cpu=16)
 sfLibrary(wrightscape)
