@@ -1,5 +1,13 @@
 require(wrightscape)
+require(socialR)
 source("parrotfish_data.R")
+
+# since we can't install package while other reps are running
+source("../R/wrightscape.R")
+source("../R/mcmc.R")
+source("../R/likelihood.R")
+source("../R/prior_library.R")
+
 general = list(alpha="indep", sigma="indep", theta="indep")
 rc = list(alpha="indep", sigma="global", theta="global")
 fit_input <- list(data=labrid$data["close"], tree=labrid$tree,
@@ -7,11 +15,11 @@ fit_input <- list(data=labrid$data["close"], tree=labrid$tree,
                   Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
                   method ="SANN", control=list(maxit=80000,temp=25,tmax=50))
 true <- do.call(multiTypeOU, fit_input)
-true$Xo <- 0
+true$Xo <- 1
 true$alpha <- c(.01, 20)
 true$sigma <- 10
 true$theta <- 0
-sim_trait <- simulate(true)
+sim_trait <- simulate(true, seed=1)
 ## Now we're up and running with fake data
 
 fit <- multiTypeOU(data=sim_trait, tree=labrid$tree,
@@ -24,14 +32,20 @@ gen_fit <- multiTypeOU(data=sim_trait, tree=labrid$tree,
                   Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
                   method ="SANN", control=list(maxit=80000,temp=25,tmax=50))
 
-boots <- montecarlotest(fit, gen_fit, nboot=80, cpu=16)
+save(list=ls(), file="simtest.Rdat")
+require(pmc)
+
+sfInit(parallel=T, cpu=16)
+sfLibrary(wrightscape)
+sfExportAll()
+boots <- montecarlotest(fit, gen_fit, nboot=80, cpu=16, GetParNames=FALSE)
 social_plot(plot(boots), tags="phylogenetics")
 
 sfStop()
 sfInit(parallel=T, cpu=4)
 sfLibrary(wrightscape)
 sfExportAll()
-o <- phylo_mcmc(sim_trait, labrid$tree, intramandibular, MaxTime=1e5, indep=1e2)
+o <- phylo_mcmc(sim_trait, labrid$tree, intramandibular, MaxTime=1e5, indep=1e2, nchains=4)
 
 png("alphadist.png")
 cold_chain <- o$chains[[1]]

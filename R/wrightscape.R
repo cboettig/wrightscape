@@ -7,10 +7,10 @@ update.wrighttree <- function(ws, data){
 }
 
 
-simulate.wrighttree <- function(ws){
+simulate.wrighttree <- function(ws, ...){
 	output <- simulate_wrightscape(tree=ws$tree, regimes=ws$regimes,
                                    Xo=ws$Xo, alpha=ws$alpha,
-                                   theta=ws$theta, sigma=ws$sigma)
+                                   theta=ws$theta, sigma=ws$sigma, ...)
   output$rep.1
 }
 loglik.wrighttree <- function(ws) ws$loglik
@@ -96,13 +96,18 @@ wrightscape <- function(data, tree, regimes, alpha=1, sigma=1,
 		as.integer(use_siman) #use the simulated annealing approach 
 	  )
 
-	output <- list(data=dataIn, tree=tree, regimes=regimesIn, loglik=o[[11]], Xo = o[[1]], alpha = o[[2]], theta =  o[[3]], sigma = o[[4]]  )  
+	output <- list(data=dataIn, tree=tree, regimes=regimesIn, loglik=o[[11]],
+              Xo = o[[1]], alpha = o[[2]], theta =  o[[3]], sigma = o[[4]])  
 	class(output) <- "wrighttree"
 	output
 }
 
 
-simulate_wrightscape <- function(tree, regimes, Xo, alpha, theta, sigma){
+
+## Should make sure return values of internal nodes are NAs (unless requested)
+## should also make sure outputs aren't NANs!
+simulate_wrightscape <- function(tree, regimes, Xo, alpha, theta, sigma,
+                                 seed=NULL){
 
 	# regimes should be a factor instead of data.frame
 	regimesIn <- regimes
@@ -127,7 +132,8 @@ simulate_wrightscape <- function(tree, regimes, Xo, alpha, theta, sigma){
 	levels(regimes) <- 1:n_regimes
 	regimes <- as.integer(regimes)-1  # convert to C-style indexing
 
-	seed <- runif(1)*2^16
+  if(is.null(seed))
+  	seed <- runif(1)*2^16
 
 
 	if(length(alpha) == 1){ alpha <- rep(alpha, n_regimes) }
@@ -152,8 +158,8 @@ simulate_wrightscape <- function(tree, regimes, Xo, alpha, theta, sigma){
 	  )
 
 	simdata <- data.frame(o[[8]], row.names = tree@nodes)
-	
-
+  	
+  
 	output <- list(rep.1=simdata, tree=tree, regimes=regimesIn, loglik=o[[11]], alpha = o[[2]], theta =  o[[3]], sigma = o[[4]]  )  
 	class(output) <- "wrighttree"
 	output

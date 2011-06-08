@@ -1,5 +1,5 @@
 #rename and replace old one when done testing
-new_update.multiOU <- function(model, data){
+update.multiOU <- function(model, data){
   do.call(multiTypeOU, c(list(data=data, tree=model$tree,
                                    regimes=model$regimes,
                                    model_spec=model$model_spec,

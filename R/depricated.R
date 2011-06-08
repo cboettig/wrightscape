@@ -3,7 +3,7 @@
 
 
 #multiou can try and take lca as a parameter option rather than calculating each time, for efficiency
-update.multiOU <- function(model, data){
+old_update.multiOU <- function(model, data){
     switch(model$submodel,
            wright = do.call(wright, 
                             c(list(data=data, tree=model$tree,
