@@ -16,9 +16,15 @@ multiTypeOU <- function(data, tree, regimes, model_spec =
   optim_output <- optim(par,f, ...) 
   indices <- get_indices(model_spec, n_regimes)
 
+  ## deal with fixed alpha at 0
+  if(is.null(indices$alpha_i))
+    alpha_out <- rep(1e-12, n_regimes)
+  else 
+    alpha_out <- optim_output$par[indices$alpha_i]
+
   output <- list(data=data, tree=tree, regimes=regimes, 
                  loglik=-optim_output$value, Xo=optim_output$par[1], 
-                 alpha=optim_output$par[indices$alpha_i], 
+                 alpha=alpha_out, 
                  sigma=optim_output$par[indices$sigma_i],
                  theta=optim_output$par[indices$theta_i],
                  optim_output=optim_output, model_spec=model_spec,
