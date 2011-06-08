@@ -6,16 +6,31 @@ source("../R/wrightscape.R")
 source("../R/mcmc.R")
 source("../R/likelihood.R")
 source("../R/prior_library.R")
+# Create some simulated data on the parrotfish tree
+true <- multiTypeOU(data=labrid$data["close"], tree=labrid$tree,regimes=intramandibular, 
+                    model_spec=list(alpha="indep", sigma="global", theta="global"), 
+                    Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
+                    method ="SANN", control=list(maxit=80000,temp=50,tmax=50))
+true$Xo <- 1
+true$alpha <- c(.01, 20)
+true$sigma <- 10
+true$theta <- 0
+sim_trait <- simulate(true, seed=1)
+## Start with a simple fit of indep alphas model to get some parameters
+fit <- multiTypeOU(data=sim_trait, tree=labrid$tree, regimes=intramandibular, 
+                  model_spec=list(alpha="indep", sigma="global", theta="global"), 
+                  Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
+                  method ="SANN", control=list(maxit=80000,temp=50,tmax=50)) 
 
-
-# from simulated_release
-load("simtest.Rdat")
 
 
 sfInit(parallel=T, cpu=4)
 sfLibrary(wrightscape)
 sfExportAll()
-o <- phylo_mcmc(sim_trait, labrid$tree, intramandibular, MaxTime=1e5, indep=1e2, nchains=4)
+# MCMCMC the rc model
+o <- phylo_mcmc(sim_trait, labrid$tree, intramandibular, MaxTime=1e5, indep=1e2,
+                model_spec=list(alpha="indep", sigma="global", theta="global"),
+                nchains=4)
 
 png("alphadist.png")
 cold_chain <- o$chains[[1]]
