@@ -1,86 +1,93 @@
 # mcmc_demo.R
 require(wrightscape)
 require(socialR)
-
-source("../R/likelihood.R")
-source("../R/mcmc.R")
-
-
 tags <- c("phylogenetics parrotfish")
 source("parrotfish_data.R")
-sfInit(parallel=T, cpu=2)
+
+
+
+
+MaxTime = 1e6
+spec = list(alpha="indep", sigma="global", theta="indep")
+
+
+
+sfInit(parallel=T, cpu=8)
 sfLibrary(wrightscape)
 sfExportAll()
+o <- sfLapply(1:nchains, function(i){ 
+    phylo_mcmc(labrid$data['gape.y'], labrid$tree, intramandibular, MaxTime=MaxTime, 
+               model_spec=spec,
+               stepsizes=0.05)[[1]]
+    })
 
-# example with the rc model
+burnin <- 1:1e3
+chains <- o[[1]][-burnin,]
+for(i in 2:nchains)
+  chains <- rbind(chains, o[[i]][-burnin, ])
+colnames(chains) <- c("Pi", "Xo", "alpha1", "sigma1", "sigma2", "theta1", "theta2")
+par_dist <- chains
 
-# check out priors, figure out priors!!
-o <- phylo_mcmc(labrid$data['open'], labrid$tree, intramandibular,
-             model_spec=list(alpha="indep", sigma="global", theta="global"),
-             alpha=.01, sigma=.01, MaxTime=1e5, indep=1e2, prior=function(x) 1)
+comment=paste("Simulated data, parrotfish tree, 8 x 1e5 gen", spec, "MaxTime =", MaxTime)
 
 
-cold_chain <- o$chains[[1]]
-colnames(cold_chain) <- c("Pi", "Xo", "alpha1", "alpha2", "sigma", "theta")
-poste_alpha1 <- density(cold_chain[, "alpha1"])
-poste_alpha2 <- density(cold_chain[, "alpha2"])
-xlim <- c(min(poste_alpha1$x, poste_alpha2$x), max(poste_alpha1$x, poste_alpha2$x)) 
-ylim <- c(min(poste_alpha1$y, poste_alpha2$y), max(poste_alpha1$y, poste_alpha2$y)) 
-plot(poste_alpha2, xlab="alpha", main="Selection Strength", xlim=xlim, ylim=ylim)
+
+
+social_plot({
+par(mfrow=c(2,3))
+poste_alpha1 <- density(par_dist[, "alpha1"])
+poste_alpha2 <- density(par_dist[, "alpha2"])
+poste_theta1 <- density(par_dist[, "theta1"])
+poste_theta2 <- density(par_dist[, "theta2"])
+poste_sigma1 <- density(par_dist[, "sigma1"])
+poste_sigma2 <- density(par_dist[, "sigma1"]) ######## REPEAT SINCE ONLY 1
+
+
+plot(poste_alpha1, xlab="alpha", main="Selection Strength", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
 polygon(poste_alpha1, col=rgb(0,1,0,.5))
+plot(poste_theta1, xlab="theta", main="Optimum", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+polygon(poste_theta1, col=rgb(0,1,0,.5))
+plot(poste_sigma1, xlab="sigma", main="Diversification rate",  cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+polygon(poste_sigma1, col=rgb(0,1,0,.5))
+
+plot(poste_alpha2, xlab="alpha", main="Selection Strength", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
 polygon(poste_alpha2, col=rgb(0,0,1,.5))
+plot(poste_theta2, xlab="theta", main="Optimum", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+polygon(poste_theta2, col=rgb(0,0,1,.5))
+plot(poste_sigma2, xlab="sigma", main="Diversification rate",  cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+polygon(poste_sigma2, col=rgb(0,0,1,.5))
+}, file="parameter_mcmc.png", width=3*480, height=2*480, tag="phylogenetics", comment=comment)
 
 
 
-general <- phylo_mcmc(labrid$data['open'], labrid$tree, intramandibular,
-                  model_spec=list(alpha="indep", sigma="indep", theta="indep"),
-                  alpha=.01, sigma=.01, MaxTime=1e5, indep=1e2)
-
-is_general_model <- function(o){
-colnames(cold_chain) <- c("Pi", "Xo", "alpha1", "alpha2", "sigma1", "sigma2", "theta1", "theta2")
-
-
-png("posteriors.png", width=3*480)
+social_plot({
 par(mfrow=c(1,3))
-poste_alpha1 <- density(cold_chain[, "alpha1"])
-poste_alpha2 <- density(cold_chain[, "alpha2"])
+poste_alpha1 <- density(par_dist[, "alpha1"])
+poste_alpha2 <- density(par_dist[, "alpha1"]) ######## REPEAT SINCE ONLY 1
 xlim <- c(min(poste_alpha1$x, poste_alpha2$x), max(poste_alpha1$x, poste_alpha2$x)) 
 ylim <- c(min(poste_alpha1$y, poste_alpha2$y), max(poste_alpha1$y, poste_alpha2$y)) 
-plot(poste_alpha2, xlab="alpha", main="Selection Strength", xlim=xlim, ylim=ylim)
+plot(poste_alpha2, xlab="alpha", main="Selection Strength", xlim=xlim, ylim=ylim, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
 polygon(poste_alpha1, col=rgb(0,1,0,.5))
 polygon(poste_alpha2, col=rgb(0,0,1,.5))
 
-poste_theta1 <- density(cold_chain[, "theta1"])
-poste_theta2 <- density(cold_chain[, "theta2"])
+poste_theta1 <- density(par_dist[, "theta1"])
+poste_theta2 <- density(par_dist[, "theta2"])
 xlim <- c(min(poste_theta1$x, poste_theta2$x), max(poste_theta1$x, poste_theta2$x))
 ylim <- c(min(poste_theta1$y, poste_theta2$y), max(poste_theta1$y, poste_theta2$y)) 
-plot(poste_theta2, xlab="theta", main="Optimum", xlim=xlim, ylim=ylim)
+plot(poste_theta2, xlab="theta", main="Optimum", xlim=xlim, ylim=ylim, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
 polygon(poste_theta1, col=rgb(0,1,0,.5))
 polygon(poste_theta2, col=rgb(0,0,1,.5))
 
-poste_sigma1 <- density(cold_chain[, "sigma1"])
-poste_sigma2 <- density(cold_chain[, "sigma2"])
+poste_sigma1 <- density(par_dist[, "sigma1"])
+poste_sigma2 <- density(par_dist[, "sigma2"])
 xlim <- c(min(poste_sigma1$x, poste_sigma2$x), max(poste_sigma1$x, poste_sigma2$x)) 
 ylim <- c(min(poste_sigma1$y, poste_sigma2$y), max(poste_sigma1$y, poste_sigma2$y)) 
-plot(poste_sigma2, xlab="sigma", main="Diversification rate", xlim=xlim, ylim=ylim)
+plot(poste_sigma2, xlab="sigma", main="Diversification rate", xlim=xlim, ylim=ylim, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
 polygon(poste_sigma1, col=rgb(0,1,0,.5))
 polygon(poste_sigma2, col=rgb(0,0,1,.5))
-dev.off()
+}, file="parameter_mcmc.png", width=3*480, tag="phylogenetics", comment=comment)
 
-social_report(file="posteriors.png", tag=tags,
-comment=paste(c(names(o$myCall),">><<", o$myCall), collapse=" "))
 
-png("convergenceTemp.png")
-  burnin <- 1:5e3
-  plot(o$chains[[4]][-burnin,1], type="l", col=rgb(1,0,0.3))
-  lines(o$chains[[3]][-burnin,1], col=rgb(1,0,0.5))
-  lines(o$chains[[2]][-burnin,1], col=rgb(1,0,0.8))
-  lines(o$chains[[1]][-burnin,1])
-dev.off()
 
-social_report(file="convergenceTemp.png", tag=tags,
-comment=paste(o$myCall))
 
-}
-is_general_model(general)
 

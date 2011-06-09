@@ -11,13 +11,10 @@ alphas <- multiTypeOU(data=labrid$data["close"], tree=labrid$tree, regimes=intra
                   method ="SANN", control=list(maxit=50000,temp=50,tmax=20))
 
 sigmas <- multiTypeOU(data=labrid$data["close"], tree=labrid$tree, regimes=intramandibular, 
-                  model_spec=list(alpha="indep", sigma="global", theta="indep"), 
+                model_spec=list(alpha="global", sigma="indep", theta="indep"), 
                   Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
                   method ="SANN", control=list(maxit=50000,temp=50,tmax=20))
 
-
-save(list=ls(), file="parrotfish_gape.Rdat") #bit o checkpting
-tweet("@cboettig Parrotfish run initialized")
 
 
 require(snowfall)
@@ -25,7 +22,7 @@ sfInit(parallel=TRUE, cpu=8)
 sfLibrary(wrightscape)
 sfExportAll()
 
-boots <- montecarlotest(sigmas, alphas, nboot=80, cpu=16)
+boots <- montecarlotest(sigmas, alphas, nboot=800, cpu=16)
 social_plot(plot(boots), tag=tag)
 
 finalplots <- function(boots){

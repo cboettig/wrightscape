@@ -12,8 +12,8 @@ sim_trait <- simulate(true, seed=1)
 
 
 
-MaxTime = 1e5
-spec = list(alpha="indep", sigma="global", theta="indep")
+MaxTime = 1e6
+spec = list(alpha="global", sigma="indep", theta="indep")
 
 nchains<-8
 sfInit(parallel=T, cpu=8)
@@ -43,24 +43,28 @@ social_plot({
 par(mfrow=c(2,3))
 poste_alpha1 <- density(par_dist[, "alpha1"])
 poste_alpha2 <- density(par_dist[, "alpha1"]) ######## REPEAT SINCE ONLY 1
-plot(poste_alpha1, xlab="alpha", main="Selection Strength", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
-polygon(poste_alpha1, col=rgb(0,1,0,.5))
-plot(poste_alpha2, xlab="alpha", main="Selection Strength", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
-polygon(poste_alpha2, col=rgb(0,0,1,.5))
-
 poste_theta1 <- density(par_dist[, "theta1"])
 poste_theta2 <- density(par_dist[, "theta2"])
-plot(poste_theta1, xlab="theta", main="Optimum", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
-polygon(poste_theta1, col=rgb(0,1,0,.5))
-plot(poste_theta2, xlab="theta", main="Optimum", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
-polygon(poste_theta2, col=rgb(0,0,1,.5))
-
 poste_sigma1 <- density(par_dist[, "sigma1"])
 poste_sigma2 <- density(par_dist[, "sigma2"])
+
+
+plot(poste_alpha1, xlab="alpha", main="Selection Strength", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+polygon(poste_alpha1, col=rgb(0,1,0,.5))
+plot(poste_theta1, xlab="theta", main="Optimum", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+polygon(poste_theta1, col=rgb(0,1,0,.5))
 plot(poste_sigma1, xlab="sigma", main="Diversification rate",  cex=3, cex.lab=3, cex.main=3, cex.axis=3)
 polygon(poste_sigma1, col=rgb(0,1,0,.5))
+
+plot(poste_alpha2, xlab="alpha", main="Selection Strength", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+polygon(poste_alpha2, col=rgb(0,0,1,.5))
+plot(poste_theta2, xlab="theta", main="Optimum", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+polygon(poste_theta2, col=rgb(0,0,1,.5))
 plot(poste_sigma2, xlab="sigma", main="Diversification rate",  cex=3, cex.lab=3, cex.main=3, cex.axis=3)
 polygon(poste_sigma2, col=rgb(0,0,1,.5))
+
+
+
 }, file="parameter_mcmc.png", width=3*480, height=2*480, tag="phylogenetics", comment=comment)
 
 
