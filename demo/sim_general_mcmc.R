@@ -22,7 +22,7 @@ sfExportAll()
 # MCMCMC the rc model
 
 o <- sfLapply(1:nchains, function(i){ 
-    phylo_mcmc(sim_trait, labrid$tree, intramandibular, MaxTime=1e5, 
+    phylo_mcmc(sim_trait, labrid$tree, intramandibular, MaxTime=1e6, 
                model_spec=list(alpha="indep", sigma="indep", theta="indep"),
                stepsizes=0.05)[[1]]
     })

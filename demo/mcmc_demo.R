@@ -79,7 +79,7 @@ png("convergenceTemp.png")
 dev.off()
 
 social_report(file="convergenceTemp.png", tag=tags,
-comment=paste(c(names(o$myCall),">><<", o$myCall), collapse=" "))
+comment=paste(o$myCall))
 
 }
 is_general_model(general)
