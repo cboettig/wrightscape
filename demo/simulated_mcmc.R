@@ -10,8 +10,7 @@ source("../R/prior_library.R")
 true <- multiTypeOU(
         data=labrid$data["close"], tree=labrid$tree,regimes=intramandibular, 
         model_spec=list(alpha="indep", sigma="global", theta="global"), 
-        Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
-        method ="SANN", control=list(maxit=80000,temp=50,tmax=50))
+        Xo=NULL, alpha = .1, sigma = .1, theta=NULL)
 true$Xo <- 1
 true$alpha <- c(.01, 20)
 true$sigma <- 10
@@ -20,19 +19,32 @@ sim_trait <- simulate(true, seed=1)
 ## Start with a simple fit of indep alphas model to get some parameters
 fit <- multiTypeOU(data=sim_trait, tree=labrid$tree, regimes=intramandibular, 
                 model_spec=list(alpha="indep", sigma="global", theta="global"), 
-                Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
-                method ="SANN", control=list(maxit=80000,temp=50,tmax=50)) 
+                Xo=NULL, alpha = .1, sigma = .1, theta=NULL) 
 
-sfInit(parallel=F)
+
+nchains<-16
+
+sfInit(parallel=T, cpu=16)
 sfLibrary(wrightscape)
 sfExportAll()
 # MCMCMC the rc model
-o <- phylo_mcmc(sim_trait, labrid$tree, intramandibular, MaxTime=1e5, indep=1e2,
-                alpha=fit$alpha, sigma=fit$sigma, theta=fit$theta, Xo=fit$Xo,
-                model_spec=list(alpha="indep", sigma="global", theta="global"))
 
-colnames(o$chain) <- c("Pi", "Xo", "alpha1", "alpha2", "sigma", "theta")
-par_dist <- o$chain
+o <- sfLapply(1:nchains, function(i){ 
+    phylo_mcmc(sim_trait, labrid$tree, intramandibular, 
+               MaxTime=1e2, indep=1e1, alpha=fit$alpha, 
+               sigma=fit$sigma, theta=fit$theta, Xo=fit$Xo,
+               model_spec=list(alpha="indep", sigma="global", theta="global"),
+               stepsizes=0.5)[[1]]
+    })
+
+## Should be dropping burnin, but starting from MLE anyhow
+chains <- o[[1]]
+for(i in 2:nchains)
+  chains <- rbind(chains, o[[i]])
+
+
+colnames(chains) <- c("Pi", "Xo", "alpha1", "alpha2", "sigma", "theta")
+par_dist <- chains
 social_plot({
 par(mfrow=c(1,3))
 poste_alpha1 <- density(par_dist[, "alpha1"])
