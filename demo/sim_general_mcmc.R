@@ -34,7 +34,7 @@ o <- sfLapply(1:nchains, function(i){
                MaxTime=1e5, alpha=fit$alpha, sigma=fit$sigma, 
                theta=fit$theta, Xo=fit$Xo,
                model_spec=list(alpha="indep", sigma="indep", theta="indep"),
-               stepsizes=0.5)[[1]]
+               stepsizes=0.05)[[1]]
     })
 
 burnin <- 1:1e3
