@@ -2,10 +2,6 @@ require(wrightscape)
 require(socialR)
 source("parrotfish_data.R")
 # since we can't install package while other reps are running
-source("../R/wrightscape.R")
-source("../R/mcmc.R")
-source("../R/likelihood.R")
-source("../R/prior_library.R")
 # Create some simulated data on the parrotfish tree
 true <- multiTypeOU(
         data=labrid$data["close"], tree=labrid$tree,regimes=intramandibular, 
@@ -16,12 +12,8 @@ true$alpha <- c(.01, 20)
 true$sigma <- 10
 true$theta <- 0
 sim_trait <- simulate(true, seed=1)
-## Start with a simple fit of indep alphas model to get some parameters
-## of course we could also start with the true values.  
-fit <- multiTypeOU(data=sim_trait, tree=labrid$tree, regimes=intramandibular, 
-                model_spec=list(alpha="indep", sigma="indep", theta="indep"), 
-                Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
-                  method ="SANN", control=list(maxit=80000,temp=25,tmax=50)) 
+
+
 
 nchains<-8
 sfInit(parallel=T, cpu=8)
@@ -30,14 +22,12 @@ sfExportAll()
 # MCMCMC the rc model
 
 o <- sfLapply(1:nchains, function(i){ 
-    phylo_mcmc(sim_trait, labrid$tree, intramandibular, 
-               MaxTime=1e5, alpha=fit$alpha, sigma=fit$sigma, 
-               theta=fit$theta, Xo=fit$Xo,
+    phylo_mcmc(sim_trait, labrid$tree, intramandibular, MaxTime=1e2, 
                model_spec=list(alpha="indep", sigma="indep", theta="indep"),
-               stepsizes=0.5)[[1]]
+               stepsizes=0.05)[[1]]
     })
 
-burnin <- 1:1e3
+burnin <- 1:1e1
 chains <- o[[1]][-burnin,]
 for(i in 2:nchains)
   chains <- rbind(chains, o[[i]][-burnin, ])
@@ -45,13 +35,7 @@ colnames(chains) <- c("Pi", "Xo", "alpha1", "alpha2", "sigma1", "sigma2", "theta
 par_dist <- chains
 
 
-run_id <- runif(1,1e9,1e10)
-script_name <- paste("run_", run_id, ".txt", sep="")
-savehistory(file=script_name)
-script <- paste(readLines(script_name), collapse = "        ")
-
-
-
+script <- paste(readLines("sim_general_mcmc.R"), collapse = "  ")
 
 social_plot({
 par(mfrow=c(1,3))
