@@ -17,13 +17,13 @@ true$sigma <- 10
 true$theta <- 0
 sim_trait <- simulate(true, seed=1)
 ## Start with a simple fit of indep alphas model to get some parameters
+## of course we could also start with the true values.  
 fit <- multiTypeOU(data=sim_trait, tree=labrid$tree, regimes=intramandibular, 
                 model_spec=list(alpha="indep", sigma="global", theta="global"), 
-                Xo=NULL, alpha = .1, sigma = .1, theta=NULL) 
-
+                Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
+                  method ="SANN", control=list(maxit=80000,temp=25,tmax=50)) 
 
 nchains<-16
-
 sfInit(parallel=T, cpu=16)
 sfLibrary(wrightscape)
 sfExportAll()
@@ -31,16 +31,16 @@ sfExportAll()
 
 o <- sfLapply(1:nchains, function(i){ 
     phylo_mcmc(sim_trait, labrid$tree, intramandibular, 
-               MaxTime=1e2, indep=1e1, alpha=fit$alpha, 
-               sigma=fit$sigma, theta=fit$theta, Xo=fit$Xo,
-               model_spec=list(alpha="indep", sigma="global", theta="global"),
+               MaxTime=1e5, alpha=fit$alpha, sigma=fit$sigma, 
+               theta=fit$theta, Xo=fit$Xo,
+               model_spec=list(alpha="indep", sigma="indep", theta="indep"),
                stepsizes=0.5)[[1]]
     })
 
-## Should be dropping burnin, but starting from MLE anyhow
-chains <- o[[1]]
+burnin <- 1:1e3
+chains <- o[[1]][-burnin,]
 for(i in 2:nchains)
-  chains <- rbind(chains, o[[i]])
+  chains <- rbind(chains, o[[i]][-burnin, ])
 
 
 colnames(chains) <- c("Pi", "Xo", "alpha1", "alpha2", "sigma", "theta")
