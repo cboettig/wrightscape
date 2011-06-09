@@ -1,5 +1,9 @@
 Package: wrightscape
+<<<<<<< HEAD
 Version: 0.2-2
+=======
+Version: 0.1-3
+>>>>>>> d4530d7d887b18a64da128e0b7b0ccd1e9dba0f1
 Title: wrightscape
 Description: Phylogenetic comparative methods for arbitrary landscapes
 Depends: geiger, boot, maticce, snowfall, ouch

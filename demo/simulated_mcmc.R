@@ -33,7 +33,7 @@ o <- sfLapply(1:nchains, function(i){
     phylo_mcmc(sim_trait, labrid$tree, intramandibular, 
                MaxTime=1e5, alpha=fit$alpha, sigma=fit$sigma, 
                theta=fit$theta, Xo=fit$Xo,
-               model_spec=list(alpha="indep", sigma="indep", theta="indep"),
+               model_spec=list(alpha="indep", sigma="global", theta="global"),
                stepsizes=0.5)[[1]]
     })
 

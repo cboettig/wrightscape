@@ -1,8 +1,8 @@
 ######### CONSIDER IMPORTING THESE ALL FROM "mcmcTools" package instead ###########
-step_fn <- function(pars, stepsizes = .02){
+step_fn <- function(pars, stepsizes = rep(.02, length(pars))){
 # Sequential random updating 
   j <- sample(1:length(pars), 1)
-  pars[j] <- rnorm(1, pars[j], stepsizes)
+  pars[j] <- rnorm(1, pars[j], stepsizes[j])
   pars
 }
 
@@ -14,6 +14,8 @@ Q <- function(pars, proposed){
 
 # The basic mcmc function
 mcmc_fn <- function(pars, loglik, prior, MaxTime=1e3, stepsizes=.02, ...){
+  if(length(stepsizes)==1)
+    stepsizes <- rep(stepsizes, length(pars))
   history <- matrix(NA, nrow=MaxTime, ncol=(1+length(pars)))
   for(t in 1:MaxTime){
     Pi <- loglik(pars)+prior(pars)
