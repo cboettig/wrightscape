@@ -216,18 +216,7 @@ void simulate_model (double * Xo, double * alpha, double * theta,
 /** Test code by running in pure C */
 int main(void)
 {
-/*	
-	double branch_length[]	= {0, 1, 1, 3, 2, 1, 1}; 
-	const int ancestor[]	={-1, 2, 0, 0, 2, 1, 1};
-	const double traits[]	= {0, 0, 0, 5, 2, 1, 3};	
-	const int regimes[]		= {0, 0, 0, 1, 0, 0, 0};
-	int n_nodes = 7;
-
-	double Xo = 1;
-	double alpha[2] = {2, 2};
-	double theta[2] = {1, 5}; 
-	double sigma[2] = {1, 1};
-/ */
+  /** Define the tree and the trait data (Anoles tree from "ouch" R package) */
 	int n_nodes = 45;
 	double branch_length[] = { 0.0, 12./38, 20./38,  2./38,  2./38,  4./38,  
 							 8./38,  5./38,  5./38,  5./38,  5./38, 10./38,  
@@ -239,33 +228,23 @@ int main(void)
 							 1./38,  2./38,  2./38};
 
 	int ancestor[] = {-1,  0,  1,  2,  3,  2,  0,  6,  7,  8,  9,
-						8,  7, 12, 13,14,  6, 16, 17, 18, 19, 18, 1,
-						3,  4,  4,  5,  5,  9, 10, 10, 11, 11, 12, 
-						13, 14, 15, 15, 16, 17, 19, 20, 20, 21, 21};
+						         8,  7, 12, 13,14,  6, 16, 17, 18, 19, 18, 1,
+						         3,  4,  4,  5,  5,  9, 10, 10, 11, 11, 12, 
+						        13, 14, 15, 15, 16, 17, 19, 20, 20, 21, 21};
 
-	double traits[] = {   0.0000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
-						  0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
-						  0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 2.602690, 2.660260,
-						  2.660260, 2.653242, 2.674149, 2.701361, 3.161247, 3.299534, 3.328627, 3.353407,
-						  3.360375, 3.049273, 2.906901, 2.980619, 2.933857, 2.975530, 3.104587, 3.346389,
-						  2.928524, 2.939162, 2.990720, 3.058707, 3.068053};
-	//int regimes[45] = {0};
-	int regimes[] =  {1, 1, 2, 2, 2, 2, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-						2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1}; 
+	double traits[] = {0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 
+                     0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
+                     0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
+                     0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 
+                     0.000000, 0.000000, 2.602690, 2.660260, 2.660260, 
+                     2.653242, 2.674149, 2.701361, 3.161247, 3.299534, 
+                     3.328627, 3.353407, 3.360375, 3.049273, 2.906901, 
+                     2.980619, 2.933857, 2.975530, 3.104587, 3.346389,
+        					   2.928524, 2.939162, 2.990720, 3.058707, 3.068053};
 
-/*
-	// ou1 parameters
-	double Xo = 2.953806;
-	double alpha[3] = { 0.192155, 0.192155, 0.192155};
-	double theta[3] = {2.953806,  2.953806, 2.953806}; 
-	double sigma[3] = {sqrt( .048365), sqrt( .048365), sqrt( .048365)};
-
-	double Xo = 1;
-	double alpha[3] = {1., 1., 1.};
-	double theta[3] = {3., 3., 3.};
-	double sigma[3] = {1.,  1., 1. };
-
-*/
+	int regimes[] =  {1, 1, 2, 2, 2, 2, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 1,
+                    1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1}; 
 
 	double Xo = 3;
 	double alpha[3] = {2.6, 2.6, 2.6};
@@ -274,18 +253,21 @@ int main(void)
 	int n_regimes = 3;
 	double llik = 0;
 
-	int use_siman = 0;
-
-    /* Initialize the lca matrix */
-    int * lca = (int *) calloc(n_nodes*n_nodes, sizeof(int));
+  /* Initialize the lca matrix */
+  int * lca = (int *) calloc(n_nodes*n_nodes, sizeof(int));
    
-   /* test the pure likelihood fn first*/
-    calc_lca(ancestor, branch_length, &n_nodes, lca);
-    calc_lik(&Xo, alpha, theta, sigma, regimes, ancestor, branch_length, traits, &n_nodes, lca, &llik);
+  /* test the pure likelihood function first */
+  calc_lca(ancestor, branch_length, &n_nodes, lca);
+  calc_lik(&Xo, alpha, theta, sigma, regimes, ancestor, 
+           branch_length, traits, &n_nodes, lca, &llik);
 	printf("log likelihood: %g\n", llik);
 
+  /* We'll use the faster Nelder-Mead algorithm for the check */
+	int use_siman = 0;
 
-	fit_model(&Xo, alpha, theta, sigma, regimes, ancestor, branch_length, traits, &n_nodes, &n_regimes, &llik, &use_siman);
+  /* Test the fitting routine */
+	fit_model(&Xo, alpha, theta, sigma, regimes, ancestor, branch_length,
+            traits, &n_nodes, &n_regimes, &llik, &use_siman);
 	printf("Xo = %g\n", Xo);
 	printf("alphas: %g %g %g\n", alpha[0], alpha[1], alpha[2]);
 	printf("thetas: %g %g %g\n", theta[0], theta[1], theta[2]);
@@ -296,10 +278,15 @@ int main(void)
 	double seed = 1.0;
 	printf("seed: %lo\n", (unsigned long int) seed);
 
-	simulate_model(&Xo, alpha, theta, sigma, regimes, ancestor, branch_length, traits, &n_nodes, &n_regimes, &llik, &seed);
+  /* Test the simulation code */
+	simulate_model(&Xo, alpha, theta, sigma, regimes, ancestor, branch_length,
+                 traits, &n_nodes, &n_regimes, &llik, &seed);
 
-//	int i;
-//	for(i=0; i < 45; i++) printf("%g\n", traits[i]);
+	int i;
+  printf("simulated traits:\n");
+	for(i=0; i < 45; i++) 
+    printf("%g ", traits[i]);
+  printf("\n");
 
   free(lca);	
 	return 0;
