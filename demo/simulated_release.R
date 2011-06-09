@@ -33,20 +33,17 @@ brownie_fit <- multiTypeOU(data=sim_trait, tree=labrid$tree,
                   method ="SANN", control=list(maxit=50000,temp=50,tmax=50))
 
 print(getParameters.multiOU(brownie_fit))
+print(getParameters.multiOU(fit))
 
 
 require(pmc)
 sfInit(parallel=T, cpu=8)
 sfLibrary(wrightscape)
 sfExportAll()
-boots <- montecarlotest(brownie_fit, fit, nboot=80, GetParNames=TRUE)
+boots <- montecarlotest(brownie_fit, fit, nboot=80)
 social_plot(plot(boots), tags="phylogenetics")
 
-
-boots <- montecarlotest(sigmas, alphas, nboot=80, cpu=16)
-social_plot(plot(boots), tag=tag)
-
-comment=paste(fit$myCall, brownie_fit$myCall)
+comment=paste("Simulated data, parrotfish tree", fit$myCall, brownie_fit$myCall)
 
 
 finalplots <- function(boots, comment=""){
