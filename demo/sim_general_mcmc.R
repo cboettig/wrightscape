@@ -1,12 +1,12 @@
 
-args=(commandArgs(TRUE))
-if(length(args)==0){
-  print("No description provided")
-  comment = ""
-} else {
-  for(i in 1:length(args))
-    eval(parse(text=args[[i]]))
-}
+#args=(commandArgs(TRUE))
+#if(length(args)==0){
+#  print("No description provided")
+#  comment = ""
+#} else {
+#  for(i in 1:length(args))
+#    eval(parse(text=args[[i]]))
+#}
 print(comment)
 
 require(wrightscape)
@@ -34,7 +34,7 @@ sfExportAll()
 
 o <- sfLapply(1:nchains, function(i){ 
     phylo_mcmc(sim_trait, labrid$tree, intramandibular, MaxTime=1e5, 
-               model_spec=list(alpha="global", sigma="indep", theta="indep"),
+               model_spec=list(alpha="indep", sigma="global", theta="indep"),
                stepsizes=0.05)[[1]]
     })
 
@@ -45,7 +45,7 @@ for(i in 2:nchains)
 colnames(chains) <- c("Pi", "Xo", "alpha1", "sigma1", "sigma2", "theta1", "theta2")
 par_dist <- chains
 
-#comment="Simulated data, parrotfish tree, indep sigma/theta, 8 x 1e5 gen"
+comment="Simulated data, parrotfish tree, indep alpha/theta, 8 x 1e5 gen"
 
 social_plot({
 par(mfrow=c(1,3))
