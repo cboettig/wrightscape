@@ -23,8 +23,8 @@ fit <- multiTypeOU(data=sim_trait, tree=labrid$tree, regimes=intramandibular,
                 Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
                   method ="SANN", control=list(maxit=80000,temp=25,tmax=50)) 
 
-nchains<-16
-sfInit(parallel=T, cpu=16)
+nchains<-8
+sfInit(parallel=T, cpu=8)
 sfLibrary(wrightscape)
 sfExportAll()
 # MCMCMC the rc model
@@ -41,10 +41,18 @@ burnin <- 1:1e3
 chains <- o[[1]][-burnin,]
 for(i in 2:nchains)
   chains <- rbind(chains, o[[i]][-burnin, ])
-
-
 colnames(chains) <- c("Pi", "Xo", "alpha1", "alpha2", "sigma1", "sigma2", "theta1", "theta2")
 par_dist <- chains
+
+
+run_id <- runif(1,1e9,1e10)
+script_name <- paste("run_", run_id, ".txt", sep="")
+savehistory(file=script_name)
+script <- paste(readLines(script_name), collapse = "        ")
+
+
+
+
 social_plot({
 par(mfrow=c(1,3))
 poste_alpha1 <- density(par_dist[, "alpha1"])
@@ -70,6 +78,6 @@ ylim <- c(min(poste_sigma1$y, poste_sigma2$y), max(poste_sigma1$y, poste_sigma2$
 plot(poste_sigma2, xlab="sigma", main="Diversification rate", xlim=xlim, ylim=ylim, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
 polygon(poste_sigma1, col=rgb(0,1,0,.5))
 polygon(poste_sigma2, col=rgb(0,0,1,.5))
-}, file="parameter_boostraps.png", width=3*480, tag="phylogenetics")
+}, file="parameter_boostraps.png", width=3*480, tag="phylogenetics", comment=script)
 
 
