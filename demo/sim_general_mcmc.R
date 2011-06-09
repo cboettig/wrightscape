@@ -22,20 +22,18 @@ sfExportAll()
 # MCMCMC the rc model
 
 o <- sfLapply(1:nchains, function(i){ 
-    phylo_mcmc(sim_trait, labrid$tree, intramandibular, MaxTime=1e2, 
+    phylo_mcmc(sim_trait, labrid$tree, intramandibular, MaxTime=1e5, 
                model_spec=list(alpha="indep", sigma="indep", theta="indep"),
                stepsizes=0.05)[[1]]
     })
 
-burnin <- 1:1e1
+burnin <- 1:1e3
 chains <- o[[1]][-burnin,]
 for(i in 2:nchains)
   chains <- rbind(chains, o[[i]][-burnin, ])
 colnames(chains) <- c("Pi", "Xo", "alpha1", "alpha2", "sigma1", "sigma2", "theta1", "theta2")
 par_dist <- chains
 
-
-script <- paste(readLines("sim_general_mcmc.R"), collapse = "  ")
 
 social_plot({
 par(mfrow=c(1,3))
@@ -62,6 +60,6 @@ ylim <- c(min(poste_sigma1$y, poste_sigma2$y), max(poste_sigma1$y, poste_sigma2$
 plot(poste_sigma2, xlab="sigma", main="Diversification rate", xlim=xlim, ylim=ylim, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
 polygon(poste_sigma1, col=rgb(0,1,0,.5))
 polygon(poste_sigma2, col=rgb(0,0,1,.5))
-}, file="parameter_boostraps.png", width=3*480, tag="phylogenetics", comment=script)
+}, file="parameter_boostraps.png", width=3*480, tag="phylogenetics", comment="MCMC")
 
 
