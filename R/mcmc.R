@@ -107,6 +107,29 @@ phylo_mcmc <- function(data, tree, regimes, model_spec =
                        list(alpha="indep", sigma="indep", theta="indep"),
                        Xo=NULL, alpha=1, sigma=1, 
                        theta=NULL, prior=NULL, MaxTime, 
+                       indep=100, stepsizes=.1, 
+                       Delta_T =1, ...){
+
+  myCall <- match.call() # keep input for the record
+  
+  n_regimes <- length(levels(regimes))
+  if(is.null(prior))
+    prior <- flat_prior_creator(model_spec, n_regimes)
+  par <- setup_pars(data, tree, regimes, model_spec, Xo=Xo, 
+                    alpha=alpha, sigma=sigma, theta=theta)
+  f <- llik.closure(data, tree, regimes, model_spec)
+  chain <- mcmc_fn(par, f, prior, MaxTime=MaxTime, indep=indep,
+                      stepsizes=stepsizes, Delta_T = Delta_T, ...) 
+  list(chain=chain, myCall=myCall)
+}
+
+
+
+## Should take number of chains as an option
+phylo_mcmcmc <- function(data, tree, regimes, model_spec =
+                       list(alpha="indep", sigma="indep", theta="indep"),
+                       Xo=NULL, alpha=1, sigma=1, 
+                       theta=NULL, prior=NULL, MaxTime, 
                        indep=100, stepsizes=.1, nchains=4, 
                        Delta_T =1, ...){
 

@@ -29,21 +29,27 @@ sfExportAll()
 # MCMCMC the rc model
 o <- phylo_mcmc(sim_trait, labrid$tree, intramandibular, MaxTime=1e5, indep=1e2,
                 alpha=fit$alpha, sigma=fit$sigma, theta=fit$theta, Xo=fit$Xo,
-                model_spec=list(alpha="indep", sigma="global", theta="global"),
-                nchains=2)
+                model_spec=list(alpha="indep", sigma="global", theta="global"))
 
-png("alphadist.png")
-cold_chain <- o$chains[[1]]
-colnames(cold_chain) <- c("Pi", "Xo", "alpha1", "alpha2", "sigma", "theta")
-poste_alpha1 <- density(cold_chain[, "alpha1"])
-poste_alpha2 <- density(cold_chain[, "alpha2"])
+colnames(o$chain) <- c("Pi", "Xo", "alpha1", "alpha2", "sigma", "theta")
+par_dist <- o$chain
+social_plot({
+par(mfrow=c(1,3))
+poste_alpha1 <- density(par_dist[, "alpha1"])
+poste_alpha2 <- density(par_dist[, "alpha2"])
 xlim <- c(min(poste_alpha1$x, poste_alpha2$x), max(poste_alpha1$x, poste_alpha2$x)) 
 ylim <- c(min(poste_alpha1$y, poste_alpha2$y), max(poste_alpha1$y, poste_alpha2$y)) 
-plot(poste_alpha2, xlab="alpha", main="Selection Strength", xlim=xlim, ylim=ylim)
+plot(poste_alpha2, xlab="alpha", main="Selection Strength", xlim=xlim, ylim=ylim, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
 polygon(poste_alpha1, col=rgb(0,1,0,.5))
 polygon(poste_alpha2, col=rgb(0,0,1,.5))
-dev.off()
 
-social_report(file="alphadist.png", tag="phylogenetics")
+poste_theta1 <- density(par_dist[, "theta"])
+plot(poste_theta1, xlab="theta", main="Optimum", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+polygon(poste_theta1, col=rgb(0,1,0,.5))
+
+poste_sigma1 <- density(par_dist[, "sigma"])
+plot(poste_sigma1, xlab="sigma", main="Diversification rate", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+polygon(poste_sigma1, col=rgb(0,1,0,.5))
+}, file="parameter_boostraps.png", width=3*480, tag="phylogenetics")
 
 
