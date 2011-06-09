@@ -111,9 +111,14 @@ polygon(poste_sigma2, col=rgb(0,0,1,.5))
 
 finalplots(boots)
 
-
-
-
-
-
+social_plot({
+par_dist <- t(boots$null_par_dist) 
+par(mfrow=c(1,2))
+poste_sigma1 <- density(par_dist[, "sigma1"])
+poste_sigma2 <- density(par_dist[, "sigma2"])
+plot(poste_sigma1, xlab="sigma", main="Diversification rate", cex=2, cex.lab=2, cex.main=2, cex.axis=2)
+polygon(poste_sigma1, col=rgb(0,1,0,.5))
+plot(poste_sigma2, xlab="sigma", main="Diversification rate", cex=2, cex.lab=2, cex.main=2, cex.axis=2)
+polygon(poste_sigma2, col=rgb(0,0,1,.5))
+}, file="sigma.png", width=480*2, tag="phylogenetics")
 
