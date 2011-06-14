@@ -12,13 +12,13 @@ source("parrotfish_data.R")
 MaxTime = 1e7
 spec = list(alpha="indep", sigma="global", theta="global")
 
-
+comment="open"
 
 sfInit(parallel=T, cpu=8)
 sfLibrary(wrightscape)
 sfExportAll()
 o <- sfLapply(1:nchains, function(i){ 
-o<-    phylo_mcmc(labrid$data['close'], labrid$tree, intramandibular, MaxTime=MaxTime, 
+o <- phylo_mcmc(labrid$data['open'], labrid$tree, intramandibular, MaxTime=MaxTime, 
                model_spec=spec,
                stepsizes=0.05)[[1]]
     })
@@ -53,5 +53,5 @@ polygon(poste_sigma1, col=rgb(0,1,0,.5))
 dev.off()
 
 
-upload("parameter_mcmc.png", script, gitopts=gitopts, tags=tags)
+upload("parameter_mcmc.png", script, gitopts=gitopts, tags=tags, comment=comment)
 
