@@ -1,12 +1,19 @@
 require(wrightscape)
 require(socialR)
+script <- "simulated_release.R"
+gitcommit(script)
+gitopts = list(user = "cboettig", dir = "demo", repo = "wrightscape") 
+on.exit(system("git push")) #  For git links.  May prompt for pw,
+tags <- "phylogenetics"  ## multiple possible: space, delim, multiple items, etc.  
+tweet_errors(script, gitopts, tags)  ## tweet on error
+
 source("parrotfish_data.R")
 
 # since we can't install package while other reps are running
-source("../R/wrightscape.R")
-source("../R/mcmc.R")
-source("../R/likelihood.R")
-source("../R/prior_library.R")
+#source("../R/wrightscape.R")
+#source("../R/mcmc.R")
+#source("../R/likelihood.R")
+#source("../R/prior_library.R")
 
 brownie = list(alpha="global", sigma="indep", theta="global")
 rc = list(alpha="indep", sigma="global", theta="global")
@@ -41,15 +48,17 @@ sfInit(parallel=T, cpu=8)
 sfLibrary(wrightscape)
 sfExportAll()
 boots <- montecarlotest(brownie_fit, fit, nboot=80)
-social_plot(plot(boots), tags="phylogenetics")
+png("sigmas_v_alphas.png")
+plot(boots)
+dev.off()
 
-comment=paste("Simulated data, parrotfish tree", fit$myCall, brownie_fit$myCall)
+upload("sigmas_v_alphas.png", script=script, tags=tags, gitopts=gitopts)
 
 
-finalplots <- function(boots, comment=""){
+finalplots <- function(boots){
   par_dist <- t(boots$test_par_dist) 
 
-  social_plot({
+ png("bootstrap_pars.png", width=3*480) 
     par(mfrow=c(1,3))
     poste_alpha1 <- density(par_dist[, "alpha1"])
     poste_alpha2 <- density(par_dist[, "alpha2"])
@@ -74,10 +83,12 @@ finalplots <- function(boots, comment=""){
     plot(poste_sigma2, xlab="sigma", main="Diversification rate", xlim=xlim, ylim=ylim, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
     polygon(poste_sigma1, col=rgb(0,1,0,.5))
     polygon(poste_sigma2, col=rgb(0,0,1,.5))
-  }, file="parameter_boostraps.png", width=3*480, tag="phylogenetics",comment=comment)
+  dev.off()
+
+upload("bootstrap_pars.png", script=script, gitopts=gitopts, tags=tags)
 
   par_dist <- t(boots$null_par_dist) 
-  social_plot({
+  png(file="parameter_bootstraps.png", width=3*480)
     par(mfrow=c(1,3))
     poste_alpha1 <- density(par_dist[, "alpha1"])
     poste_alpha2 <- density(par_dist[, "alpha2"])
@@ -102,9 +113,11 @@ finalplots <- function(boots, comment=""){
     plot(poste_sigma2, xlab="sigma", main="Diversification rate", xlim=xlim, ylim=ylim, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
     polygon(poste_sigma1, col=rgb(0,1,0,.5))
     polygon(poste_sigma2, col=rgb(0,0,1,.5))
-  }, file="parameter_boostraps.png", width=3*480, tag="phylogenetics", comment=comment)
+  dev.off()
+  upload("parameter_bootstraps.png", script=script, tags=tags, gitopts=gitopts)
 }
 
-finalplots(boots, comment)
+finalplots(boots)
+
 
 
