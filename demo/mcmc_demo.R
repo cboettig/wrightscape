@@ -18,7 +18,7 @@ sfInit(parallel=T, cpu=8)
 sfLibrary(wrightscape)
 sfExportAll()
 o <- sfLapply(1:nchains, function(i){ 
-o <- phylo_mcmc(labrid$data['gape.y'], labrid$tree, intramandibular,
+o <- phylo_mcmc(labrid$data['prot.y'], labrid$tree, intramandibular,
                 MaxTime=MaxTime, model_spec=spec, stepsizes=0.05)[[1]]
     })
 
