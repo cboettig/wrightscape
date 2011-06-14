@@ -18,9 +18,8 @@ sfInit(parallel=T, cpu=8)
 sfLibrary(wrightscape)
 sfExportAll()
 o <- sfLapply(1:nchains, function(i){ 
-o <- phylo_mcmc(labrid$data['open'], labrid$tree, intramandibular, MaxTime=MaxTime, 
-               model_spec=spec,
-               stepsizes=0.05)[[1]]
+o <- phylo_mcmc(labrid$data['gape.y'], labrid$tree, intramandibular,
+                MaxTime=MaxTime, model_spec=spec, stepsizes=0.05)[[1]]
     })
 
 burnin <- 1:1e3
