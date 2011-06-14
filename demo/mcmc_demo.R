@@ -10,6 +10,8 @@ on.exit(system("git push")) #  For git links.  May prompt for pw,
 tweet_errors(script, gitopts, tags)  ## tweet on error
 
 source("parrotfish_data.R")
+
+nchains <- 8
 MaxTime = 1e6 # 1e7 too great to store in mem, better start writing to file!
 spec = list(alpha="indep", sigma="indep", theta="global")
 
@@ -53,7 +55,7 @@ xlim <- c(min(poste_sigma1$x, poste_sigma2$x), max(poste_sigma1$x, poste_sigma2$
 plot(poste_sigma1, xlab="sigma", main="Diversification rate", cex=3, cex.lab=3, cex.main=3, cex.axis=3, xlim=xlim)
 polygon(poste_sigma1, col=rgb(0,1,0,.5))
 plot(poste_sigma2, xlab="sigma", main="Diversification rate", cex=3, cex.lab=3, cex.main=3, cex.axis=3, xlim=xlim)
-polygon(poste_sigma2, col=rgb(0,1,0,.5))
+polygon(poste_sigma2, col=rgb(0,0,1,.5))
 dev.off()
 
 
