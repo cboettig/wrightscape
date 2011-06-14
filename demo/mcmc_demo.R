@@ -10,9 +10,9 @@ tweet_errors(script, gitopts, tags)  ## tweet on error
 
 source("parrotfish_data.R")
 MaxTime = 1e6 # 1e7 too great to store in mem, better start writing to file!
-spec = list(alpha="indep", sigma="global", theta="global")
+spec = list(alpha="indep", sigma="indep", theta="global")
 
-comment="open"
+comment=""
 
 sfInit(parallel=T, cpu=8)
 sfLibrary(wrightscape)
@@ -46,9 +46,13 @@ poste_theta1 <- density(par_dist[, "theta"])
 plot(poste_theta1, xlab="theta", main="Optimum", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
 polygon(poste_theta1, col=rgb(0,1,0,.5))
 
-poste_sigma1 <- density(par_dist[, "sigma"])
-plot(poste_sigma1, xlab="sigma", main="Diversification rate", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+poste_sigma1 <- density(par_dist[, "sigma1"])
+poste_sigma1 <- density(par_dist[, "sigma2"])
+xlim <- c(min(poste_sigma1$x, poste_sigma2$x), max(poste_sigma1$x, poste_sigma2$x)) 
+plot(poste_sigma1, xlab="sigma", main="Diversification rate", cex=3, cex.lab=3, cex.main=3, cex.axis=3, xlim=xlim)
 polygon(poste_sigma1, col=rgb(0,1,0,.5))
+plot(poste_sigma2, xlab="sigma", main="Diversification rate", cex=3, cex.lab=3, cex.main=3, cex.axis=3, xlim=xlim)
+polygon(poste_sigma2, col=rgb(0,1,0,.5))
 dev.off()
 
 
