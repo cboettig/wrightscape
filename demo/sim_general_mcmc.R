@@ -1,5 +1,20 @@
 require(wrightscape)
 require(socialR)
+
+script <- "simulated_general_mcmc.R"
+gitcommit(script)
+gitopts = list(user = "cboettig", dir = "demo", repo = "wrightscape") 
+on.exit(system("git push")) #  For git links.  May prompt for pw,
+tags <- "phylogenetics"  ## multiple possible: space, delim, multiple items, etc.  
+tweet_errors(script, gitopts, tags)  ## tweet on error
+
+
+
+
+
+
+
+
 source("parrotfish_data.R")
 # since we can't install package while other reps are running
 # Create some simulated data on the parrotfish tree
@@ -39,71 +54,58 @@ comment=paste("Simulated data, parrotfish tree, 8 x 1e5 gen", spec, "MaxTime =",
 
 
 
-social_plot({
-par(mfrow=c(2,3))
-poste_alpha1 <- density(par_dist[, "alpha1"])
-poste_alpha2 <- density(par_dist[, "alpha1"]) ######## REPEAT SINCE ONLY 1
-poste_theta1 <- density(par_dist[, "theta1"])
-poste_theta2 <- density(par_dist[, "theta2"])
-poste_sigma1 <- density(par_dist[, "sigma1"])
-poste_sigma2 <- density(par_dist[, "sigma2"])
+png("parameter_mcmc.png", width=3*480, height=2*480)
+  par(mfrow=c(2,3))
+  poste_alpha1 <- density(par_dist[, "alpha1"])
+  poste_alpha2 <- density(par_dist[, "alpha1"]) ######## REPEAT SINCE ONLY 1
+  poste_theta1 <- density(par_dist[, "theta1"])
+  poste_theta2 <- density(par_dist[, "theta2"])
+  poste_sigma1 <- density(par_dist[, "sigma1"])
+  poste_sigma2 <- density(par_dist[, "sigma2"])
 
 
-plot(poste_alpha1, xlab="alpha", main="Selection Strength", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
-polygon(poste_alpha1, col=rgb(0,1,0,.5))
-plot(poste_theta1, xlab="theta", main="Optimum", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
-polygon(poste_theta1, col=rgb(0,1,0,.5))
-plot(poste_sigma1, xlab="sigma", main="Diversification rate",  cex=3, cex.lab=3, cex.main=3, cex.axis=3)
-polygon(poste_sigma1, col=rgb(0,1,0,.5))
+  plot(poste_alpha1, xlab="alpha", main="Selection Strength", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+  polygon(poste_alpha1, col=rgb(0,1,0,.5))
+  plot(poste_theta1, xlab="theta", main="Optimum", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+  polygon(poste_theta1, col=rgb(0,1,0,.5))
+  plot(poste_sigma1, xlab="sigma", main="Diversification rate",  cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+  polygon(poste_sigma1, col=rgb(0,1,0,.5))
 
-plot(poste_alpha2, xlab="alpha", main="Selection Strength", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
-polygon(poste_alpha2, col=rgb(0,0,1,.5))
-plot(poste_theta2, xlab="theta", main="Optimum", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
-polygon(poste_theta2, col=rgb(0,0,1,.5))
-plot(poste_sigma2, xlab="sigma", main="Diversification rate",  cex=3, cex.lab=3, cex.main=3, cex.axis=3)
-polygon(poste_sigma2, col=rgb(0,0,1,.5))
+  plot(poste_alpha2, xlab="alpha", main="Selection Strength", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+  polygon(poste_alpha2, col=rgb(0,0,1,.5))
+  plot(poste_theta2, xlab="theta", main="Optimum", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+  polygon(poste_theta2, col=rgb(0,0,1,.5))
+  plot(poste_sigma2, xlab="sigma", main="Diversification rate",  cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+  polygon(poste_sigma2, col=rgb(0,0,1,.5))
+dev.off()
+upload("parameter_mcmc.png", script=script, tags=tags)
 
+png("parameter_mcmc.png", width=3*480, height=480)
+  par(mfrow=c(1,3))
+  poste_alpha1 <- density(par_dist[, "alpha1"])
+  poste_alpha2 <- density(par_dist[, "alpha1"]) ######## REPEAT SINCE ONLY 1
+  xlim <- c(min(poste_alpha1$x, poste_alpha2$x), max(poste_alpha1$x, poste_alpha2$x)) 
+  ylim <- c(min(poste_alpha1$y, poste_alpha2$y), max(poste_alpha1$y, poste_alpha2$y)) 
+  plot(poste_alpha2, xlab="alpha", main="Selection Strength", xlim=xlim, ylim=ylim, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+  polygon(poste_alpha1, col=rgb(0,1,0,.5))
+  polygon(poste_alpha2, col=rgb(0,0,1,.5))
 
+  poste_theta1 <- density(par_dist[, "theta1"])
+  poste_theta2 <- density(par_dist[, "theta2"])
+  xlim <- c(min(poste_theta1$x, poste_theta2$x), max(poste_theta1$x, poste_theta2$x))
+  ylim <- c(min(poste_theta1$y, poste_theta2$y), max(poste_theta1$y, poste_theta2$y)) 
+  plot(poste_theta2, xlab="theta", main="Optimum", xlim=xlim, ylim=ylim, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+  polygon(poste_theta1, col=rgb(0,1,0,.5))
+  polygon(poste_theta2, col=rgb(0,0,1,.5))
 
-}, file="parameter_mcmc.png", width=3*480, height=2*480, tag="phylogenetics", comment=comment)
-
-
-
-
-
-
-
-
-
-
-
-
-
-social_plot({
-par(mfrow=c(1,3))
-poste_alpha1 <- density(par_dist[, "alpha1"])
-poste_alpha2 <- density(par_dist[, "alpha1"]) ######## REPEAT SINCE ONLY 1
-xlim <- c(min(poste_alpha1$x, poste_alpha2$x), max(poste_alpha1$x, poste_alpha2$x)) 
-ylim <- c(min(poste_alpha1$y, poste_alpha2$y), max(poste_alpha1$y, poste_alpha2$y)) 
-plot(poste_alpha2, xlab="alpha", main="Selection Strength", xlim=xlim, ylim=ylim, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
-polygon(poste_alpha1, col=rgb(0,1,0,.5))
-polygon(poste_alpha2, col=rgb(0,0,1,.5))
-
-poste_theta1 <- density(par_dist[, "theta1"])
-poste_theta2 <- density(par_dist[, "theta2"])
-xlim <- c(min(poste_theta1$x, poste_theta2$x), max(poste_theta1$x, poste_theta2$x))
-ylim <- c(min(poste_theta1$y, poste_theta2$y), max(poste_theta1$y, poste_theta2$y)) 
-plot(poste_theta2, xlab="theta", main="Optimum", xlim=xlim, ylim=ylim, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
-polygon(poste_theta1, col=rgb(0,1,0,.5))
-polygon(poste_theta2, col=rgb(0,0,1,.5))
-
-poste_sigma1 <- density(par_dist[, "sigma1"])
-poste_sigma2 <- density(par_dist[, "sigma2"])
-xlim <- c(min(poste_sigma1$x, poste_sigma2$x), max(poste_sigma1$x, poste_sigma2$x)) 
-ylim <- c(min(poste_sigma1$y, poste_sigma2$y), max(poste_sigma1$y, poste_sigma2$y)) 
-plot(poste_sigma2, xlab="sigma", main="Diversification rate", xlim=xlim, ylim=ylim, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
-polygon(poste_sigma1, col=rgb(0,1,0,.5))
-polygon(poste_sigma2, col=rgb(0,0,1,.5))
-}, file="parameter_mcmc.png", width=3*480, tag="phylogenetics", comment=comment)
+  poste_sigma1 <- density(par_dist[, "sigma1"])
+  poste_sigma2 <- density(par_dist[, "sigma2"])
+  xlim <- c(min(poste_sigma1$x, poste_sigma2$x), max(poste_sigma1$x, poste_sigma2$x)) 
+  ylim <- c(min(poste_sigma1$y, poste_sigma2$y), max(poste_sigma1$y, poste_sigma2$y)) 
+  plot(poste_sigma2, xlab="sigma", main="Diversification rate", xlim=xlim, ylim=ylim, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
+  polygon(poste_sigma1, col=rgb(0,1,0,.5))
+  polygon(poste_sigma2, col=rgb(0,0,1,.5))
+dev.off()
+upload("parameter_mcmc.png", script=script, tags=tags)
 
 
