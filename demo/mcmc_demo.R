@@ -1,4 +1,5 @@
 # mcmc_demo.R
+rm(list=ls())
 require(wrightscape)
 require(socialR)
 tags <- c("phylogenetics parrotfish")
@@ -27,7 +28,7 @@ chains <- o[[1]][-burnin,]
 for(i in 2:nchains)
   chains <- rbind(chains, o[[i]][-burnin, ])
 
-colnames(chains) <- c("Pi", "Xo", "alpha1", "alpha2", "sigma", "theta")
+colnames(chains) <- c("Pi", "Xo", "alpha1", "alpha2", "sigma1", "sigma2", "theta")
 par_dist <- chains
 
 
