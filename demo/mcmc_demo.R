@@ -11,13 +11,13 @@ tweet_errors(script, gitopts, tags)  ## tweet on error
 
 source("parrotfish_data.R")
 
-nchains <- 8
+nchains <- 16
 MaxTime = 1e6 # 1e7 too great to store in mem, better start writing to file!
 spec = list(alpha="indep", sigma="indep", theta="global")
 
 comment=""
 
-sfInit(parallel=T, cpu=8)
+sfInit(parallel=T, cpu=16)
 sfLibrary(wrightscape)
 sfExportAll()
 o <- sfLapply(1:nchains, function(i){ 
