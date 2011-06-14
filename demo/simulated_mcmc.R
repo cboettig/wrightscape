@@ -1,11 +1,20 @@
 require(wrightscape)
 require(socialR)
+
+script <- "simulated_mcmc.R"
+gitcommit(script)
+gitopts = list(user = "cboettig", dir = "demo", repo = "wrightscape") 
+on.exit(system("git push")) #  For git links.  May prompt for pw,
+tags <- "phylogenetics"  ## multiple possible: space, delim, multiple items, etc.  
+tweet_errors(script, gitopts, tags)  ## tweet on error
+
+
 source("parrotfish_data.R")
 # since we can't install package while other reps are running
-source("../R/wrightscape.R")
-source("../R/mcmc.R")
-source("../R/likelihood.R")
-source("../R/prior_library.R")
+#source("../R/wrightscape.R")
+#source("../R/mcmc.R")
+#source("../R/likelihood.R")
+#source("../R/prior_library.R")
 # Create some simulated data on the parrotfish tree
 true <- multiTypeOU(
         data=labrid$data["close"], tree=labrid$tree,regimes=intramandibular, 
@@ -24,7 +33,7 @@ fit <- multiTypeOU(data=sim_trait, tree=labrid$tree, regimes=intramandibular,
                   method ="SANN", control=list(maxit=80000,temp=25,tmax=50)) 
 
 nchains<-16
-sfInit(parallel=T, cpu=16)
+sfInit(parallel=T, cpu=8)
 sfLibrary(wrightscape)
 sfExportAll()
 # MCMCMC the rc model
@@ -45,7 +54,8 @@ for(i in 2:nchains)
 
 colnames(chains) <- c("Pi", "Xo", "alpha1", "alpha2", "sigma", "theta")
 par_dist <- chains
-social_plot({
+
+png(file="parameter_mcmc.png", width=3*480)
 par(mfrow=c(1,3))
 poste_alpha1 <- density(par_dist[, "alpha1"])
 poste_alpha2 <- density(par_dist[, "alpha2"])
@@ -62,6 +72,8 @@ polygon(poste_theta1, col=rgb(0,1,0,.5))
 poste_sigma1 <- density(par_dist[, "sigma"])
 plot(poste_sigma1, xlab="sigma", main="Diversification rate", cex=3, cex.lab=3, cex.main=3, cex.axis=3)
 polygon(poste_sigma1, col=rgb(0,1,0,.5))
-}, file="parameter_boostraps.png", width=3*480, tag="phylogenetics")
+dev.off()
 
+
+upload("parameter_mcmc.png", script, gitopts=gitopts, tags=tags)
 
