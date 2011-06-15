@@ -27,12 +27,12 @@ true$theta <- 0
 sim_trait <- simulate(true, seed=1)
 ## Start with a simple fit of indep alphas model to get some parameters
 ## of course we could also start with the true values.  
-fit <- multiTypeOU(data=sim_trait, tree=labrid$tree, regimes=intramandibular, 
-                model_spec=list(alpha="indep", sigma="global", theta="global"), 
-                Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
-                  method ="SANN", control=list(maxit=80000,temp=25,tmax=50)) 
+#fit <- multiTypeOU(data=sim_trait, tree=labrid$tree, regimes=intramandibular, 
+#                model_spec=list(alpha="indep", sigma="global", theta="global"), 
+#                Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
+#                  method ="SANN", control=list(maxit=80000,temp=25,tmax=50)) 
 
-nchains<-16
+nchains<-8
 sfInit(parallel=T, cpu=8)
 sfLibrary(wrightscape)
 sfExportAll()
@@ -40,8 +40,8 @@ sfExportAll()
 
 o <- sfLapply(1:nchains, function(i){ 
     phylo_mcmc(sim_trait, labrid$tree, intramandibular, 
-               MaxTime=1e5, alpha=fit$alpha, sigma=fit$sigma, 
-               theta=fit$theta, Xo=fit$Xo,
+               MaxTime=1e5, alpha=true$alpha, sigma=true$sigma, 
+               theta=true$theta, Xo=true$Xo,
                model_spec=list(alpha="indep", sigma="global", theta="global"),
                stepsizes=0.5)[[1]]
     })
