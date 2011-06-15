@@ -4,23 +4,22 @@ require(pmc)
 
 ############ Notebook logging header ##############
 require(socialR)
-tags="phylogenetics wrightscape labrids"
+script <- "labrid_trait_ML.R"
+tags="phylogenetics"
 gitopts <- list(user = "cboettig", dir = "demo", repo = "wrightscape") 
-script <- "parrotfish_gape.R"
 gitaddr <- gitcommit(script, gitopts)
 on.exit(system("git push")) 
-tags <- "phylogenetics"  
 tweet_errors(script, gitopts, tags) 
 ####################################################
 
-source("parrotfish_data.R")
+source("labrid_data.R")
 
-alphas <- multiTypeOU(data=labrid$data["prot.y"], tree=labrid$tree, regimes=intramandibular, 
-                  model_spec=list(alpha="indep", sigma="global", theta="indep"), 
-                  Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
-                  method ="SANN", control=list(maxit=50000,temp=50,tmax=20))
+alphas <- multiTypeOU(data=labrid$data["prot.y"], tree=labrid$tree, regimes=pharyngeal, 
+            model_spec=list(alpha="indep", sigma="global", theta="indep"), 
+            Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
+            method ="SANN", control=list(maxit=50000,temp=50,tmax=20))
 
-sigmas <- multiTypeOU(data=labrid$data["prot.y"], tree=labrid$tree, regimes=intramandibular, 
+sigmas <- multiTypeOU(data=labrid$data["prot.y"], tree=labrid$tree, regimes=pharngeal, 
                 model_spec=list(alpha="global", sigma="indep", theta="indep"), 
                   Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
                   method ="SANN", control=list(maxit=50000,temp=50,tmax=20))
