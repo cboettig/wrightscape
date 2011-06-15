@@ -16,7 +16,7 @@ source("labrid_data.R")
 
 nchains <- 16
 MaxTime = 1e6 
-spec = list(alpha="indep", sigma="global", theta="global")
+spec = list(alpha="global", sigma="indep", theta="global")
 
 comment=""
 
