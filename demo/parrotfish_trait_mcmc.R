@@ -1,13 +1,16 @@
 # mcmc_demo.R
 rm(list=ls())
 require(wrightscape)
+
+##############
 require(socialR)
+script <- "parrotfish_trait_mcmc.R"
 tags <- c("phylogenetics parrotfish")
-script <- "mcmc_demo.R"
-gitcommit(script)
-gitopts = list(user = "cboettig", dir = "demo", repo = "wrightscape") 
+gitopts <- list(user = "cboettig", dir = "demo", repo = "wrightscape") 
+gitaddr <- gitcommit(script, gitopts)
 on.exit(system("git push")) #  For git links.  May prompt for pw,
 tweet_errors(script, gitopts, tags)  ## tweet on error
+#################
 
 source("parrotfish_data.R")
 
@@ -59,5 +62,5 @@ polygon(poste_sigma2, col=rgb(0,0,1,.5))
 dev.off()
 
 
-upload("parameter_mcmc.png", script, gitopts=gitopts, tags=tags, comment=comment)
+upload("parameter_mcmc.png", script, gitaddr=gitaddr, tags=tags, comment=comment)
 
