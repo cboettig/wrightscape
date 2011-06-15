@@ -17,26 +17,32 @@ source("labrid_data.R")
 nchains <- 8
 MaxTime = 1e6 
 spec = list(alpha="indep", sigma="global", theta="global")
-traits <- c("close", "open", "gape.y", "prot.y")
+traits <- c("prot.y", "close", "open", "gape.y")
 
-for(trait in traits){
-  sfInit(parallel=T, cpu=8)
-  sfLibrary(wrightscape)
-  sfExportAll()
 
-  o <- sfLapply(1:nchains, function(i){ 
-  o <- phylo_mcmc(labrid$data[trait], labrid$tree, pharyngeal,
-                  MaxTime=MaxTime, model_spec=spec, stepsizes=0.05)[[1]]
-      })
+sfInit(parallel=T, cpu=4)
+sfLibrary(wrightscape)
+sfLibrary(socialR)
+sfExportAll()
 
-  burnin <- 1:1e3
-  chains <- o[[1]][-burnin,]
-  for(i in 2:nchains)
-    chains <- rbind(chains, o[[i]][-burnin, ])
+sfLapply(traits, function(trait){
+  # START SMART PLEASE
+  start <- multiTypeOU(data=labrid$data[trait], tree=labrid$tree, 
+                  regimes=pharyngeal, model_spec=spec,
+                  method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
 
+  chains <- phylo_mcmc(labrid$data[trait], labrid$tree, pharyngeal,
+                       MaxTime=MaxTime, model_spec=spec, stepsizes=0.05,
+                       Xo=start$Xo, alpha=start$alpha, sigma=start$sigma,
+                       theta=start$theta)
+  # returns [[1]]: chains, [[2]]: myCall, [[3]] colnames (for txtfile version)
+
+  burnin <- 1:1e5
+  chains <- chains[[1]][-burnin,]
   png(file="parameter_mcmc.png", width=3*480)
   plot.phylo_mcmc(chains, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
   dev.off()
-  upload("parameter_mcmc.png", script, gitaddr=gitaddr, tags=tags)
+  upload("parameter_mcmc.png", script, gitaddr=gitaddr, 
+          tags=tags, comment=trait)
 
 }
