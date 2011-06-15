@@ -25,7 +25,7 @@ sfExportAll()
 
 
 for(trait in traits){
-
+  sfExport(trait)
   o <- sfLapply(1:nchains, function(i){ 
   o <- phylo_mcmc(labrid$data[trait], labrid$tree, pharyngeal,
                   MaxTime=MaxTime, model_spec=spec, stepsizes=0.05)[[1]]
