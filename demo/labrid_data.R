@@ -1,16 +1,21 @@
-# correct_labrid_data.R
+# labrid example
 require(wrightscape)
 # This data has not been released
 path = "../data/labrids/"
 labrid_tree <- read.nexus(paste(path, "labrid_tree.nex", sep=""))
-#fin_data <-read.csv(paste(path,"labrid.csv", sep=""))
+#fin_data <-read.csv(paste(path,"labrid.csv", sep="")) # not actually being used
 diet_data <- read.csv(paste(path,"labriddata_parrotfish.csv", sep=""))
+
+#### size correct length and weight as fraction of body mass ####
+#for(i in c(3,4,6,7,8)){
+#	diet_data[i] <- diet_data[i]/diet_data[5]
+#}
+#diet_data[5] <- log(diet_data[5]) 
 
 corrected_data <- diet_data
 # Use the simple names from Price et al 2010
 traitnames <- c("Species", "group", "gape", "prot", "bodymass", "AM", "SH", "LP", "close", "open", "kt")
 names(corrected_data) <- traitnames
-
 # Lengths are log transformed 
 corrected_data[["gape"]] <- log(corrected_data[["gape"]])
 corrected_data[["prot"]] <- log(corrected_data[["prot"]])
@@ -21,12 +26,10 @@ corrected_data[["SH"]] <- log(corrected_data[["SH"]])/3
 corrected_data[["LP"]] <- log(corrected_data[["LP"]])/3
 # ratios are fine as they are
 
-# We'll get just the parrotfish data by taking only the traits for parrotfish.  
-# treedata() will automatically drop the tips with wrasses from the phylogeny.  
+# Drop any unmatched tip-traits
+ape <- treedata(labrid_tree, corrected_data[,3:11], corrected_data[,1])
 
-parrotfish <- corrected_data[corrected_data[,2]=="parrotfish",]
-ape <- treedata(labrid_tree, parrotfish[,3:11], parrotfish[,1])
-
+# Run Revell's phylogenetic size corrections
 require(RevellExtensions)
 ape$data["bodysize"]
 out <- phyl.resid(ape$phy, ape$data[,"bodymass"], ape$data[,c("gape", "prot","AM", "SH", "LP")] )
@@ -34,17 +37,35 @@ out <- phyl.resid(ape$phy, ape$data[,"bodymass"], ape$data[,c("gape", "prot","AM
 traits <- merge(ape$data, out$resid, by="row.names")
 # columns that are transformed now have gape.x for untransformed, gape.y for transformed.  
 
-# format data gets regimes from column specified in "regimes" (e.g. this is a column id, not a # of regimes)
+# format_data() gets regimes from column specified in
+# "regimes" (e.g. this is a column id, not a # of regimes)
 # This also converts the tree and data into ouch format
 ## Could just hand it all traits, but these are just the tranformed and size-corrected ones
 labrid <- format_data(labrid_tree, traits[,2:length(traits)], species_names=traits[,1])  
-#names(labrid$data)
 
-## PAINTING REGIMES: Having taken care of traits, we paint on the 3 regime models.  
+############### PAINTING REGIMES #################
 # Select common ancestor of a Chlorurus and a Hipposcarus as the changepoint
 intra_ancestor <- mrcaOUCH(c("Chlorurus_sordidus", "Hipposcarus_longiceps"), labrid$tree)
 intramandibular <- paintBranches(intra_ancestor, labrid$tree, c("other","intramandibular"))
+# Select common ancestor for all parrot fish
+pharyngeal_ancestor<-mrcaOUCH(c("Bolbometopon_muricatum", "Sparisoma_radians"), labrid$tree)
+pharyngeal <- paintBranches(pharyngeal_ancestor, labrid$tree, c("other","pharyngeal"))
+two_shifts <- paintBranches(c(pharyngeal_ancestor, intra_ancestor), labrid$tree, c("wrasses", "pharyngeal", "intramandibular") )
 
+## This leaves the branch on which the second transition occurs unspecified (fourth regime).  
+## We have to fix this manually
+two_shifts[as.numeric(intra_ancestor)] <- "intramandibular"
+two_shifts <- as.factor(as.character(two_shifts))
+names(two_shifts) <- names(intramandibular)
+
+### We now have access to the following configurations:
+## intramandibular, pharyngeal and two_shifts paintings, (and labrid$noregimes),
+## and tree in labrid$tree
+
+
+  ## Note that this will converge poorly with the .01, .01 starting conditions
+  #  ou3 <- hansen(trait, labrid$tree, regime=two_shifts, .01, .01 )
+  #  loglik(ou3) - loglik(ou2_phar)
 
 
 

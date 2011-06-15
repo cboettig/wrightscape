@@ -1,12 +1,11 @@
+## Uses the smart_multiType function which fits the all indep model using 
+## initial values estimated from the submodels
+
+
 require(wrightscape)
 require(socialR)
 source("parrotfish_data.R")
 
-# since we can't install package while other reps are running
-source("../R/wrightscape.R")
-source("../R/mcmc.R")
-source("../R/likelihood.R")
-source("../R/prior_library.R")
 
 brownie = list(alpha="fixed", sigma="indep", theta="globa")
 rc = list(alpha="indep", sigma="global", theta="global")
