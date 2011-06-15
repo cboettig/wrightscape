@@ -21,6 +21,7 @@ traits <- c("prot.y", "close", "open", "gape.y")
 
 sfInit(parallel=T, cpu=4)
 sfLibrary(wrightscape)
+sfLibrary(socialR)
 sfExportAll()
 sfLapply(traits, function(trait){
 
