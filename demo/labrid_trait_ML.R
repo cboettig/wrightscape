@@ -19,7 +19,7 @@ alphas <- multiTypeOU(data=labrid$data["prot.y"], tree=labrid$tree, regimes=phar
             Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
             method ="SANN", control=list(maxit=50000,temp=50,tmax=20))
 
-sigmas <- multiTypeOU(data=labrid$data["prot.y"], tree=labrid$tree, regimes=pharngeal, 
+sigmas <- multiTypeOU(data=labrid$data["prot.y"], tree=labrid$tree, regimes=pharyngeal, 
                 model_spec=list(alpha="global", sigma="indep", theta="global"), 
                   Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
                   method ="SANN", control=list(maxit=50000,temp=50,tmax=20))

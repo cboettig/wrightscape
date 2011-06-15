@@ -121,11 +121,20 @@ phylo_mcmc <- function(data, tree, regimes, model_spec =
                     alpha=alpha, sigma=sigma, theta=theta)
   f <- llik.closure(data, tree, regimes, model_spec)
   chain <- mcmc_fn(par, f, prior, MaxTime=MaxTime, indep=indep,
-                      stepsizes=stepsizes, Delta_T = Delta_T, ...) 
+                      stepsizes=stepsizes, Delta_T = Delta_T, ...)
+
+
+  colnames(chain) <- unique_names(model_spec, n_regimes) 
   list(chain=chain, myCall=myCall)
 }
 
-
+unique_names <- function(model_spec, n_regimes){
+  indices <- get_indices(model_spec, n_regimes)
+  indices <- lapply(indices, function(x) x[!duplicated(x)] )
+  tmp <- c("Pi" = 1, "Xo"=2, "alpha" = indices$alpha_i,
+           "sigma"=indices$sigma_i, "theta"=indices$theta_i)
+  names(tmp)
+}
 
 ## Should take number of chains as an option
 phylo_mcmcmc <- function(data, tree, regimes, model_spec =
