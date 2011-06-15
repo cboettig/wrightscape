@@ -17,12 +17,12 @@ source("labrid_data.R")
 nchains <- 8
 MaxTime = 1e6 
 spec = list(alpha="indep", sigma="global", theta="global")
+traits <- c("close", "open", "gape.y", "prot.y")
 
 sfInit(parallel=T, cpu=8)
 sfLibrary(wrightscape)
 sfExportAll()
 
-traits <- c("close", "open", "gape.y", "prot.y")
 
 for(trait in traits){
 
