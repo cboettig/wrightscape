@@ -16,7 +16,7 @@ source("parrotfish_data.R")
 
 nchains <- 16
 MaxTime = 1e6 # 1e7 too great to store in mem, better start writing to file!
-spec = list(alpha="indep", sigma="indep", theta="global")
+spec = list(alpha="indep", sigma="global", theta="global")
 
 comment=""
 
