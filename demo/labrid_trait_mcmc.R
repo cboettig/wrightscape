@@ -45,4 +45,4 @@ sfLapply(traits, function(trait){
   upload("parameter_mcmc.png", script, gitaddr=gitaddr, 
           tags=tags, comment=trait)
 
-}
+})
