@@ -8,6 +8,6 @@ export(update.multiOU, simulate.multiOU, loglik.multiOU, getParameters.multiOU, 
 export(multiTypeOU, smart_multiType)
 
 # mcmc.R
-export(phylo_mcmc, general_prior, flat_prior_creator)
+export(phylo_mcmc, general_prior, flat_prior_creator, plot.phylo_mcmc)
 
 import(pmc)

@@ -36,5 +36,5 @@ for(i in 2:nchains)
 png(file="parameter_mcmc.png", width=3*480)
 plot.phylo_mcmc(chains, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
 dev.off()
-#upload("parameter_mcmc.png", script, gitaddr=gitaddr, tags=tags)
+upload("parameter_mcmc.png", script, gitaddr=gitaddr, tags=tags)
 
