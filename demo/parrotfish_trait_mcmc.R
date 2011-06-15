@@ -17,17 +17,16 @@ source("parrotfish_data.R")
 nchains <- 8
 MaxTime = 1e6 # 1e7 too great to store in mem, better start writing to file!
 spec = list(alpha="indep", sigma="global", theta="global")
-traits <- c("gape.y", "prot.y")
+traits <- c("close", "open", "gape.y", "prot.y")
 
-for(trait in traits){
+#for(trait in traits){
   sfInit(parallel=T, cpu=8)
   sfLibrary(wrightscape)
   sfExportAll()
 
-  print(trait)
 
   o <- sfLapply(1:nchains, function(i){ 
-  o <- phylo_mcmc(labrid$data[trait], labrid$tree, intramandibular,
+  o <- phylo_mcmc(labrid$data['prot.y'], labrid$tree, intramandibular,
                   MaxTime=MaxTime, model_spec=spec, stepsizes=0.05)[[1]]
       })
 
@@ -40,4 +39,5 @@ for(trait in traits){
   plot.phylo_mcmc(chains, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
   dev.off()
   upload("parameter_mcmc.png", script, gitaddr=gitaddr, tags=tags)
-}
+
+#}
