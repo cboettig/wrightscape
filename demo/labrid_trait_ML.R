@@ -4,9 +4,9 @@ require(pmc)
 
 ############ Notebook logging header ##############
 require(socialR)
-script <- "parrotfish_trait_ML.R"
 tags="phylogenetics wrightscape labrids"
 gitopts <- list(user = "cboettig", dir = "demo", repo = "wrightscape") 
+script <- "parrotfish_gape.R"
 gitaddr <- gitcommit(script, gitopts)
 on.exit(system("git push")) 
 tags <- "phylogenetics"  
