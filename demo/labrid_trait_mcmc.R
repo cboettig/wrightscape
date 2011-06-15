@@ -19,13 +19,11 @@ MaxTime = 1e6
 spec = list(alpha="indep", sigma="global", theta="global")
 traits <- c("close", "open", "gape.y", "prot.y")
 
-sfInit(parallel=T, cpu=8)
-sfLibrary(wrightscape)
-sfExportAll()
-
-
 for(trait in traits){
-  sfExport(trait)
+  sfInit(parallel=T, cpu=8)
+  sfLibrary(wrightscape)
+  sfExportAll()
+
   o <- sfLapply(1:nchains, function(i){ 
   o <- phylo_mcmc(labrid$data[trait], labrid$tree, pharyngeal,
                   MaxTime=MaxTime, model_spec=spec, stepsizes=0.05)[[1]]
@@ -40,4 +38,5 @@ for(trait in traits){
   plot.phylo_mcmc(chains, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
   dev.off()
   upload("parameter_mcmc.png", script, gitaddr=gitaddr, tags=tags)
+
 }
