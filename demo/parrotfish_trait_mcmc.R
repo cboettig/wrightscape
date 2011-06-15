@@ -5,7 +5,7 @@ require(wrightscape)
 ##############
 require(socialR)
 script <- "parrotfish_trait_mcmc.R"
-tags <- c("phylogenetics parrotfish")
+tags <- c("phylogenetics")
 gitopts <- list(user = "cboettig", dir = "demo", repo = "wrightscape") 
 gitaddr <- gitcommit(script, gitopts)
 on.exit(system("git push")) #  For git links.  May prompt for pw,
