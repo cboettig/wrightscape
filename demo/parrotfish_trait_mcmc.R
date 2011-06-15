@@ -18,8 +18,6 @@ nchains <- 16
 MaxTime = 1e6 # 1e7 too great to store in mem, better start writing to file!
 spec = list(alpha="global", sigma="indep", theta="global")
 
-comment=""
-
 sfInit(parallel=T, cpu=16)
 sfLibrary(wrightscape)
 sfExportAll()
@@ -38,5 +36,5 @@ for(i in 2:nchains)
 png(file="parameter_mcmc.png", width=3*480)
 plot.phylo_mcmc(chains, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
 dev.off()
-upload("parameter_mcmc.png", script, gitaddr=gitaddr, tags=tags)
+#upload("parameter_mcmc.png", script, gitaddr=gitaddr, tags=tags)
 
