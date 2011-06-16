@@ -16,7 +16,7 @@ source("labrid_data.R")
 
 MaxTime = 1e6 
 spec = list(alpha="indep", sigma="indep", theta="global")
-traits <- c("prot.y", "close", "open", "gape.y")
+traits <- c("prot.y")#, "close", "open", "gape.y")
 
 nchains <- 4
 burnin <- 1:1e5
@@ -45,7 +45,7 @@ sfExportAll()
   # the first chain
   chains <- o[[1]][-burnin,]
   for(i in 2:nchains){
-    chains <- rbind(chains, o[[i]][-burnin, ]
+    chains <- rbind(chains, o[[i]][-burnin, ])
   }
 
   # chains <- chains[[1]][-burnin,]  ## without parrallel
@@ -57,4 +57,4 @@ sfExportAll()
   upload("parameter_mcmc.png", script, gitaddr=gitaddr, 
           tags=tags, comment=trait)
 
-})
+#})
