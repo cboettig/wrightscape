@@ -15,8 +15,10 @@ tweet_errors(script, gitopts, tags)
 
 source("parrotfish_data.R")
 
-alphas <- multiTypeOU(data=labrid$data["prot.y"], tree=labrid$tree, regimes=intramandibular, 
-                  model_spec=list(alpha="indep", sigma="global", theta="global"), 
+alphas <- multiTypeOU(data=labrid$data["prot.y"], tree=labrid$tree, 
+                  regimes=intramandibular, 
+                  model_spec=list(alpha="indep", sigma="global", 
+                  theta="global"), 
                   Xo=NULL, alpha = .1, sigma = .1, theta=NULL,
                   method ="SANN", control=list(maxit=50000,temp=50,tmax=20))
 
