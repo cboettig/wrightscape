@@ -1,7 +1,7 @@
 ## Uses the smart_multiType function which fits the all indep model using 
 ## initial values estimated from the submodels
 
-
+rm(list=ls())
 require(wrightscape)
 require(socialR)
 source("parrotfish_data.R")
