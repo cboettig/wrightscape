@@ -1,3 +1,15 @@
+evaluate_likelihood <- function(data, tree, regimes, model_spec =
+                       list(alpha="indep", sigma="indep", theta="indep"),
+                       Xo, alpha, sigma, theta){
+
+  n_regimes <- length(levels(regimes))
+  par <- setup_pars(data, tree, regimes, model_spec, Xo=Xo, 
+                    alpha=alpha, sigma=sigma, theta=theta)
+  f <- llik.closure(data, tree, regimes, model_spec, neg=FALSE)
+  f(par)
+
+}
+
 multiTypeOU <- function(data, tree, regimes, model_spec =
                        list(alpha="indep", sigma="indep", theta="indep"),
                        Xo=NULL, alpha=1, sigma=1, theta=NULL, ...){
@@ -128,6 +140,8 @@ llik.closure <- function(data, tree, regimes, model_spec, fixed=
     else 
         llik<-multiOU_lik_lca(data, tree, regimes, alpha=alpha,
                               sigma=sigma, theta=theta, Xo=Xo, lca)
+    if(is.nan(llik))
+      llik <- -Inf
     if(neg_llik) # for optimizer routines
       llik <- -llik
     llik

@@ -36,7 +36,7 @@ sfExportAll()
                   regimes=pharyngeal, model_spec=spec,
                   method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
 
-  o <- sfLapply(1:4, function(i)){
+  o <- sfLapply(1:4, function(i){
     chains <- phylo_mcmc(labrid$data[trait], labrid$tree, pharyngeal,
                          MaxTime=MaxTime, model_spec=spec, stepsizes=0.05,
                          Xo=start$Xo, alpha=start$alpha, sigma=start$sigma,

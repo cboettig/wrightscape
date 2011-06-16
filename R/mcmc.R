@@ -13,22 +13,51 @@ Q <- function(pars, proposed){
 }
 
 # The basic mcmc function
-mcmc_fn <- function(pars, loglik, prior, MaxTime=1e3, stepsizes=.02, ...){
+mcmc_fn <- function(pars, loglik, prior, MaxTime=1e3, stepsizes=.02,
+                    write=NULL){
+# 
+# Args:
+#   pars:  parameters over which we search
+#   loglik: a function of pars returning the log likelihood
+#   prior: a function of pars to compute the prior probability
+#   MaxTime: number of mcmc steps to take
+#   stepsizes: a numeric or vector of length pars for stepsizes to use
+#   write: filename, write the output to disk instead of memory
+#   
+# 
   if(length(stepsizes)==1)
     stepsizes <- rep(stepsizes, length(pars))
-  history <- matrix(NA, nrow=MaxTime, ncol=(1+length(pars)))
+  if(is.null(write))
+    history <- matrix(NA, nrow=MaxTime, ncol=(1+length(pars)))
+  else
+   sink(write) 
   for(t in 1:MaxTime){
     Pi <- loglik(pars)+prior(pars)
-    history[t,] <- c(Pi, pars)
+
+    if(is.null(write))
+      history[t,] <- c(Pi, pars)
+    else
+      cat(c(Pi, pars), "\n")
+
     proposed <- step_fn(pars, stepsizes)
     alpha <- exp(loglik(proposed)+prior(proposed) - Pi)
-  if (alpha > runif(1) )
+    if(!is.numeric(alpha))
+      alpha <- 0
+    if (alpha > runif(1) )
       pars <- proposed
   }
-  history
+  if(is.null(write))
+    return(history)
+  else
+    sink()
 }
 
+
+
+
+
 beta <- function(i, Delta_T=1){
+# Heating function for MCMCMC
   1/(1+Delta_T*(i-1))
 }
 
@@ -107,10 +136,8 @@ mcmcmc_fn <- function(pars, loglik, prior, MaxTime=1e3, indep=100, stepsizes=.02
 ## Should take number of chains as an option
 phylo_mcmc <- function(data, tree, regimes, model_spec =
                        list(alpha="indep", sigma="indep", theta="indep"),
-                       Xo=NULL, alpha=1, sigma=1, 
-                       theta=NULL, prior=NULL, MaxTime, 
-                       indep=100, stepsizes=.1, 
-                       Delta_T =1, ...){
+                       Xo=NULL, alpha=1, sigma=1, theta=NULL, prior=NULL,
+                       MaxTime, stepsizes=.1, write=NULL){
 
   myCall <- match.call() # keep input for the record
   
@@ -120,12 +147,16 @@ phylo_mcmc <- function(data, tree, regimes, model_spec =
   par <- setup_pars(data, tree, regimes, model_spec, Xo=Xo, 
                     alpha=alpha, sigma=sigma, theta=theta)
   f <- llik.closure(data, tree, regimes, model_spec)
-  chain <- mcmc_fn(par, f, prior, MaxTime=MaxTime, indep=indep,
-                      stepsizes=stepsizes, Delta_T = Delta_T, ...)
+  chain <- mcmc_fn(par, f, prior, MaxTime=MaxTime, 
+                   stepsizes=stepsizes, write=write)
 
 
-  colnames(chain) <- unique_names(model_spec, n_regimes) 
-  list(chain=chain, myCall=myCall)
+  heading <- unique_names(model_spec, n_regimes) 
+  if(is.null(write))
+    colnames(chain) <- heading 
+  else
+    chain=write
+  list(chain=chain, myCall=myCall, colnames=heading)
 }
 
 unique_names <- function(model_spec, n_regimes){
@@ -187,8 +218,7 @@ plot.phylo_mcmc <- function(par_dist, ...){
   }
   xlim <- c(min(sapply(posterior[id], function(P) P$x)),
             max(sapply(posterior[id], function(P) P$x)))
-  plot(posterior[[id[1]]], xlab=parname, xlim=xlim,
-       )
+  plot(posterior[[id[1]]], xlab=parname, xlim=xlim, ...)
   cindex <- 1
   for(i in id){
     polygon(posterior[[i]], col=colors[cindex])
