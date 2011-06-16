@@ -1,4 +1,6 @@
 useDynLib(wrightscape)
+
+# wrightscape.R
 export(wrightscape,  LR_bootstrap, pretty_plot, choose_model, fast_boot, format_data, plot.wrightboot, bootstrap.wrighttree)
 
 # methods.R
@@ -10,4 +12,6 @@ export(multiTypeOU, smart_multiType, evaluate_likelihood)
 # mcmc.R
 export(phylo_mcmc, general_prior, flat_prior_creator, plot.phylo_mcmc)
 
+# plots.R 
+export(plot_par)
 import(pmc)
