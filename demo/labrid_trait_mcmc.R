@@ -16,10 +16,13 @@ source("labrid_data.R")
 
 MaxTime = 1e6 
 spec = list(alpha="indep", sigma="indep", theta="global")
-traits <- c("prot.y")#, "close", "open", "gape.y")
+traits <- c("prot.y", "close", "open", "gape.y")
+trait <- traits[1]
 
 nchains <- 4
 burnin <- 1:1e5
+
+
 
 
 sfInit(parallel=T, cpu=4)
