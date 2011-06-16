@@ -14,27 +14,27 @@ tweet_errors(script, gitopts, tags)  ## tweet on error
 
 source("labrid_data.R")
 
-MaxTime = 1e6 
+MaxTime = 1e3
 spec = list(alpha="indep", sigma="indep", theta="global")
 traits <- c("prot.y", "close", "open", "gape.y")
 trait <- traits[1]
 
 nchains <- 4
-burnin <- 1:1e5
+burnin <- 1:1e1
 
 
 
 
-sfInit(parallel=T, cpu=4)
-sfLibrary(wrightscape)
-sfLibrary(socialR)
-sfExportAll()
+#sfInit(parallel=T, cpu=4)
+#sfLibrary(wrightscape)
+#sfLibrary(socialR)
+#sfExportAll()
 
 #sfLapply(traits, function(trait){
   # START SMART PLEASE
   start <- multiTypeOU(data=labrid$data[trait], tree=labrid$tree, 
-                  regimes=pharyngeal, model_spec=spec,
-                  method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
+                  regimes=pharyngeal, model_spec=spec) #,
+#                  method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
 
   o <- sfLapply(1:4, function(i){
     chains <- phylo_mcmc(labrid$data[trait], labrid$tree, pharyngeal,
