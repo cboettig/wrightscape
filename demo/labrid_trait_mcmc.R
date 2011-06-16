@@ -43,7 +43,7 @@ sfExportAll()
                          theta=start$theta)
     # returns [[1]]: chains, [[2]]: myCall, [[3]] colnames (for txtfile version)
   chains[[1]]
-  }
+  })
 
   # the first chain
   chains <- o[[1]][-burnin,]
