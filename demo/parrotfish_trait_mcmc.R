@@ -14,9 +14,9 @@ tweet_errors(script, gitopts, tags)  ## tweet on error
 
 source("parrotfish_data.R")
 
-MaxTime = 1e6 # 1e7 too great to store in mem, better start writing to file!
+MaxTime = 1e7 # 1e7 too great to store in mem, better start writing to file!
 spec = list(alpha="indep", sigma="global", theta="global")
-traits <- c("prot.y")# , "close", "open", "gape.y")
+traits <- c("prot.y", "close", "open", "gape.y")
 
 
 
