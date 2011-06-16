@@ -206,7 +206,7 @@ phylo_mcmcmc <- function(data, tree, regimes, model_spec =
 
 ## Verify that alpha1, sigma1, etc corresponds to regimes[1], etc!!!
 ## make sure that colnames are given in increasing numerical order!
-plot.phylo_mcmc <- function(par_dist, ...){
+plot.phylo_mcmc <- function(par_dist, xlim=NULL, ...){
  posterior <- vector("list", dim(par_dist)[2])
 
  colors <- c( rgb(0,1,0.5), rgb(0,0,1,.5), rgb(1,0,0,.5), rgb(1,1,0.5) )
@@ -216,8 +216,9 @@ plot.phylo_mcmc <- function(par_dist, ...){
   for(i in id){
     posterior[[i]] <- density(par_dist[,i])
   }
-  xlim <- c(min(sapply(posterior[id], function(P) P$x)),
-            max(sapply(posterior[id], function(P) P$x)))
+  if(is.null(xlim))
+    xlim <- c(min(sapply(posterior[id], function(P) P$x)),
+              max(sapply(posterior[id], function(P) P$x)))
   plot(posterior[[id[1]]], xlab=parname, xlim=xlim, ...)
   cindex <- 1
   for(i in id){

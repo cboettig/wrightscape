@@ -1,4 +1,5 @@
 # parrotfish.R
+rm(list=ls())
 require(wrightscape)
 require(pmc)
 
@@ -31,7 +32,7 @@ sfInit(parallel=TRUE, cpu=8)
 sfLibrary(wrightscape)
 sfExportAll()
 
-boots <- montecarlotest(sigmas, alphas, nboot=400, cpu=8)
+boots <- montecarlotest(sigmas, alphas, nboot=100, cpu=16)
 png("sigmas_v_alphas.png")
 plot(boots)
 dev.off()

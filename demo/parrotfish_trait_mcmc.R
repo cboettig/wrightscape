@@ -14,7 +14,7 @@ tweet_errors(script, gitopts, tags)  ## tweet on error
 
 source("parrotfish_data.R")
 
-MaxTime = 1e6 # 1e7 too great to store in mem, better start writing to file!
+MaxTime = 1e7 # 1e7 too great to store in mem, better start writing to file!
 spec = list(alpha="indep", sigma="global", theta="global")
 traits <- c("prot.y", "close", "open", "gape.y")
 
@@ -30,6 +30,8 @@ sfLapply(traits, function(trait){
   start <- multiTypeOU(data=labrid$data[trait], tree=labrid$tree, 
                   regimes=intramandibular, model_spec=spec,
                   method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
+
+  print(getParameters(start))
 
   chains <- phylo_mcmc(labrid$data[trait], labrid$tree, intramandibular,
                        MaxTime=MaxTime, model_spec=spec, stepsizes=0.05,
