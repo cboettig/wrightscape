@@ -31,7 +31,7 @@ sigmas <- multiTypeOU(data=labrid$data["close"], tree=labrid$tree, regimes=intra
 
 
 require(snowfall)
-sfInit(parallel=TRUE, cpu=8)
+sfInit(parallel=TRUE, cpu=4)
 sfLibrary(wrightscape)
 sfExportAll()
 
