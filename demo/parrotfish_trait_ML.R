@@ -24,18 +24,18 @@ alphas <- multiTypeOU(data=labrid$data["prot.y"], tree=labrid$tree,
                   method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
 
 sigmas <- multiTypeOU(data=labrid$data["prot.y"], tree=labrid$tree, regimes=intramandibular, 
-                model_spec=list(alpha="global", sigma="indep", theta="global"), 
+                model_spec=list(alpha="global", sigma="global", theta="global"), 
                   Xo=NULL, alpha = .1, sigma = 40, theta=NULL,
                   method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
 
 
 
 require(snowfall)
-sfInit(parallel=TRUE, cpu=4)
+sfInit(parallel=TRUE, cpu=16)
 sfLibrary(wrightscape)
 sfExportAll()
 
-boots <- montecarlotest(sigmas, alphas, nboot=200, cpu=8)
+boots <- montecarlotest(sigmas, alphas, nboot=200, cpu=16)
 png("sigmas_v_alphas.png")
 plot(boots)
 dev.off()
