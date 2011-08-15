@@ -1,5 +1,5 @@
 Package: wrightscape
-Version: 0.2-2
+Version: 0.2-3
 Title: wrightscape
 Description: Phylogenetic comparative methods for arbitrary landscapes
 Imports: geiger, boot, maticce, snowfall, ouch
