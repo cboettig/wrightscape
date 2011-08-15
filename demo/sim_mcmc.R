@@ -1,3 +1,4 @@
+rm(list=ls())
 require(wrightscape)
 require(socialR)
 
