@@ -14,4 +14,10 @@ export(phylo_mcmc, general_prior, flat_prior_creator, plot.phylo_mcmc)
 
 # plots.R 
 export(plot_par)
-import(pmc)
+
+import(geiger)
+import(boot)
+import(maticce)
+import(snowfall)
+import(ouch)
+#import(pmc)
