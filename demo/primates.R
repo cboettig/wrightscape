@@ -1,9 +1,9 @@
 # primates.R
 
 ## laod the packages we'll need
-require(wrightscape)
-require(auteur)  # for the data
-require(maticce) # to generate paintings
+require(wrightscape, lib.loc="~/R/x86_64-redhat-linux-gnu-library/2.13")
+require(auteur, lib.loc="~/R/x86_64-redhat-linux-gnu-library/2.13")  # for the data
+require(maticce, lib.loc="~/R/x86_64-redhat-linux-gnu-library/2.13") # to generate paintings
 
 ## Load and format the data 
 data(primates)
