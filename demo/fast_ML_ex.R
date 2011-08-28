@@ -28,17 +28,23 @@ sigmas <- multiTypeOU(data=labrid$data["close"], tree=labrid$tree, regimes=intra
                 model_spec=list(alpha="fixed", sigma="indep", theta="global"), 
                   Xo=NULL, alpha = .1, sigma = 10, theta=NULL)
 
+bm <- brown(data=labrid$data["close"], tree=labrid$tree)
+ou <- hansen(data=labrid$data["close"], tree=labrid$tree, regimes=intramandibular, 
+             sqrt.alpha = .1, sigma = 10)
+
+
 
 require(snowfall)
 sfInit(parallel=TRUE, cpu=16)
 sfLibrary(wrightscape)
+sfLibrary(warningsignals)
 sfExportAll()
 
-boots <- montecarlotest(sigmas, alphas, nboot=200, cpu=8)
+boots <- montecarlotest(bm, ou, nboot=20, cpu=16)
+#boots <- montecarlotest(sigmas, alphas, nboot=200, cpu=8)
 png("sigmas_v_alphas.png")
 plot(boots)
 dev.off()
 upload("sigmas_v_alphas.png", script=script, tags=tags, gitaddr=gitaddr)
-
 
 

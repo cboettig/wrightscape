@@ -1,5 +1,9 @@
 # correct_labrid_data.R
 require(wrightscape)
+require(phytools)
+require(geiger)
+require(maticce)
+
 # This data has not been released
 path = "../data/labrids/"
 labrid_tree <- read.nexus(paste(path, "labrid_tree.nex", sep=""))
@@ -27,7 +31,6 @@ corrected_data[["LP"]] <- log(corrected_data[["LP"]])/3
 parrotfish <- corrected_data[corrected_data[,2]=="parrotfish",]
 ape <- treedata(labrid_tree, parrotfish[,3:11], parrotfish[,1])
 
-require(RevellExtensions)
 ape$data["bodysize"]
 out <- phyl.resid(ape$phy, ape$data[,"bodymass"], ape$data[,c("gape", "prot","AM", "SH", "LP")] )
 ## phyl.resid changes order of species listing. Merge for a set of uncorrected and corrected traits.  
