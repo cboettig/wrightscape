@@ -15,7 +15,7 @@ data(primates)
 monkey <- format_data(primates$phy, primates$dat)
 
 
-## Pain the tree with a transition at New World monkeys
+## Paint the tree with a transition at New World monkeys
 new_world_ancestor <- mrcaOUCH(c("Ateles_belzebuth",
                                  "Leontopithecus_caissara"), 
                                monkey$tree)
@@ -23,8 +23,22 @@ new_world <- paintBranches(new_world_ancestor, monkey$tree,
                             c("OldWorld", "NewWorld"))
 
 ## take a quick look at the tree
-plot(monkey$tree, regimes=new_world)
+png("monkeytree.png", 2000, 2000)
+plot(monkey$tree, regimes=new_world, cex=.5)
+dev.off()
 
+
+### Time to use wrightscape.  Note that the general model form 
+# is specified by model_spec list.  This specifies which parameters
+# out of alpha, theta, and sigma are independently estimated on 
+# each regime, kept global across regimes, or, in the case of alpha,
+# fixed to zero (to give purely Brownian behavior).  i.e.
+# ouch model is equivalent to: list(alpha="global", sigma="global",
+# theta="indep"), while the brownie model is equivalent to 
+# list(alpha="fixed", sigma="indep", theta="global") 
+# Starting parameter estimates are given or left to NULL.  
+# method refers to the optimization, using parameters given in control.  
+# We'll use simulated annealing to get a robust result.  
 
 
 #####  Estimate the models by maximum likelihood, as in OUCH #####
@@ -42,7 +56,14 @@ sigmas <- multiTypeOU(data=monkey$data, tree=monkey$tree,
                       sigma = 40, theta=NULL, method ="SANN",
                       control=list(maxit=100000,temp=50,tmax=20))
 
+# My PMC package contains a method to bootstrap these to get the 
+# model choice curves and parameter confidence intervals.  It'll 
+# be very slow without a lot of processing power: 4n times longer
+# than one of the above commands.  
 
+
+
+## Run the MCMC 
 chains <- function(){ 
           phylo_mcmc(monkey$data, monkey$tree, new_world, 
                      MaxTime=1e5, alpha=.1, sigma=.1, 
