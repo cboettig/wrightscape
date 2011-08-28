@@ -38,6 +38,7 @@ require(snowfall)
 sfInit(parallel=TRUE, cpu=16)
 sfLibrary(wrightscape)
 sfLibrary(warningsignals)
+sfLibrary(ouch)
 sfExportAll()
 
 boots <- montecarlotest(bm, ou, nboot=20, cpu=16)
