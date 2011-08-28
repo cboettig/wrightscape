@@ -31,10 +31,10 @@ sim_trait <- simulate(true, seed=1)
 # MCMCMC the rc model
 
 #o <- sfLapply(1:nchains, function(i){ 
- chains<-   phylo_mcmc(sim_trait, labrid$tree, intramandibular, 
+chains <- phylo_mcmc(sim_trait, labrid$tree, intramandibular, 
                MaxTime=1e5, alpha=true$alpha, sigma=true$sigma, 
-               theta=true$theta, Xo=true$Xo,
-               model_spec=list(alpha="indep", sigma="global", theta="global"),
+               theta=true$theta, Xo=true$Xo, model_spec=
+               list(alpha="indep", sigma="global",theta="global"),
                stepsizes=0.05)[[1]]
    # })
 

@@ -1,5 +1,5 @@
 
-subplot <- function(parname, par_dist, xlim=NULL, ...){
+subplot <- function(parname, par_dist, xlim=NULL, xlab=NULL, ...){
    colors <- c( rgb(0,1,0.5), rgb(0,0,1,.5), rgb(1,0,0,.5), rgb(1,1,0.5) )
    posterior <- vector("list", dim(par_dist)[2])
     id <- grep(parname, colnames(par_dist))
@@ -12,7 +12,12 @@ subplot <- function(parname, par_dist, xlim=NULL, ...){
     else 
       xlim <- xlim[[parname]]
 
-    plot(posterior[[id[1]]], xlab=parname, xlim=xlim, ...)
+    if(is.null(xlab))
+      xlab<-parse(text=parname)
+    else
+      xlab<-xlab[[parname]]
+
+    plot(posterior[[id[1]]], xlab=xlab, xlim=xlim, ...)
     cindex <- 1
     for(i in id){
       polygon(posterior[[i]], col=colors[cindex])
