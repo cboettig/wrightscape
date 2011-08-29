@@ -75,7 +75,7 @@ A_sim <- parLapply(cluster, 1:nboot, function(x)
 B_sim <- parLapply(cluster, 1:nboot, function(x) 
                    compare_models(alphas, bm))
 stopCluster(cluster)
-bm_v_ouch <- collect(A_sim, B_sim, bm, ouch)
+mc <- collect(A_sim, B_sim, bm, alphas)
 
 save(list=ls(), file="primates.Rdat")
 
