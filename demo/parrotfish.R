@@ -19,20 +19,34 @@ print(hash)
 
 source("parrotfish_data.R")
 
-alphas <- multiTypeOU(data=labrid$data["prot.y"], tree=labrid$tree, 
-                  regimes=intramandibular, 
-                  model_spec=list(alpha="indep", sigma="global", 
-                  theta="global"), 
-                  Xo=NULL, alpha = .1, sigma = 40, theta=NULL,
-                  method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
+args <- function(spec){
+	  list(data=labrid$data["prot.y"], tree=labrid$tree, 
+               regimes=intramandibular, model_spec = spec,                 
+               Xo=NULL, alpha = .1, sigma = 1, theta=NULL,
+               method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
+	  }
 
-sigmas <- multiTypeOU(data=labrid$data["prot.y"], tree=labrid$tree, regimes=intramandibular, 
-                model_spec=list(alpha="fixed", sigma="indep", theta="global"), 
-                  Xo=NULL, alpha = .1, sigma = 40, theta=NULL,
-                  method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
+alphas <- do.call(multiTypeOU, 
+          args(list(alpha="indep", sigma="global", theta="global")))
+
+ou <- hansen(data=labrid$data["prot.y"], tree=labrid$tree, 
+	     labrid$noregimes, sqrt.alpha=sqrt(.1), sigma=1)
+
+# brownie hypothesis, clearly not winning (by likelihood score alone)
+#sigmas <- do.call(multiTypeOU, 
+#	   args(list(alpha="fixed", sigma="indep", theta="global")))
+
+# probably same as alphas 
+#sigmas2 <- do.call(multiTypeOU, 
+#	   args(list(alpha="global", sigma="indep", theta="global")))
+
+# worth attempting?
+#indeps <- do.call(multiTypeOU, 
+#          args(list(alpha="indep", sigma="indep", theta="indep")))
+
 
 # models we are testing
-A <- sigmas 
+A <- ou
 B <- alphas
 
 nboot <- 64*4
