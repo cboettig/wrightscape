@@ -4,7 +4,7 @@
 ## use bash commands
 #$ -S /bin/bash
 ## Launch parallel mpi threads 
-#$ -pe mpi 11
+#$ -pe mpi 161
 #$ -o primates.sungrid.out
 # combine error and output files
 #$ -j y

@@ -51,7 +51,7 @@ chains <- function(){
                      stepsizes=0.05)[[1]]
 }
 
-N <- 10 # n-1 from the threads allocated(?) 
+N <- 160 # n-1 from the threads allocated(?) 
 
 require(Rmpi)
 mpi.spawn.Rslaves(nslaves=N)
@@ -74,6 +74,7 @@ mpi.bcast.Robj2slave(chains)
 
 mcmc_out <- mpi.remote.exec(chains())
 
+save(list=ls(), file="primates_mcmc.Rdat")
 
 # close slaves and exit
 mpi.close.Rslaves()
