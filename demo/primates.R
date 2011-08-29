@@ -48,30 +48,34 @@ ou <- hansen(data=monkey$data, tree=monkey$tree,
 ouch <- hansen(data=monkey$data, tree=monkey$tree,
              regimes=new_world, sigma=1, sqrt.alpha=1 )
 
-alphas <- multiTypeOU(data=monkey$data, tree=monkey$tree,
-                      regimes=new_world,model_spec = 
-                      list(alpha="indep",sigma="global", 
-                      theta="global"), Xo=NULL, alpha = .1, 
-                      sigma = 40, theta=NULL, method ="SANN", 
-                      control = list(maxit=100000,temp=50,tmax=20))
-
-sigmas <- multiTypeOU(data=monkey$data, tree=monkey$tree, 
-                      regimes=new_world, model_spec= 
-                      list(alpha="fixed", sigma="indep", 
-                      theta="global"), Xo=NULL, alpha = .1,
-                      sigma = 40, theta=NULL, method ="SANN",
-                      control=list(maxit=100000,temp=50,tmax=20))
-
+#alphas <- multiTypeOU(data=monkey$data, tree=monkey$tree,
+#                      regimes=new_world,model_spec = 
+#                      list(alpha="indep",sigma="global", 
+#                      theta="global"), Xo=NULL, alpha = .1, 
+#                      sigma = 40, theta=NULL, method ="SANN", 
+#                      control = list(maxit=100000,temp=50,tmax=20))
+#
+#sigmas <- multiTypeOU(data=monkey$data, tree=monkey$tree, 
+#                      regimes=new_world, model_spec= 
+#                      list(alpha="fixed", sigma="indep", 
+#                      theta="global"), Xo=NULL, alpha = .1,
+#                      sigma = 40, theta=NULL, method ="SANN",
+#                      control=list(maxit=100000,temp=50,tmax=20))
+#
 nboot <- 16*4
 
 require(snow)
 cluster <- makeCLuster(16, type="MPI")
+clusterEvalQ(cluster, library(geiger))
+clusterEvalQ(cluster, library(wrightscape))
+clusterExport(cluster, bm)
+clusterExport(cluster, ouch)
 A_sim <- parLapply(cluster, 1:nboot, function(x) 
-                   compare_models(bm,sigmas))
+                   compare_models(bm,ouch))
 B_sim <- parLapply(cluster, 1:nboot, function(x) 
-                   compare_models(bm,sigmas))
+                   compare_models(ouch, bm))
 stopCluster(cluster)
-bm_v_sigmas <- collect(A_sim, B_sim, bm, sigmas)
+bm_v_ouch <- collect(A_sim, B_sim, bm, ouch)
 
 save(list=ls(), file="primates.Rdat")
 
