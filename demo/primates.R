@@ -62,10 +62,10 @@ sigmas <- multiTypeOU(data=monkey$data, tree=monkey$tree,
                       sigma = 40, theta=NULL, method ="SANN",
                       control=list(maxit=100000,temp=50,tmax=20))
 
-nboot <- 64*4
+nboot <- 16*4
 
 require(snow)
-cluster <- makeCLuster(64, type="MPI")
+cluster <- makeCLuster(16, type="MPI")
 A_sim <- parLapply(cluster, 1:nboot, function(x) 
                    compare_models(bm,sigmas))
 B_sim <- parLapply(cluster, 1:nboot, function(x) 
