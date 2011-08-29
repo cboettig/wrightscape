@@ -42,6 +42,12 @@ dev.off()
 
 
 #####  Estimate the models by maximum likelihood, as in OUCH #####
+bm <- brown(data=monkey$data, tree=monkey$tree)
+ou <- hansen(data=monkey$data, tree=monkey$tree,
+             regimes=monkey$noregimes, sigma=1, sqrt.alpha=1 )
+ouch <- hansen(data=monkey$data, tree=monkey$tree,
+             regimes=new_world, sigma=1, sqrt.alpha=1 )
+
 alphas <- multiTypeOU(data=monkey$data, tree=monkey$tree,
                       regimes=new_world,model_spec = 
                       list(alpha="indep",sigma="global", 
@@ -56,48 +62,19 @@ sigmas <- multiTypeOU(data=monkey$data, tree=monkey$tree,
                       sigma = 40, theta=NULL, method ="SANN",
                       control=list(maxit=100000,temp=50,tmax=20))
 
-# My PMC package contains a method to bootstrap these to get the 
-# model choice curves and parameter confidence intervals.  It'll 
-# be very slow without a lot of processing power: 4n times longer
-# than one of the above commands.  
+nboot <- 64*4
+
+require(snow)
+cluster <- makeCLuster(64, type="MPI")
+A_sim <- parLapply(cluster, 1:nboot, function(x) 
+                   compare_models(bm,sigmas))
+B_sim <- parLapply(cluster, 1:nboot, function(x) 
+                   compare_models(bm,sigmas))
+stopCluster(cluster)
+bm_v_sigmas <- collect(A_sim, B_sim, bm, sigmas)
+
+save(list=ls(), file="primates.Rdat")
 
 
-
-## Run the MCMC 
-chains <- function(){ 
-          phylo_mcmc(monkey$data, monkey$tree, new_world, 
-                     MaxTime=1e5, alpha=.1, sigma=.1, 
-                     theta=NULL, Xo=NULL, model_spec=
-                     list(alpha="indep", sigma="global",theta="global"),
-                     stepsizes=0.05)[[1]]
-}
-
-N <- 10 # n-1 from the threads allocated(?) 
-
-require(Rmpi)
-mpi.spawn.Rslaves(nslaves=N)
-
-## Clean-up 
-.Last <- function(){
-    if (is.loaded("mpi_initialize")){
-        if (mpi.comm.size(1) > 0){
-            print("Please use mpi.close.Rslaves() to close slaves.")
-            mpi.close.Rslaves()
-        }
-        print("Please use mpi.quit() to quit R")
-        .Call("mpi_finalize")
-    }
-}
-
-mpi.bcast.Robj2slave(monkey)
-mpi.bcast.Robj2slave(new_world)
-mpi.bcast.Robj2slave(chains)
-
-mcmc_out <- mpi.remote.exec(chains())
-
-
-# close slaves and exit
-mpi.close.Rslaves()
-mpi.quit(save = "no")
 
 
