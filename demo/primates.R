@@ -65,11 +65,11 @@ ouch <- hansen(data=monkey$data, tree=monkey$tree,
 nboot <- 16*4
 
 require(snow)
-cluster <- makeCLuster(16, type="MPI")
-clusterEvalQ(cluster, library(geiger))
+cluster <- makeCluster(16, type="MPI")
+clusterEvalQ(cluster, library(pmc))
 clusterEvalQ(cluster, library(wrightscape))
-clusterExport(cluster, bm)
-clusterExport(cluster, ouch)
+clusterExport(cluster, "bm")
+clusterExport(cluster, "ouch")
 A_sim <- parLapply(cluster, 1:nboot, function(x) 
                    compare_models(bm,ouch))
 B_sim <- parLapply(cluster, 1:nboot, function(x) 
