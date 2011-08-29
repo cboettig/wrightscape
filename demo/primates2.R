@@ -55,12 +55,12 @@ alphas <- multiTypeOU(data=monkey$data, tree=monkey$tree,
                       sigma = 40, theta=NULL, method ="SANN", 
                       control = list(maxit=100000,temp=50,tmax=20))
 
-#sigmas <- multiTypeOU(data=monkey$data, tree=monkey$tree, 
-#                      regimes=new_world, model_spec= 
-#                      list(alpha="fixed", sigma="indep", 
-#                      theta="global"), Xo=NULL, alpha = .1,
-#                      sigma = 40, theta=NULL, method ="SANN",
-#                      control=list(maxit=100000,temp=50,tmax=20))
+sigmas <- multiTypeOU(data=monkey$data, tree=monkey$tree, 
+                      regimes=new_world, model_spec= 
+                      list(alpha="fixed", sigma="indep", 
+                      theta="global"), Xo=NULL, alpha = .1,
+                      sigma = 40, theta=NULL, method ="SANN",
+                      control=list(maxit=100000,temp=50,tmax=20))
 
 nboot <- 64*4
 
@@ -68,16 +68,16 @@ require(snow)
 cluster <- makeCluster(64, type="MPI")
 clusterEvalQ(cluster, library(pmc))
 clusterEvalQ(cluster, library(wrightscape))
-clusterExport(cluster, "bm")
+clusterExport(cluster, "sigmas")
 clusterExport(cluster, "alphas")
 A_sim <- parLapply(cluster, 1:nboot, function(x) 
-                   compare_models(bm,alphas))
+                   compare_models(sigmas,alphas))
 B_sim <- parLapply(cluster, 1:nboot, function(x) 
-                   compare_models(alphas, bm))
+                   compare_models(alphas, sigmas))
 stopCluster(cluster)
-bm_v_ouch <- collect(A_sim, B_sim, bm, ouch)
 
-save(list=ls(), file="primates.Rdat")
+sigmas_v_alphas <- collect(A_sim, B_sim, sigmas, alphas)
+save(list=ls(), file="primates2.Rdat")
 
 
 
