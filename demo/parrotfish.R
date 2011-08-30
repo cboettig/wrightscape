@@ -40,18 +40,18 @@ sigmas <- do.call(multiTypeOU,
 sigmas2 <- do.call(multiTypeOU, 
 	   args(list(alpha="global", sigma="indep", theta="global")))
 
-# worth attempting?
-#indeps <- do.call(multiTypeOU, 
-#          args(list(alpha="indep", sigma="indep", theta="indep")))
+ worth attempting?
+indeps <- do.call(multiTypeOU, 
+          args(list(alpha="indep", sigma="indep", theta="indep")))
 
 
 # models we are testing
 A <- sigmas2
-B <- alphas
+B <- indeps
 
 nboot <- 64*4
 require(snow)
-cluster <- makeCluster(64, type="MPI")
+cluster <- makeCluster(128, type="MPI")
 clusterEvalQ(cluster, library(pmc))
 clusterEvalQ(cluster, library(wrightscape))
 clusterExport(cluster, "A")
