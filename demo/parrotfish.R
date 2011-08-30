@@ -32,15 +32,15 @@ alphas <- do.call(multiTypeOU,
 #ou <- hansen(data=labrid$data["prot.y"], tree=labrid$tree, 
 #	     labrid$noregimes, sqrt.alpha=sqrt(.1), sigma=1)
 
-# brownie hypothesis, clearly not winning (by likelihood score alone)
+## brownie hypothesis, clearly not winning (by likelihood score alone)
 sigmas <- do.call(multiTypeOU, 
 	   args(list(alpha="fixed", sigma="indep", theta="global")))
 
-# probably same as alphas 
+## probably same as alphas 
 sigmas2 <- do.call(multiTypeOU, 
 	   args(list(alpha="global", sigma="indep", theta="global")))
 
- worth attempting?
+## worth attempting?
 indeps <- do.call(multiTypeOU, 
           args(list(alpha="indep", sigma="indep", theta="indep")))
 
