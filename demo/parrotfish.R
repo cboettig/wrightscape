@@ -29,16 +29,16 @@ args <- function(spec){
 alphas <- do.call(multiTypeOU, 
           args(list(alpha="indep", sigma="global", theta="global")))
 
-ou <- hansen(data=labrid$data["prot.y"], tree=labrid$tree, 
-	     labrid$noregimes, sqrt.alpha=sqrt(.1), sigma=1)
+#ou <- hansen(data=labrid$data["prot.y"], tree=labrid$tree, 
+#	     labrid$noregimes, sqrt.alpha=sqrt(.1), sigma=1)
 
 # brownie hypothesis, clearly not winning (by likelihood score alone)
-#sigmas <- do.call(multiTypeOU, 
-#	   args(list(alpha="fixed", sigma="indep", theta="global")))
+sigmas <- do.call(multiTypeOU, 
+	   args(list(alpha="fixed", sigma="indep", theta="global")))
 
 # probably same as alphas 
-#sigmas2 <- do.call(multiTypeOU, 
-#	   args(list(alpha="global", sigma="indep", theta="global")))
+sigmas2 <- do.call(multiTypeOU, 
+	   args(list(alpha="global", sigma="indep", theta="global")))
 
 # worth attempting?
 #indeps <- do.call(multiTypeOU, 
@@ -46,7 +46,7 @@ ou <- hansen(data=labrid$data["prot.y"], tree=labrid$tree,
 
 
 # models we are testing
-A <- ou
+A <- sigmas2
 B <- alphas
 
 nboot <- 64*4
