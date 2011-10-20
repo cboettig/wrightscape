@@ -68,7 +68,7 @@ all_oumva <- sfLapply(X, function(x){
                root.station=TRUE, plot.resid=FALSE)
 })
 
-save(list=ls(), file="method2_parrotfish.Rdat")
+save(list=ls(), file="method2_labrid.Rdat")
 
 #### Organize the data and plot ####
 alphas <- vector("list", length=length(X))
@@ -97,12 +97,12 @@ names(sigmas.SE) <- X
 names(thetas) <- X
 names(thetas) <- X
 
-png("test.png")
+png("test_labrid.png")
 barplot(alphas)
 dev.off()
 
-require(socialR)
-upload("test.png", script="method2_parrotfish", tags="phylogenetics")
+#require(socialR)
+#upload("test.png", script="method2_parrotfish", tags="phylogenetics")
 
 
 
