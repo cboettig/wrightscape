@@ -4,30 +4,38 @@
 #' @param clades: a list of clades defined by species pairs,
 #' e.g. list(c(sp1, sp2), c(sp3, sp4)), or just a vector c(sp1, sp2)
 #' the descendents of the MRCA of sp1 and sp2 define the regime
+#' later clades are painted over earlier ones, so should be in 
+#' order of nesting or otherwise non-overlapping.  
 paint_phy <- function(phy, data, clades, show_plot=TRUE){
 
  # drop unmatched tips & characters
+ # may produce difficulties on already-dropped trees?
   pruned <- treedata(phy, data)
   phy <- pruned$phy
+  data <- pruned$data
 
   # one regime or multiple?
   if(is.list(clades)){
     sp1 <- sapply(clades, function(x) x[1])
-    sp2 <- sapply(clades, function(x) x[1])
+    sp2 <- sapply(clades, function(x) x[2])
     n <- length(clades)
-  } else if(is.character){
+  } else if(is.character(clades)){
     sp1 <- clades[1]
     sp2 <- clades[2]
     n <- 1
+  } else {
+    error("clades input not recognized")
   }
 
   desc <- vector("list", length=n)
   regimes <- rep(0, length(phy$edge[,1]))
+  colors <- rep(1, length(phy$edge[,1]))
 
   for(i in 1:n){
     # Create the painting
     desc[[i]] <- get_clade(phy, sp1[i], sp2[i])
     regimes[desc[[i]]] <- i
+    colors[desc[[i]]] <- i+1
   }
 
   # pick out tips and nodes
@@ -40,13 +48,11 @@ paint_phy <- function(phy, data, clades, show_plot=TRUE){
 
   Reg <- data.frame(Reg=as.integer(regime_tips),
                     row.names=phy$tip.label)
-  data <- merge(Reg, as.data.frame(pruned$data), by="row.names")
+  data <- merge(Reg, as.data.frame(data), by="row.names")
   names(data)[1] <- "Genus_species"
 
   # optionally plot the tree to verify the painting
   if(show_plot){
-    colors <- rep("black", length(phy$edge[,1]))
-    colors[desc] <- "red"
     plot(phy, edge.color=colors)
     nodelabels(pch=21, bg=c("black", colors[!tips]))
     tiplabels(pch=21, bg=colors[tips])
