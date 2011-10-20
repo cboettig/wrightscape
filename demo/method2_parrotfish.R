@@ -60,6 +60,8 @@ X <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "
 ##### Here we go, fit everything.  Slow step ###
 require(snowfall)
 sfInit(parallel=T, cpu=16)
+sfLibrary(OUwie)
+sfExportAll()
 all_oumva <- sfLapply(X, function(x){
   trait <- input$data[c("Genus_species", "Reg", x)]
   oumva <- OUwie(input$phy, trait, model = c("OUMVA"),
