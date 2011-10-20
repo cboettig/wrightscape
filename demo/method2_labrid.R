@@ -1,4 +1,5 @@
 # labrid example
+rm(list=ls()) # clean workspace
 require(phytools)
 require(geiger)
 require(OUwie)
@@ -69,41 +70,5 @@ all_oumva <- sfLapply(X, function(x){
 })
 
 save(list=ls(), file="method2_labrid.Rdat")
-
-#### Organize the data and plot ####
-alphas <- vector("list", length=length(X))
-alphas.se <- vector("list", length=length(X))
-thetas <- vector("list", length=length(X))
-thetas.se <- vector("list", length=length(X))
-sigmas <- vector("list", length=length(X))
-sigmas.se <- vector("list", length=length(X))
-
-for(i in 1:length(X)){
-  oumva <- all_oumva[[i]]
-  if(oumva$Diagnostic == "Arrived at a reliable solution"){
-  alphas[[i]] <- oumva$Param.est["alpha",]
-  sigmas[[i]] <- oumva$Param.est["sigma",]
-  alphas.se[[i]] <- oumva$Param.SE["alpha",]
-  sigmas.se[[i]] <- oumva$Param.SE["sigma",]
-  thetas[[i]] <- oumva$theta[,"Estimate"]
-  thetas[[i]] <- oumva$theta[,"SE"]
-  }
-}
-# add trait names back on. 
-names(alphas) <- X
-names(alphas.SE) <- X
-names(sigmas) <- X
-names(sigmas.SE) <- X
-names(thetas) <- X
-names(thetas) <- X
-
-png("test_labrid.png")
-barplot(alphas)
-dev.off()
-
-#require(socialR)
-#upload("test.png", script="method2_parrotfish", tags="phylogenetics")
-
-
 
 
