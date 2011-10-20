@@ -54,13 +54,19 @@ X <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "
 
 
 
+
+
+
 ##### Here we go, fit everything.  Slow step ###
-lapply(X, function(x){
+require(snowfall)
+sfInit(parallel=T, cpu=16)
+all_oumva <- sfLapply(X, function(x){
   trait <- input$data[c("Genus_species", "Reg", x)]
   oumva <- OUwie(input$phy, trait, model = c("OUMVA"),
                root.station=TRUE, plot.resid=FALSE)
 })
 
+save(list=ls(), file="method2_parrotfish.Rdat")
 
 #### Organize the data and plot ####
 alphas <- vector("list", length=length(X))
@@ -71,6 +77,7 @@ sigmas <- vector("list", length=length(X))
 sigmas.se <- vector("list", length=length(X))
 
 for(i in 1:length(X)){
+  oumva <- all_oumva[[i]]
   if(oumva$Diagnostic == "Arrived at a reliable solution"){
   alphas[[i]] <- oumva$Param.est["alpha",]
   sigmas[[i]] <- oumva$Param.est["sigma",]
