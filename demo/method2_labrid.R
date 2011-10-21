@@ -72,4 +72,3 @@ all_oumva <- sfLapply(X, function(x){
 save(list=ls(), file="method2_labrid.Rdat")
 
 
-
