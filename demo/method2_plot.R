@@ -82,9 +82,13 @@ dev.off()
 require(socialR)
 upload("test*.png", script="method2_parrotfish.R", tags="phylogenetics")
 
+load("method2_labrid.Rdat")
 
 png("phylo.png", 600, 600)
-input <- paint_phy(ape$phy, traits,  c("Chlorurus_sordidus", "Hipposcarus_longiceps"))
+input <- paint_phy(ape$phy, traits,  
+         list(c("Bolbometopon_muricatum", "Sparisoma_radians"), 
+              c("Chlorurus_sordidus", "Hipposcarus_longiceps")))
+#input <- paint_phy(ape$phy, traits,  c("Chlorurus_sordidus", "Hipposcarus_longiceps"))
 dev.off()
 require(socialR)
 flickr("phylo.png", tag="phylogenetics")

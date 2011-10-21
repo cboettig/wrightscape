@@ -54,6 +54,7 @@ input <- paint_phy(ape$phy, traits,  c("Chlorurus_sordidus", "Hipposcarus_longic
 X <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
 
 
+oumv <- OUwie(input$phy, input$data[c("Genus_species","Reg","prot.y")], model = c("OUMV"), root.station=TRUE, plot.resid=FALSE)
 
 
 
