@@ -88,11 +88,11 @@ require(socialR)
 upload("test*.png", script=script, tags="phylogenetics")
 
 
+load("method2_labrid.Rdat")
 
 ## plot the tree used 
 require(geiger)
 png("phylo.png", 600, 600)
-
 ## LABRID TREE ###
 #input <- paint_phy(ape$phy, traits,list(c("Bolbometopon_muricatum", "Sparisoma_radians"), c("Chlorurus_sordidus", "Hipposcarus_longiceps")))
 ### Pharangeal only ###
