@@ -1,6 +1,14 @@
 rm(list=ls()) # clean workspace
-load("method2_parrotfish.Rdat")
-#load("method2_labrid.Rdat")
+#load("method2_parrotfish.Rdat")
+#regime.names=c("other", "intramandibular")
+
+script <- "method2_labrid_intra.R" 
+
+#regime.names=c("wrasse", "pharyngeal", "intramandibular")
+#regime.names=c("other", "intramandibular")
+#regime.names=c("wrasse", "parrotfish")
+
+load("method2_labrid_intra.Rdat")
 
 
 
@@ -11,9 +19,6 @@ error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
   arrows(x,y + upper, x, y - lower, 
          angle = 90, code = 3, length=length, ...)
 }
-
-
-regime.names=c("other", "intramandibular")
 
 alphas <- sapply(all_oumva, function(x){
   if(x$Diagnostic != "Arrived at a reliable solution")
@@ -80,10 +85,19 @@ dev.off()
 
 
 require(socialR)
-upload("test*.png", script="method2_parrotfish.R", tags="phylogenetics")
+upload("test*.png", script=script, tags="phylogenetics")
 
 
+
+## plot the tree used 
+require(geiger)
 png("phylo.png", 600, 600)
+
+## LABRID TREE ###
+#input <- paint_phy(ape$phy, traits,list(c("Bolbometopon_muricatum", "Sparisoma_radians"), c("Chlorurus_sordidus", "Hipposcarus_longiceps")))
+### Pharangeal only ###
+#input <- paint_phy(ape$phy, traits, list(c("Bolbometopon_muricatum", "Sparisoma_radians")))
+## PARROTFISH TREE / intramdibular only 
 input <- paint_phy(ape$phy, traits,  c("Chlorurus_sordidus", "Hipposcarus_longiceps"))
 dev.off()
 require(socialR)

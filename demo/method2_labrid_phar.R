@@ -1,9 +1,5 @@
 # labrid example
 rm(list=ls()) # clean workspace
-
-# load previous run to keep all_oumva result.  
-load("method2_labrid.Rdat")
-
 require(phytools)
 require(geiger)
 require(OUwie)
@@ -56,8 +52,7 @@ traits <- traits[,-1]
 source("method2_tools.R")
 
 input <- paint_phy(ape$phy, traits,  
-         list(c("Bolbometopon_muricatum", "Sparisoma_radians"), 
-              c("Chlorurus_sordidus", "Hipposcarus_longiceps")))
+         c("Bolbometopon_muricatum", "Sparisoma_radians"))
 
 # Get just the active trait # not sure if necessary
 X <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
@@ -67,19 +62,23 @@ sfInit(parallel=T, cpu=16)
 sfLibrary(OUwie)
 sfExportAll()
 
+all_oumva <- sfLapply(X, function(x){
+  trait <- input$data[c("Genus_species", "Reg", x)]
+  oumva <- OUwie(input$phy, trait, model = c("OUMVA"),
+               root.station=TRUE, plot.resid=FALSE)
+})
+all_ouma <- sfLapply(X, function(x){
+  trait <- input$data[c("Genus_species", "Reg", x)]
+  ouma <- OUwie(input$phy, trait, model = c("OUMA"),
+               root.station=TRUE, plot.resid=FALSE)
+})
 all_oumv <- sfLapply(X, function(x){
   trait <- input$data[c("Genus_species", "Reg", x)]
   oumv <- OUwie(input$phy, trait, model = c("OUMV"),
                root.station=TRUE, plot.resid=FALSE)
 })
 
-all_ouma <- sfLapply(X, function(x){
-  trait <- input$data[c("Genus_species", "Reg", x)]
-  ouma <- OUwie(input$phy, trait, model = c("OUMA"),
-               root.station=TRUE, plot.resid=FALSE)
-})
 
-
-save(list=ls(), file="method2_labrid.Rdat")
+save(list=ls(), file="method2_labrid_phar.Rdat")
 
 

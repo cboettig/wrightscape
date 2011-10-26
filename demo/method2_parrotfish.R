@@ -68,6 +68,16 @@ all_oumva <- sfLapply(X, function(x){
   oumva <- OUwie(input$phy, trait, model = c("OUMVA"),
                root.station=TRUE, plot.resid=FALSE)
 })
+all_ouma <- sfLapply(X, function(x){
+  trait <- input$data[c("Genus_species", "Reg", x)]
+  oumva <- OUwie(input$phy, trait, model = c("OUMA"),
+               root.station=TRUE, plot.resid=FALSE)
+})
+all_oumv <- sfLapply(X, function(x){
+  trait <- input$data[c("Genus_species", "Reg", x)]
+  oumva <- OUwie(input$phy, trait, model = c("OUMV"),
+               root.station=TRUE, plot.resid=FALSE)
+})
 
 save(list=ls(), file="method2_parrotfish.Rdat")
 
