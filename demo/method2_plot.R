@@ -2,13 +2,13 @@ rm(list=ls()) # clean workspace
 #load("method2_parrotfish.Rdat")
 #regime.names=c("other", "intramandibular")
 
-script <- "method2_labrid_intra.R" 
+script <- "method2_labrid_phar.R" 
 
 #regime.names=c("wrasse", "pharyngeal", "intramandibular")
-#regime.names=c("other", "intramandibular")
-#regime.names=c("wrasse", "parrotfish")
+#regime.names=c("wrasse", "intramandibular")
+regime.names=c("wrasse", "parrotfish")
 
-load("method2_labrid_intra.Rdat")
+load("method2_labrid_phar.Rdat")
 
 
 
@@ -92,13 +92,13 @@ load("method2_labrid.Rdat")
 
 ## plot the tree used 
 require(geiger)
-png("phylo.png", 600, 600)
+png("phylo.png", 600, 4*600)
 ## LABRID TREE ###
 #input <- paint_phy(ape$phy, traits,list(c("Bolbometopon_muricatum", "Sparisoma_radians"), c("Chlorurus_sordidus", "Hipposcarus_longiceps")))
 ### Pharangeal only ###
-#input <- paint_phy(ape$phy, traits, list(c("Bolbometopon_muricatum", "Sparisoma_radians")))
+input <- paint_phy(ape$phy, traits, list(c("Bolbometopon_muricatum", "Sparisoma_radians")))
 ## PARROTFISH TREE / intramdibular only 
-input <- paint_phy(ape$phy, traits,  c("Chlorurus_sordidus", "Hipposcarus_longiceps"))
+#input <- paint_phy(ape$phy, traits,  c("Chlorurus_sordidus", "Hipposcarus_longiceps"))
 dev.off()
 require(socialR)
 flickr("phylo.png", tag="phylogenetics")
