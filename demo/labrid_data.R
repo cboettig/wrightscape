@@ -1,4 +1,7 @@
 # labrid example
+require(phytools)
+require(geiger)
+require(maticce)
 require(wrightscape)
 # This data has not been released
 path = "../data/labrids/"
@@ -30,7 +33,6 @@ corrected_data[["LP"]] <- log(corrected_data[["LP"]])/3
 ape <- treedata(labrid_tree, corrected_data[,3:11], corrected_data[,1])
 
 # Run Revell's phylogenetic size corrections
-require(RevellExtensions)
 ape$data["bodysize"]
 out <- phyl.resid(ape$phy, ape$data[,"bodymass"], ape$data[,c("gape", "prot","AM", "SH", "LP")] )
 ## phyl.resid changes order of species listing. Merge for a set of uncorrected and corrected traits.  
