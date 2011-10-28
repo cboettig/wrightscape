@@ -4,11 +4,11 @@ require(wrightscape)
 require(snowfall)
 
 source("parrotfish_data.R")
-MaxTime = 1e6
+MaxTime = 1e4
 spec = list(alpha="fixed", sigma="indep", theta="global")
 trait <-  "open"
-nchains <- 10
-burnin <- 1:1e3
+nchains <- 2
+burnin <- 1:1e2
 
 sfInit(par=T, cpu=nchains)
 sfLibrary(wrightscape)
