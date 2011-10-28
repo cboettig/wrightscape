@@ -4,12 +4,15 @@ require(wrightscape)
 require(snowfall)
 source("labrid_data.R")
 
-MaxTime = 1e5
+MaxTime = 1e6
 spec = list(alpha="fixed", sigma="indep", theta="global")
 trait <-  "open"
 nchains <- 10
 burnin <- 1:1e3
 
+sfInit(par=T, cpu=nchains)
+sfExportAll()
+sfLibrary(wrightscape)
 
 # START SMART PLEASE
 start <- multiTypeOU(data=labrid$data[trait], tree=labrid$tree, 
@@ -32,11 +35,11 @@ for(i in 2:nchains)
 
 # chains <- chains[[1]][-burnin,]  ## without parrallel
 
+save(list=ls(), file="labrid_mcmc.Rdat")
+
   png(file="labrid_parameter_mcmc.png", width=3*480)
   plot.phylo_mcmc(chains, cex=3, cex.lab=3, cex.main=3, cex.axis=3)
   dev.off()
-
-save(list=ls(), file="labrid_mcmc.Rdat")
 
 #  upload("parameter_mcmc.png", script, gitaddr=gitaddr, 
 #          tags=tags, comment=trait)
