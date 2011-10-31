@@ -10,15 +10,16 @@ trait <-  "open"
 nchains <- 10
 burnin <- 1:1e3
 
-sfInit(par=T, cpu=nchains)
-sfExportAll()
-sfLibrary(wrightscape)
 
 # START SMART PLEASE
 start <- multiTypeOU(data=labrid$data[trait], tree=labrid$tree, 
 regimes=pharyngeal, model_spec=spec) #,
 #                  method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
 
+
+#sfInit(par=T, cpu=nchains)
+sfLibrary(wrightscape)
+sfExportAll()
 o <- sfLapply(1:nchains, function(i){
 chains <- phylo_mcmc(labrid$data[trait], labrid$tree, pharyngeal,
 		 MaxTime=MaxTime, model_spec=spec, stepsizes=0.05,
