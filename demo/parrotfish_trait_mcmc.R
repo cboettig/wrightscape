@@ -23,19 +23,15 @@ sfExportAll()
 
 
 o <- sfLapply(1:nchains, function(i){
-phylo_mcmc(labrid$data[trait], labrid$tree, intramandibular,
+chains <- phylo_mcmc(labrid$data[trait], labrid$tree, intramandibular,
 		 MaxTime=MaxTime, model_spec=spec, stepsizes=0.05,
 		 Xo=start$Xo, alpha=start$alpha, sigma=start$sigma,
 		 theta=start$theta)[[1]]
 # returns [[1]]: chains, [[2]]: myCall, [[3]] colnames (for txtfile version)
 })
 
-# Concatinate chains 
-chains <- o[[1]][-burnin,] # the first chain
-for(i in 2:nchains)
-	chains <- rbind(chains, o[[i]][-burnin, ])
 
-# chains <- chains[[1]][-burnin,]  ## without parrallel
+chains <- chains[[1]][-burnin,]  ## without parrallel
 
 save(list=ls(), file="parrotfish_mcmc.Rdat")
 
