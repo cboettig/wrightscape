@@ -1,12 +1,13 @@
 rm(list=ls()) # clean workspace
 #load("method2_parrotfish.Rdat")
-#regime.names=c("other", "intramandibular")
 
 script <- "method2_labrid_phar.R" 
 
 #regime.names=c("wrasse", "pharyngeal", "intramandibular")
 #regime.names=c("wrasse", "intramandibular")
-regime.names=c("wrasse", "parrotfish")
+#regime.names=c("wrasse", "parrotfish")
+regime.names=c("intramandibular", "other")
+
 
 load("method2_labrid_phar.Rdat")
 
