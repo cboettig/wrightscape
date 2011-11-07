@@ -79,8 +79,8 @@ pool.rjmcmcsamples(base.dirs=dirs, lab=r)
   
 ## plot Markov sampled rates
 
-png("primate_brains.png", height=480*3, width=480*2)
-  shifts.plot(phy=phy, base.dir=paste(r,"combined.rjmcmc",sep="."), burnin=0.5, legend=TRUE, edge.width=4, x.lim = c(0,80))
+png("primate_brains.png", height=480*1.2, width=480)
+  shifts.plot(phy=phy, base.dir=paste(r,"combined.rjmcmc",sep="."), burnin=0.5, legend=TRUE, edge.width=4, x.lim = c(0,60))
 dev.off()
 # clean-up: unlink those directories
 #    unlink(dir(pattern=paste(r)),recursive=TRUE)
