@@ -8,7 +8,6 @@
 rm(list=ls()) # clean workspace
 require(phytools)
 require(geiger)
-require(OUwie)
 
 # This data has not been released
 path = "../data/labrids/"
@@ -44,41 +43,39 @@ rownames(traits) <- traits[,1]
 traits <- traits[,-1]
 
 
+phy <- ape$phy
+dat <- traits[["prot.y"]]
+names(dat) <- rownames(traits)
+## run two short reversible-jump Markov chains
+# (create some random strings for temporary file names)
+r=paste(sample(letters,9,replace=TRUE),collapse="")
 
-#==============================================================#
-# Paint regimes onto the phylogeny                             #
-#==============================================================#
-source("method2_tools.R")
-input <- paint_phy(ape$phy, traits,  c("Chlorurus_sordidus", "Hipposcarus_longiceps"))
-X <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+# run four short MCMC chains to search for a change point in brain weight
+out <- lapply(1:2, 
+         function(x) rjmcmc.bm(phy=phy, dat=dat,
+          ngen=100000, sample.freq=10, prob.mergesplit=0.1, simplestart=TRUE,
+          prop.width=1, fileBase=paste(r,x,sep=".")))
+
+# collect directories
+dirs=dir("./",pattern=paste("BM",r,sep="."))
+pool.rjmcmcsamples(base.dirs=dirs, lab=r)
+ 
+## view contents of .rda
+ load(paste(paste(r,"combined.rjmcmc",sep="."), 
+      paste(r,"posteriorsamples.rda",sep="."),sep="/"))
+ print(head(posteriorsamples$rates))
+ print(head(posteriorsamples$rate.shifts))
+  
+## plot Markov sampled rates
+
+shifts.plot(phy=phy, base.dir=paste(r,"combined.rjmcmc",sep="."), burnin=0.5, legend=TRUE, edge.width=4, x.lim = c(0,60))
+# clean-up: unlink those directories
+#    unlink(dir(pattern=paste(r)),recursive=TRUE)
 
 
-oumv <- OUwie(input$phy, input$data[c("Genus_species","Reg","prot.y")], model = c("OUMV"), root.station=TRUE, plot.resid=FALSE)
 
 
 
 
-##### Here we go, fit everything.  Slow step ###
-require(snowfall)
-sfInit(parallel=T, cpu=16)
-sfLibrary(OUwie)
-sfExportAll()
-all_oumva <- sfLapply(X, function(x){
-  trait <- input$data[c("Genus_species", "Reg", x)]
-  oumva <- OUwie(input$phy, trait, model = c("OUMVA"),
-               root.station=TRUE, plot.resid=FALSE)
-})
-all_ouma <- sfLapply(X, function(x){
-  trait <- input$data[c("Genus_species", "Reg", x)]
-  oumva <- OUwie(input$phy, trait, model = c("OUMA"),
-               root.station=TRUE, plot.resid=FALSE)
-})
-all_oumv <- sfLapply(X, function(x){
-  trait <- input$data[c("Genus_species", "Reg", x)]
-  oumva <- OUwie(input$phy, trait, model = c("OUMV"),
-               root.station=TRUE, plot.resid=FALSE)
-})
-
-save(list=ls(), file="method2_parrotfish.Rdat")
 
 
