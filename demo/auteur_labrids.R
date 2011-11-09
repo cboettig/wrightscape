@@ -3,8 +3,7 @@
 rm(list=ls()) # clean workspace
 
 require(phytools)
-require(geiger)
-require(OUwie)
+require(auteur)
 # This data has not been released
 path = "../data/labrids/"
 labrid_tree <- read.nexus(paste(path, "labrid_tree.nex", sep=""))
