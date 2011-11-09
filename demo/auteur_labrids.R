@@ -70,7 +70,7 @@ pool.rjmcmcsamples(base.dirs=dirs, lab=r)
  print(head(posteriorsamples$rate.shifts))
   
 ## plot Markov sampled rates
-png("labrids.png")
+png("labrids.png", height=3*480, pointsize=20)
 shifts.plot(phy=phy, base.dir=paste(r,"combined.rjmcmc",sep="."), burnin=0.5, legend=TRUE, edge.width=4, x.lim = c(0,60))
 dev.off()
 
