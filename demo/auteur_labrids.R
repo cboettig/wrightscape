@@ -74,8 +74,11 @@ png("labrids.png", height=3*480, pointsize=20)
 shifts.plot(phy=phy, base.dir=paste(r,"combined.rjmcmc",sep="."), burnin=0.5, legend=TRUE, edge.width=4, x.lim = c(0,60))
 dev.off()
 
-require(socialR)
-upload("labrids.png", script="auteur_labrids.R", tag="phylogenetics")
+
+save(list=ls(), file="auteur_labrids.Rdat")
+
+#require(socialR)
+#upload("labrids.png", script="auteur_labrids.R", tag="phylogenetics")
 
 # clean-up: unlink those directories
 #    unlink(dir(pattern=paste(r)),recursive=TRUE)
