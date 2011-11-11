@@ -54,9 +54,9 @@ names(dat) <- rownames(traits)
 r=paste(sample(letters,9,replace=TRUE),collapse="")
 
 # run four short MCMC chains to search for a change point in brain weight
-out <- lapply(1:2, 
+out <- lapply(1:4, 
          function(x) rjmcmc.bm(phy=phy, dat=dat,
-          ngen=100000, sample.freq=10, prob.mergesplit=0.1, simplestart=TRUE,
+          ngen=1000000, sample.freq=10, prob.mergesplit=0.1, simplestart=TRUE,
           prop.width=1, fileBase=paste(r,x,sep=".")))
 
 # collect directories
