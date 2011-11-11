@@ -21,7 +21,6 @@ export(plot_par)
 
 import(geiger)
 import(boot)
-import(maticce)
 import(snowfall)
 import(ouch)
 #import(pmc)
