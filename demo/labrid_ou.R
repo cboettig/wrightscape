@@ -7,7 +7,7 @@ source("labrid_data.R")
 spec = list(alpha="indep", sigma="global", theta="indep")
 traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
 
-sfInit(par=T, cpu=2)
+sfInit(par=T, cpu=4)
 sfLibrary(wrightscape)
 sfExportAll()
 
@@ -15,7 +15,7 @@ fits <- sfLapply(traits, function(trait){
 
 
   modelfit <- multiTypeOU(data=labrid$data[trait], tree=labrid$tree, 
-  regimes=pharyngeal, model_spec=spec) #,
+  regimes=two_shifts, model_spec=spec) #,
 # method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
 
 
@@ -43,7 +43,7 @@ fits <- sfLapply(traits, function(trait){
 })
 
 
-regime.names <- levels(pharyngeal)
+regime.names <- levels(two_shifts)
 error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
   if(length(x) != length(y) | length(y) != 
      length(lower) | length(lower) != length(upper))
