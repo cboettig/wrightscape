@@ -62,7 +62,7 @@ clusterEvalQ(cl, library(auteur))
 ## RUN AUTEUR
 out <- parLapply(cl, 1:20, 
          function(x) rjmcmc.bm(phy=phy, dat=dat,
-          ngen=1000000, sample.freq=10, prob.mergesplit=0.1, simplestart=TRUE,
+          ngen=100000, sample.freq=10, prob.mergesplit=0.1, simplestart=TRUE,
           prop.width=1, fileBase=paste(r,x,sep=".")))
 stopCluster(cl)
 

@@ -71,7 +71,10 @@ pool.rjmcmcsamples(base.dirs=dirs, lab=r)
       paste(r,"posteriorsamples.rda",sep="."),sep="/"))
  print(head(posteriorsamples$rates))
  print(head(posteriorsamples$rate.shifts))
-  
+ 
+
+save(list=ls(), file="parrotfish_auteur.rda")
+ 
 ## plot Markov sampled rates
 png("parrotfish.png")
 shifts.plot(phy=phy, base.dir=paste(r,"combined.rjmcmc",sep="."), burnin=0.5, legend=TRUE, edge.width=4, x.lim = c(0,60))
@@ -80,8 +83,8 @@ dev.off()
 #    unlink(dir(pattern=paste(r)),recursive=TRUE)
 
 
-require(socialR)
-upload("parrotfish.png", script="auteur_labrids.R", tag="phylogenetics")
+#require(socialR)
+#upload("parrotfish.png", script="auteur_labrids.R", tag="phylogenetics")
 
 
 
