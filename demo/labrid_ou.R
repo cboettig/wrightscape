@@ -7,7 +7,7 @@ source("labrid_data.R")
 spec = list(alpha="indep", sigma="global", theta="indep")
 traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
 
-sfInit(par=T, cpu=4)
+sfInit(par=T, cpu=16)
 sfLibrary(wrightscape)
 sfExportAll()
 
