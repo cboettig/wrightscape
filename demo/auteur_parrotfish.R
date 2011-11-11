@@ -49,11 +49,18 @@ names(dat) <- rownames(traits)
 # (create some random strings for temporary file names)
 r=paste(sample(letters,9,replace=TRUE),collapse="")
 
-# run four short MCMC chains to search for a change point in brain weight
-out <- lapply(1:2, 
+## Get ready for some MPI parallel computing action
+require(snow)
+cl <- makeCluster(20, type="MPI")
+clusterExport(cl, c("phy", "dat", "r"))
+clusterEvalQ(cl, library(auteur))
+
+## RUN AUTEUR
+out <- parLapply(cl, 1:20, 
          function(x) rjmcmc.bm(phy=phy, dat=dat,
           ngen=100000, sample.freq=10, prob.mergesplit=0.1, simplestart=TRUE,
           prop.width=1, fileBase=paste(r,x,sep=".")))
+stopCluster(cl)
 
 # collect directories
 dirs=dir("./",pattern=paste("BM",r,sep="."))
