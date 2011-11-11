@@ -1,5 +1,9 @@
 useDynLib(wrightscape)
 
+# maticce functions in regimes.R, treeTraversal.R
+export(paintBranches, mrcaOUCH)
+
+
 # wrightscape.R
 export(wrightscape,  LR_bootstrap, pretty_plot, choose_model, fast_boot, format_data, plot.wrightboot, bootstrap.wrighttree)
 
