@@ -4,7 +4,7 @@ require(wrightscape)
 require(snowfall)
 
 source("labrid_data.R")
-spec = list(alpha="indep", sigma="global", theta="indep")
+spec = list(alpha = "indep", sigma = "global", theta = "indep")
 traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
 
 sfInit(par=T, cpu=4)
@@ -19,7 +19,11 @@ fits <- sfLapply(traits, function(trait){
 # method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
 
 
-  bootstrap <- sapply(1:80, 
+  reps <- sapply(1:100, function(i) simulate(modelfit))
+  
+
+
+  bootstrap <- sapply(1:40, 
     function(i){
       dat <- simulate(modelfit) 
       out <- update(modelfit, dat)
