@@ -6,22 +6,22 @@ require(snowfall)
 source("labrid_data.R")
 spec = list(alpha = "indep", sigma = "global", theta = "indep")
 traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+trait <- "prot.y"
 
-sfInit(par=T, cpu=4)
-sfLibrary(wrightscape)
-sfExportAll()
+#sfInit(par=T, cpu=4)
+#sfLibrary(wrightscape)
+#sfExportAll()
 
-fits <- sfLapply(traits, function(trait){
+#fits <- sfLapply(traits, function(trait){
 
 
   modelfit <- multiTypeOU(data=labrid$data[trait], tree=labrid$tree, 
-  regimes=two_shifts, model_spec=spec) #,
+  regimes=intramandibular, model_spec=spec) #,
 # method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
 
-
-  reps <- sapply(1:100, function(i) simulate(modelfit))
-  
-
+  png("tip_plot.png", height=3*480, point=20)
+  tip_plot(modelfit) 
+  dev.off()
 
   bootstrap <- sapply(1:40, 
     function(i){
@@ -44,6 +44,10 @@ fits <- sfLapply(traits, function(trait){
   colnames(SE) = levels(modelfit$regimes)
   colnames(est) = levels(modelfit$regimes)
   list(Param.est = est, Param.SE = SE)
+
+
+
+
 })
 
 

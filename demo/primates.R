@@ -1,14 +1,13 @@
-# primates.R
+# File: primates.R
+# Author: Carl Boettiger <cboettig@gmail.com>
+# License: BSD
+# Date: 2011-11-16
+
+rm(list=ls()) # start clean
+
 ## load the packages we'll need
-RLIBS="~/R/x86_64-redhat-linux-gnu-library/2.13"
-.libPaths(c(RLIBS, .libPaths()))
-
-
 require(wrightscape)
 require(auteur)  # for the data
-require(maticce) # to generate paintings
-
-
 
 ## Load and format the data 
 data(primates)
@@ -23,9 +22,9 @@ new_world <- paintBranches(new_world_ancestor, monkey$tree,
                             c("OldWorld", "NewWorld"))
 
 ## take a quick look at the tree
-png("monkeytree.png", 2000, 2000)
+#png("monkeytree.png", 2000, 2000)
 plot(monkey$tree, regimes=new_world, cex=.5)
-dev.off()
+#dev.off()
 
 
 ### Time to use wrightscape.  Note that the general model form 
@@ -51,24 +50,26 @@ ouch <- hansen(data=monkey$data, tree=monkey$tree,
 alphas <- multiTypeOU(data=monkey$data, tree=monkey$tree,
                       regimes=new_world,model_spec = 
                       list(alpha="indep",sigma="global", 
-                      theta="global"), Xo=NULL, alpha = .1, 
-                      sigma = 40, theta=NULL, method ="SANN", 
-                      control = list(maxit=100000,temp=50,tmax=20))
+                      theta="indep"))
 
-#sigmas <- multiTypeOU(data=monkey$data, tree=monkey$tree, 
-#                      regimes=new_world, model_spec= 
-#                      list(alpha="fixed", sigma="indep", 
-#                      theta="global"), Xo=NULL, alpha = .1,
-#                      sigma = 40, theta=NULL, method ="SANN",
-#                      control=list(maxit=100000,temp=50,tmax=20))
+sigmas <- multiTypeOU(data=monkey$data, tree=monkey$tree,
+                      regimes=new_world,model_spec = 
+                      list(alpha="fixed",sigma="indep", 
+                      theta="global"))
+
+full <- multiTypeOU(data=monkey$data, tree=monkey$tree,
+                      regimes=new_world)
+
+
+#                      method ="SANN", 
+#                      control = list(maxit=100000,temp=50,tmax=20))
 
 nboot <- 64*4
 
 require(snow)
 cluster <- makeCluster(64, type="MPI")
-clusterEvalQ(cluster, library(pmc))
 clusterEvalQ(cluster, library(wrightscape))
-clusterExport(cluster, "bm")
+clusterExport(cluster, "sigmas")
 clusterExport(cluster, "alphas")
 A_sim <- parLapply(cluster, 1:nboot, function(x) 
                    compare_models(bm,alphas))

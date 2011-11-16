@@ -2,7 +2,6 @@
 require(wrightscape)
 require(phytools)
 require(geiger)
-require(maticce)
 
 # This data has not been released
 path = "../data/labrids/"
