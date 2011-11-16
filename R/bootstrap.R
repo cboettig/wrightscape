@@ -7,7 +7,6 @@
 #' define the generic S3 bootstrap method
 bootstrap <- function(x, ...) UseMethod("bootstrap")
 
-
 #' function to bootstrap a multiOU object
 #' @param modelfit a multiOU object, (output of multiTypeOU() fn)
 #' @returns a matrix of bootstrap values. (replicates fixed values)
@@ -79,4 +78,9 @@ summary.multiOU <- function(modelfit, bootstrap = NULL, silent = FALSE){
   list(Param.est = est, Param.SE = SE, bootstraps=bootstrap)
 }
 
+
+# should consider writing a ggplot-style function...
+plot.multiOU <- function(multiOU, boots=NULL){
+  out <- summary(multiOU, boots, silent=TRUE)
+}
 
