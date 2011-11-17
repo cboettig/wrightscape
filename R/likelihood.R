@@ -1,23 +1,34 @@
-evaluate_likelihood <- function(data, tree, regimes, model_spec =
-                       list(alpha="indep", sigma="indep", theta="indep"),
-                       Xo, alpha, sigma, theta){
+#' Fits the generic multitype OU.  
+#'
+#' @details 
+#' Submodels such as brownie, and other unique models, can be created
+#' by specifiying how parameters are treated under model_spec
 
-  n_regimes <- length(levels(regimes))
-  par <- setup_pars(data, tree, regimes, model_spec, Xo=Xo, 
-                    alpha=alpha, sigma=sigma, theta=theta)
-  f <- llik.closure(data, tree, regimes, model_spec, neg=FALSE)
-  f(par)
-
-}
-
+#' get the likelihood of the specified model using the specified parameters
+#' @param data the trait data
+#' @param tree the phylogenetic tree in ouch format
+#' @param regimes the regimes in ouch format
+#' @param model_spec a list that specifies the model, see details
+#' @param Xo root state
+#' @param alpha a vector of length n_regimes if indep in model, or a scalar
+#' @param sigma a vector of length n_regimes if indep in model, or a scalar
+#' @param theta  a vector of length n_regimes if indep in model, or a scalar
+#' @return log likelihood
+#' @details
+#' the general model form is specified by model_spec list.  This specifies 
+#' which parameters out of alpha, theta, and sigma are independently estimated
+#' on each regime, kept global across regimes, or, in the case of alpha,
+#' fixed to zero (to give purely Brownian behavior).  i.e.
+#' ouch model is equivalent to: list(alpha="global", sigma="global",
+#' theta="indep"), while the brownie model is equivalent to 
+#' list(alpha="fixed", sigma="indep", theta="global") 
+#' @useDynLib wrightscape
+#' @import ouch
+#' @import geiger
+#' @export
 multiTypeOU <- function(data, tree, regimes, model_spec =
                        list(alpha="indep", sigma="indep", theta="indep"),
                        Xo=NULL, alpha=1, sigma=1, theta=NULL, ...){
-## Fits the generic multitype OU.  
-##
-## Details:  
-## Submodels such as brownie, and other unique models, can be created
-## by specifiying how parameters are treated under model_spec
   opts=list(...)
 
   myCall <- match.call()
@@ -47,76 +58,38 @@ multiTypeOU <- function(data, tree, regimes, model_spec =
 
 }
 
-smart_multiType <- function(data, tree, regimes, model_spec =
+#' get the likelihood of the specified model using the specified parameters
+#' @param data the trait data
+#' @param tree the phylogenetic tree in ouch format
+#' @param regimes the regimes in ouch format
+#' @param model_spec a list that specifies the model, see details
+#' @param Xo root state
+#' @param alpha a vector of length n_regimes if indep in model, or a scalar
+#' @param sigma a vector of length n_regimes if indep in model, or a scalar
+#' @param theta  a vector of length n_regimes if indep in model, or a scalar
+#' @return log likelihood
+#' @details
+#' the general model form is specified by model_spec list.  This specifies 
+#' which parameters out of alpha, theta, and sigma are independently estimated
+#' on each regime, kept global across regimes, or, in the case of alpha,
+#' fixed to zero (to give purely Brownian behavior).  i.e.
+#' ouch model is equivalent to: list(alpha="global", sigma="global",
+#' theta="indep"), while the brownie model is equivalent to 
+#' list(alpha="fixed", sigma="indep", theta="global") 
+#' @export
+evaluate_likelihood <- function(data, tree, regimes, model_spec =
                        list(alpha="indep", sigma="indep", theta="indep"),
-                       Xo=NULL, alpha=1, sigma=1, theta=NULL, ...){
-## Fits the general multitype OU by seeding starting conditions from submodels
-## Update will repeat all this crap, so go easy on reps if using SANN 
-  opts=list(...)
-  myCall <- match.call()
+                       Xo, alpha, sigma, theta){
+
   n_regimes <- length(levels(regimes))
-
-  ## Should the guesses be propigated through?  currently not. 
-  alpha_spec = list(alpha="indep",  sigma="global", theta="global")   
-  par <- setup_pars(data, tree, regimes, alpha_spec, Xo=Xo, 
-                    alpha=alpha, sigma=sigma, theta=theta)
-  alpha_f <- llik.closure(data, tree, regimes, alpha_spec, neg=TRUE)
-  alpha_optim <- optim(par,alpha_f, ...) 
-  alpha_indices <- get_indices(alpha_spec, n_regimes)
-
-  sigma_spec = list(alpha="global", sigma="indep",  theta="global")   
-  par <- setup_pars(data, tree, regimes, sigma_spec, Xo=Xo, 
-                    alpha=alpha, sigma=sigma, theta=theta)
-  sigma_f <- llik.closure(data, tree, regimes, sigma_spec, neg=TRUE)
-  sigma_optim <- optim(par,sigma_f, ...) 
-  sigma_indices <- get_indices(sigma_spec, n_regimes)
-
-  theta_spec = list(alpha="global", sigma="global", theta="indep")   
-  par <- setup_pars(data, tree, regimes, theta_spec, Xo=Xo, 
-                    alpha=alpha, sigma=sigma, theta=theta)
-  theta_f <- llik.closure(data, tree, regimes, theta_spec, neg=TRUE)
-  theta_optim <- optim(par,theta_f, ...) 
-  theta_indices <- get_indices(theta_spec, n_regimes)
-
-
-  # get alpha guesses as the optimum alphas in the alpha model, etc
-  alpha <- alpha_optim$par[alpha_indices$alpha_i]
-  sigma <- sigma_optim$par[sigma_indices$sigma_i]
-  theta <- theta_optim$par[theta_indices$theta_i]
-
-
-  print(paste("alpha: ", alpha))
-  print(paste("sigma: ", sigma))
-  print(paste("theta: ", theta))
-  print(paste("alpha LL", -alpha_optim$value, 
-              "simga LL", -sigma_optim$value,
-              "theta LL", -theta_optim$value))
-
   par <- setup_pars(data, tree, regimes, model_spec, Xo=Xo, 
                     alpha=alpha, sigma=sigma, theta=theta)
-  f <- llik.closure(data, tree, regimes, model_spec, neg=TRUE)
-  optim_output <- optim(par,f, ...) 
-  indices <- get_indices(model_spec, n_regimes)
-
-
-  ## deal with fixed alpha at 0
-  if(is.null(indices$alpha_i))
-    alpha_out <- rep(1e-12, n_regimes)
-  else 
-    alpha_out <- optim_output$par[indices$alpha_i]
-
-  output <- list(data=data, tree=tree, regimes=regimes, 
-                 loglik=-optim_output$value, Xo=optim_output$par[1], 
-                 alpha = alpha_out, 
-                 sigma=optim_output$par[indices$sigma_i],
-                 theta=optim_output$par[indices$theta_i],
-                 optim_output=optim_output, model_spec=model_spec,
-                 convergence=optim_output$convergence,
-                 opts=opts)
-  class(output) = "multiOU"
-  output
+  f <- llik.closure(data, tree, regimes, model_spec, neg=FALSE)
+  f(par)
 
 }
+
+
 
 
 
@@ -201,7 +174,6 @@ setup_pars <- function(data, tree, regimes, model_spec, Xo=NULL, alpha=1,
 
 
 ## Wrappers for the C functions that actually calculate the likelihood #########
-
 lca_calc <- function(tree){
 # Calculates the last common ancestor matrix, which is used by the likelihood algorithm
 # Because this is constant given a tree, it need not be recalculated each time.  
@@ -230,21 +202,21 @@ lca_calc <- function(tree){
     lca[[4]]
 }
 
+#' A version of the multitype OU likelihood function that accepts the least 
+#' common ancestor matrix as a parameter.  This may increase computational speed,
+#' since the calculation needs to be done only once and is rather slow as implemented    
+#' 
+#' @param data - ouch-style data
+#  @param tree - ouch-tree
+#  @param regimes - painting of selective regimes, as in ouch
+#  @param alpha - (vector length n_regimes) gives strength of selection in each regime
+#  @param sigma - (vector length n_regimes) gives diversification rate in each regime
+#  @param theta - (vector length n_regimes) gives optimum trait in each regime
+#  @param Xo - root value
+#  @param lca - least common ancestor matrix, from lca_calc fun
+#  @return the log likelihood at the given parameter values
 ## .C calls should do some error checking on the length of inputs maybe, to avoid crashes when given inappropriate calls
 multiOU_lik_lca <- function(data, tree, regimes, alpha=NULL, sigma=NULL, theta=NULL, Xo=NULL, lca){
-# A version of the multitype OU likelihood function that accepts the least 
-# common ancestor matrix as a parameter.  This may increase computational speed,
-# since the calculation needs to be done only once and is rather slow as implemented    
-# 
-# Args: data -- ouch-style data
-#       tree -- ouch-tree
-#       regimes -- painting of selective regimes, as in ouch
-#       alpha -- (vector length n_regimes) gives strength of selection in each regime
-#       sigma -- (vector length n_regimes) gives diversification rate in each regime
-#       theta -- (vector length n_regimes) gives optimum trait in each regime
-#       Xo -- root value
-#       lca -- least common ancestor matrix, from lca_calc fun
-# Returns: log likelihood 
 
     ## ERROR HANDLING, write this as a seperate function
 	# data should be a numeric instead of data.frame.  Should check node names or node order too!
@@ -293,5 +265,84 @@ multiOU_lik_lca <- function(data, tree, regimes, alpha=NULL, sigma=NULL, theta=N
 
 
 
+
+
+
+
+
+
+
+
+
+smart_multiType <- function(data, tree, regimes, model_spec =
+                       list(alpha="indep", sigma="indep", theta="indep"),
+                       Xo=NULL, alpha=1, sigma=1, theta=NULL, ...){
+## Fits the general multitype OU by seeding starting conditions from submodels
+## Update will repeat all this crap, so go easy on reps if using SANN 
+  opts=list(...)
+  myCall <- match.call()
+  n_regimes <- length(levels(regimes))
+
+  ## Should the guesses be propigated through?  currently not. 
+  alpha_spec = list(alpha="indep",  sigma="global", theta="global")   
+  par <- setup_pars(data, tree, regimes, alpha_spec, Xo=Xo, 
+                    alpha=alpha, sigma=sigma, theta=theta)
+  alpha_f <- llik.closure(data, tree, regimes, alpha_spec, neg=TRUE)
+  alpha_optim <- optim(par,alpha_f, ...) 
+  alpha_indices <- get_indices(alpha_spec, n_regimes)
+
+  sigma_spec = list(alpha="global", sigma="indep",  theta="global")   
+  par <- setup_pars(data, tree, regimes, sigma_spec, Xo=Xo, 
+                    alpha=alpha, sigma=sigma, theta=theta)
+  sigma_f <- llik.closure(data, tree, regimes, sigma_spec, neg=TRUE)
+  sigma_optim <- optim(par,sigma_f, ...) 
+  sigma_indices <- get_indices(sigma_spec, n_regimes)
+
+  theta_spec = list(alpha="global", sigma="global", theta="indep")   
+  par <- setup_pars(data, tree, regimes, theta_spec, Xo=Xo, 
+                    alpha=alpha, sigma=sigma, theta=theta)
+  theta_f <- llik.closure(data, tree, regimes, theta_spec, neg=TRUE)
+  theta_optim <- optim(par,theta_f, ...) 
+  theta_indices <- get_indices(theta_spec, n_regimes)
+
+
+  # get alpha guesses as the optimum alphas in the alpha model, etc
+  alpha <- alpha_optim$par[alpha_indices$alpha_i]
+  sigma <- sigma_optim$par[sigma_indices$sigma_i]
+  theta <- theta_optim$par[theta_indices$theta_i]
+
+
+  print(paste("alpha: ", alpha))
+  print(paste("sigma: ", sigma))
+  print(paste("theta: ", theta))
+  print(paste("alpha LL", -alpha_optim$value, 
+              "simga LL", -sigma_optim$value,
+              "theta LL", -theta_optim$value))
+
+  par <- setup_pars(data, tree, regimes, model_spec, Xo=Xo, 
+                    alpha=alpha, sigma=sigma, theta=theta)
+  f <- llik.closure(data, tree, regimes, model_spec, neg=TRUE)
+  optim_output <- optim(par,f, ...) 
+  indices <- get_indices(model_spec, n_regimes)
+
+
+  ## deal with fixed alpha at 0
+  if(is.null(indices$alpha_i))
+    alpha_out <- rep(1e-12, n_regimes)
+  else 
+    alpha_out <- optim_output$par[indices$alpha_i]
+
+  output <- list(data=data, tree=tree, regimes=regimes, 
+                 loglik=-optim_output$value, Xo=optim_output$par[1], 
+                 alpha = alpha_out, 
+                 sigma=optim_output$par[indices$sigma_i],
+                 theta=optim_output$par[indices$theta_i],
+                 optim_output=optim_output, model_spec=model_spec,
+                 convergence=optim_output$convergence,
+                 opts=opts)
+  class(output) = "multiOU"
+  output
+
+}
 
 

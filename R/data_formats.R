@@ -1,9 +1,103 @@
+#' format data in ape format into ouch format
+#' @param tree a phylogenetic tree of class "phylo", ape format
+#' @param traits a numeric with trait values, or a matrix or data frame of traits, rownames matching species or handed in
+#' @param species_names in the order of entries in traits, if not given in rownames.  
+#' @param regimes the column in traits containing regime labels
+#' @return the ouch-formatted tree, traits, and regimes  
+#' @seealso \code{\link{convert}} to toggle between formats, including regime paintings
+#' @details Should become an internal function to handle data conversion to ape-type 
+format_data <- function(tree, traits, species_names = NULL, regimes = NULL ){
+	require(geiger)
+
+# Function checks that tree and trait match and convert them into a format used by wrightscape
+# Function also will code tree by finding the common ancestor of all species with matching entry specified in the regimes list and assigning that codename as the regime of all descendents of that ancestor.  May not handle conflicts if corresponding to overlapping clades.  Alternatively, the regimes can be specified directly in ouch format.   
+
+	# Args:
+		# tree can be a path to a nexus file, an object of class "phylo", or an object of class "ouchtree"
+
+
+	if( is(tree, "character" ) ){ 
+		tree <- read.nexus(tree) 
+	} else if (is(tree, "ouchtree")) {
+		# uses my ouch2ape tree conversion script
+		#tree <- convert(tree)
+	}
+	if( !is(tree, "phylo") ) { stop("Problem with tree format") }
+
+
+	# Figure out if species names is already attached to traits 
+	if(is.null(species_names) ){
+		if( !is.null(names(traits)) & is(traits, "numeric") ){
+			species_names <- names(traits)
+		} else if( !is.null(rownames(traits)) ){ 
+			species_names <- rownames(traits) 
+		} else { 
+			stop("Species names not found")
+		}
+	}
+
+	## attach species names to traits
+	if(is(traits, "numeric") ){
+		names(traits) <- species_names
+	} else if (is(traits, "data.frame") | is(traits, "matrix")){
+	rownames(traits) <- species_names
+	} else { stop("traits format unrecognized") }
+
+	# drop missing taxa using geiger's function
+	matched <- treedata(tree, traits, species_names)
+	# treedata returns a matrix which loses class type for trait data.frame
+	# so we restore the the dataframe structure
+
+	if( is(matched$data, "matrix") ){ 
+		matched$data <- as.data.frame(matched$data, stringsAsFactors=FALSE)
+		if(is(traits, "data.frame")){
+		for(i in 1:length(traits)){
+				tmp <- class(traits[[i]])
+				# each datarow that isn't numeric should be a character string (for regime, etc)
+				if(tmp == "factor") tmp <- "character"
+				class(matched$data[[i]]) <- tmp
+			}
+		}
+	} 
+	traits <- matched$data
+	species_names <- rownames(matched$data) 
+
+	# Convert to OUCH format 
+	tree <- ape2ouch(matched$phy) 
+   
+	# Makes sure data is reformatted to ouch format matching the tree
+	if( is(traits, "data.frame") ){
+		message("traits ouch-formatted as data.frame")
+		if(length(traits)>1){
+		    dataIn <- traits[match(tree@nodelabels, species_names),]
+		} else {
+			#hack to get around size-1 data-frames 
+			traits[[2]] = NA
+			dataIn <- traits[match(tree@nodelabels, species_names),]
+			dataIn[[2]] <- NULL
+		}
+	} else if(is(traits, "numeric") ){ 
+message("traits ouch-formatted as numeric")
+	    dataIn <- traits[match(tree@nodelabels, species_names)]
+	} else { stop(paste("data of class", class(traits), "not recognized")) }
+	rownames(dataIn) <- tree@nodes
+
+	if(is.numeric(regimes)){	
+		R <- compute_regimes(tree, traits, species_names, regimes)
+    nr <- R$noregimes
+	} else {
+		regimes= as.factor(rep(" ", length=tree@nnodes))
+		names(regimes) <- tree@nodes 
+		R <- list(regimes=regimes) 
+    nr <- R$regimes
+	}
+
+	list(tree=tree, data=dataIn, regimes=R$regimes, noregimes=nr)
+} 
 
 
 compute_regimes <- function(tree, traits, species_names, regimes){
-
 # regimes can be an integer specifying the column in traits dataframe 
-
 # Internal function for convert_data
 # takes ouch_formatted tree and traits,  
 
@@ -54,113 +148,18 @@ compute_regimes <- function(tree, traits, species_names, regimes){
 	list(regimes=regimes, noregimes=noregimes)
 }
 
-## changed default of regimes to 1 from NULL, to handle trivial cases
-format_data <- function(tree, traits, species_names = NULL, regimes = 1 ){
-	require(geiger)
-
-# Function checks that tree and trait match and convert them into a format used by wrightscape
-# Function also will code tree by finding the common ancestor of all species with matching entry specified in the regimes list and assigning that codename as the regime of all descendents of that ancestor.  May not handle conflicts if corresponding to overlapping clades.  Alternatively, the regimes can be specified directly in ouch format.   
-
-	# Args:
-		# tree can be a path to a nexus file, an object of class "phylo", or an object of class "ouchtree"
-
-
-	if( is(tree, "character" ) ){ 
-		tree <- read.nexus(tree) 
-	} else if (is(tree, "ouchtree")) {
-		# uses my ouch2ape tree conversion script
-		#tree <- convert(tree)
-	}
-	if( !is(tree, "phylo") ) { stop("Problem with tree format") }
-
-
-
-
-	# Figure out if species names is already attached to traits 
-	if(is.null(species_names) ){
-		if( !is.null(names(traits)) & is(traits, "numeric") ){
-			species_names <- names(traits)
-		} else if( !is.null(rownames(traits)) ){ 
-			species_names <- rownames(traits) 
-		} else { 
-			stop("Species names not found")
-		}
-	}
-
-
-	
-	## attach species names to traits
-	if(is(traits, "numeric") ){
-		names(traits) <- species_names
-	} else if (is(traits, "data.frame") | is(traits, "matrix")){
-	rownames(traits) <- species_names
-	} else { stop("traits format unrecognized") }
-
-
-
-	# drop missing taxa using geiger's function
-	matched <- treedata(tree, traits, species_names)
-	# treedata returns a matrix which loses class type for trait data.frame
-	# so we restore the the dataframe structure
-
-	if( is(matched$data, "matrix") ){ 
-		matched$data <- as.data.frame(matched$data, stringsAsFactors=FALSE)
-		if(is(traits, "data.frame")){
-		for(i in 1:length(traits)){
-				tmp <- class(traits[[i]])
-				# each datarow that isn't numeric should be a character string (for regime, etc)
-				if(tmp == "factor") tmp <- "character"
-				class(matched$data[[i]]) <- tmp
-			}
-		}
-	} 
-	traits <- matched$data
-	species_names <- rownames(matched$data) 
-
-
-
-
-	# Convert to OUCH format 
-	tree <- ape2ouch(matched$phy) 
-   
-	# Makes sure data is reformatted to ouch format matching the tree
-	if( is(traits, "data.frame") ){
-		message("traits ouch-formatted as data.frame")
-		if(length(traits)>1){
-		    dataIn <- traits[match(tree@nodelabels, species_names),]
-		} else {
-			#hack to get around size-1 data-frames 
-			traits[[2]] = NA
-			dataIn <- traits[match(tree@nodelabels, species_names),]
-			dataIn[[2]] <- NULL
-		}
-	} else if(is(traits, "numeric") ){ 
-message("traits ouch-formatted as numeric")
-	    dataIn <- traits[match(tree@nodelabels, species_names)]
-	} else { stop(paste("data of class", class(traits), "not recognized")) }
-	rownames(dataIn) <- tree@nodes
-
-
-
-
-	if(regimes > 1){	
-		R <- compute_regimes(tree, traits, species_names, regimes)
-    nr <- R$noregimes
-	} else {
-		regimes= as.factor(rep(" ", length=tree@nnodes))
-		names(regimes) <- tree@nodes 
-		R <- list(regimes=regimes) 
-    nr <- R$regimes
-	}
-
-	list(tree=tree, data=dataIn, regimes=R$regimes, noregimes=nr)
-} 
 
 
 
 
 
 
+
+
+
+
+
+## adapted from maticce
 ape2ouch_all <-
  function(tree, characterStates){
 	if( is(tree, "phylo")){

@@ -1,6 +1,9 @@
 # treeformats.R
-# Convert toggles between ouch and ape format trees 
 
+#'  toggles between ouch and ape format trees 
+#' @param ot a phylogenetic tree of class "phylo" or "ouchtree"
+#' @param regimes optional list of regimes for an ouchtree
+#' @param the 
 convert <- function(ot, regimes=NULL){
 	if(is(ot, "ouchtree")){
 

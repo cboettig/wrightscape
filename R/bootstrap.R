@@ -16,7 +16,9 @@ bootstrap <- function(x, ...) UseMethod("bootstrap")
 #'   model_spec = list(alpha = "indep",sigma = "global", theta = "indep"))
 #'  boots <- replicate(3, bootstrap(alphas))
 #'  summary(alphas, boots)
-#' @S3method 
+#' @S3method bootstrap multiOU
+#' @method bootstrap multiOU
+#' @export
 bootstrap.multiOU <- function(modelfit){
       dat <- simulate(modelfit) 
       out <- update(modelfit, dat)
@@ -25,18 +27,10 @@ bootstrap.multiOU <- function(modelfit){
       Xo <- rep(out$Xo,n) 
       loglik <- rep(out$loglik, n)
       pars <- rep(NA, 5 * n)
-
-#      names(out$alpha) <- paste("alpha", levels(modelfit$regimes), sep=".")
-#      names(out$sigma) <- paste("sigma", levels(modelfit$regimes), sep=".")
-#      names(out$theta) <- paste("theta", levels(modelfit$regimes), sep=".")
-#      names(loglik) <- rep("loglik", n)
-#      names(Xo) <- rep("Xo", n)
       if(out$convergence == 0) # only return values if successful
         pars <- c(out$alpha, out$sigma, out$theta, Xo, loglik)
       pars
     }
-
-
 
 #' Summarize a multiOU fit's outputs, including bootstraps, if provided
 #' @param modelfit a multiOU class model fit (from multiTypeOU)
@@ -79,8 +73,4 @@ summary.multiOU <- function(modelfit, bootstrap = NULL, silent = FALSE){
 }
 
 
-# should consider writing a ggplot-style function...
-plot.multiOU <- function(multiOU, boots=NULL){
-  out <- summary(multiOU, boots, silent=TRUE)
-}
 
