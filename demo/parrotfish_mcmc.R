@@ -13,7 +13,7 @@ burnin <- 1:1e2
 
 
 # START SMART PLEASE
-start <- multiTypeOU(data=labrid$data[trait], tree=tree, 
+start <- multiTypeOU(data=dat[trait], tree=tree, 
 regimes=intramandibular, model_spec=spec) #,
 #                  method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
 

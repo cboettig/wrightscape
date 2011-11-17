@@ -44,7 +44,7 @@ full <- multiTypeOU(data=monkey$data, tree=monkey$tree,
 nboot <- 64
 require(snow)
 cluster <- makeCluster(64, type="MPI")  # for supercomputers
-#cluster < makeCluster(2, type="SOCK")    # for debugging locally
+#cluster <- makeCluster(2, type="SOCK")    # for debugging locally
 
 clusterEvalQ(cluster, library(wrightscape))
 clusterExport(cluster, "full") # can just export ls()
