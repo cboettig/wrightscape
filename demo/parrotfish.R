@@ -6,27 +6,27 @@ require(ggplot2)
 
 data(parrotfish)
 
-#traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
-traits <- c("close", "open", "gape.y",  "prot.y")
+traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+#traits <- c("close", "open", "gape.y",  "prot.y")
 
-sfInit(par=T, 4)    # for debugging locally
+sfInit(par=T, 10)    # for debugging locally
 sfLibrary(wrightscape)
 sfExportAll()
 fits <- sfLapply(traits, function(trait){
   alphas <- multiTypeOU(data=dat[trait], tree=tree, regimes=intramandibular, 
     model_spec = list(alpha = "indep", sigma = "global", theta = "indep"),
     alpha = c(.01, 10), sigma = c(.01, .01), control=list(maxit=5000)) 
-  alphas_out <- replicate(20, bootstrap(alphas))
+  alphas_out <- replicate(50, bootstrap(alphas))
 
   sigmas <- multiTypeOU(data=dat[trait], tree=tree, regimes=intramandibular, 
     model_spec = list(alpha = "global", sigma = "indep", theta = "indep"), 
     control=list(maxit=5000))  
-  sigmas_out <- replicate(20, bootstrap(sigmas))
+  sigmas_out <- replicate(50, bootstrap(sigmas))
 
   full <- multiTypeOU(data=dat[trait], tree=tree, regimes=intramandibular, 
     model_spec = list(alpha = "global", sigma = "indep", theta = "indep"), 
     control=list(maxit=5000))  
-  full_out <- replicate(20, bootstrap(full))
+  full_out <- replicate(50, bootstrap(full))
 
   list(ouma=alphas_out, oumv=sigmas_out, oumva=full_out)
 })
@@ -40,10 +40,10 @@ p2 <- ggplot(subset(data, value < 100 & param %in% c("sigma", "alpha", "theta"))
 
 save(list=ls(), file="parrotfish.Rdat")
 
-#ggsave("parrotfish_lik.png", p1)
-#ggsave("parrotfish_params.png", p2)
-#require(socialR)
-#upload("parrotfish_*.png", script="parrotfish.R", tag="phylogenetics")
+ggsave("parrotfish_lik.png", p1)
+ggsave("parrotfish_params.png", p2)
+require(socialR)
+upload("parrotfish_*.png", script="parrotfish.R", tag="phylogenetics")
 
 
 #p <- ggplot(subset(data, param=="alpha" & value < 100)) + geom_boxplot(aes(trait, value, fill=regimes)) + facet_grid(. ~ model) 
