@@ -98,10 +98,10 @@ llik.closure <- function(data, tree, regimes, model_spec, fixed=
   indices <- get_indices(model_spec, n_regimes)
   lca <- lca_calc(tree)
   f <- function(par){
-    if(is.null(model_spec$Xo)) # Force NULL Xo to assume theta of the root regime
+#    if(is.null(model_spec$Xo)) # Force NULL Xo to assume theta of the root regime
       Xo <- par[indices$theta_i][match(regimes[1], levels(regimes))]
-    else 
-      Xo <- par[1]
+#    else 
+#      Xo <- par[1]
     if(any(is.null(indices$alpha_i)))
       alpha <- rep(fixed$alpha, n_regimes)
     else 
@@ -164,8 +164,6 @@ setup_pars <- function(data, tree, regimes, model_spec, Xo=NULL, alpha=1,
   n_regimes <- length(levels(regimes))
   indices <- get_indices(model_spec, n_regimes)
   pars <- numeric(indices$n)
-  if(is.null(Xo)) # should use phylo mean, but need to convert tree to ape type
-    Xo <- mean(data, na.rm=TRUE) 
   if(is.null(theta)) 
     theta <- mean(data, na.rm=TRUE)
   pars[1] <- Xo
@@ -173,6 +171,9 @@ setup_pars <- function(data, tree, regimes, model_spec, Xo=NULL, alpha=1,
     pars[indices$alpha_i] <- alpha
   pars[indices$sigma_i] <- sigma
   pars[indices$theta_i] <- theta 
+  if(is.null(Xo)) # should use phylo mean, but need to convert tree to ape type
+    Xo <- pars[indices$theta_i][match(regimes[1], levels(regimes))]
+    #Xo <- mean(data, na.rm=TRUE) 
   pars
 }
 

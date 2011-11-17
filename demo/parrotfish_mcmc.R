@@ -3,7 +3,8 @@ rm(list=ls())
 require(wrightscape)
 require(snowfall)
 
-source("parrotfish_data.R")
+data(parrotfish)
+
 MaxTime = 1e4
 spec = list(alpha="fixed", sigma="indep", theta="global")
 trait <-  "open"
@@ -12,7 +13,7 @@ burnin <- 1:1e2
 
 
 # START SMART PLEASE
-start <- multiTypeOU(data=labrid$data[trait], tree=labrid$tree, 
+start <- multiTypeOU(data=labrid$data[trait], tree=tree, 
 regimes=intramandibular, model_spec=spec) #,
 #                  method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
 
