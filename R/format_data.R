@@ -6,6 +6,7 @@
 #' @return the ouch-formatted tree, traits, and regimes  
 #' @seealso \code{\link{convert}} to toggle between formats, including regime paintings
 #' @details Should become an internal function to handle data conversion to ape-type 
+#' @export 
 format_data <- function(tree, traits, species_names = NULL, regimes = NULL ){
 	require(geiger)
 

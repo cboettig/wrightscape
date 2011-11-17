@@ -16,7 +16,6 @@ Depends:
     ape
 Collate:
     'bootstrap.R'
-    'data_formats.R'
     'depricated.R'
     'likelihood.R'
     'maticce.R'
@@ -26,3 +25,4 @@ Collate:
     'prior_library.R'
     'treeformats.R'
     'wrightscape.R'
+    'format_data.R'
