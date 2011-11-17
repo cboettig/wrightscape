@@ -3,10 +3,9 @@ require(phytools)
 require(geiger)
 require(wrightscape)
 # This data has not been released
-path = "../data/labrids/"
-labrid_tree <- read.nexus(paste(path, "labrid_tree.nex", sep=""))
+labrid_tree <- read.nexus("labrid_tree.nex")
 #fin_data <-read.csv(paste(path,"labrid.csv", sep="")) # not actually being used
-diet_data <- read.csv(paste(path,"labriddata_parrotfish.csv", sep=""))
+diet_data <- read.csv("labriddata_parrotfish.csv")
 
 #### size correct length and weight as fraction of body mass ####
 #for(i in c(3,4,6,7,8)){
@@ -58,6 +57,17 @@ two_shifts <- paintBranches(c(pharyngeal_ancestor, intra_ancestor), labrid$tree,
 two_shifts[as.numeric(intra_ancestor)] <- "intramandibular"
 two_shifts <- as.factor(as.character(two_shifts))
 names(two_shifts) <- names(intramandibular)
+
+# rename the ouch-formated data 
+dat <- labrid$data
+tree <- labrid$tree
+
+# rename the ape-formatted data
+ape.phy <- ape$phy
+ape.dat <- traits
+
+
+save(list=c("intramandibular", "pharyngeal", "two_shifts", "tree", "dat", "ape.phy", "ape.dat"), file="labrids.rda")
 
 ### We now have access to the following configurations:
 ## intramandibular, pharyngeal and two_shifts paintings, (and labrid$noregimes),

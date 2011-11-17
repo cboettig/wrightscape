@@ -1,6 +1,5 @@
 # intro_example.R
 require(wrightscape)
-require(maticce)
 require(geiger)
 
 ######## STEP 1: Load all the data ###################
