@@ -5,7 +5,7 @@ require(snowfall)
 
 data(parrotfish)
 
-spec = list(alpha = "indep", sigma = "global", theta = "indep")
+spec = list(alpha = "global", sigma = "indep", theta = "indep")
 #traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
 #trait <- "prot.y"
 traits <- c("close", "open", "gape.y",  "prot.y")
@@ -24,8 +24,11 @@ fits <- sfLapply(traits, function(trait){
 })
 
 
-## Plot ## 
+
+param <- "sigma"
 regime.names <- levels(intramandibular)
+
+
 
 error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
   if(length(x) != length(y) | length(y) != 
@@ -35,15 +38,21 @@ error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
          angle = 90, code = 3, length=length, ...)
 }
 
-alphas <- sapply(fits, function(x)  x$Param.est["alpha",])
-colnames(alphas) <- traits
-alphas.se <- sapply(fits, function(x)   x$Param.SE["alpha",])
-png("alphas.png", width=600)
-  bars <- barplot(alphas, beside=T, main="alphas", legend.text=regime.names,
-  ylim=c(0, max(alphas+alphas.se, na.rm=T)))
-  error.bar(bars, alphas, alphas.se)
+estimate <- sapply(fits, function(x)  x$Param.est[param,])
+estimate.se <- sapply(fits, function(x)   x$Param.SE[param,])
+colnames(estimate) <- traits
+colnames(estimate.se) <- traits
+
+print(estimate)
+print(estimate.se)
+
+## Plot ## 
+png("param.png", width=600)
+  bars <- barplot(estimate, beside=T, main=param, legend.text=regime.names,
+  ylim=c(0, max(estimate+estimate.se, na.rm=T)))
+  error.bar(bars, estimate, estimate.se)
 dev.off()
 
 require(socialR)
-upload("alphas.png", script="parrotfish.R", tag="phylogenetics")
+upload("param.png", script="parrotfish.R", tag="phylogenetics")
 
