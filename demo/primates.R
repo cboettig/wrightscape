@@ -34,7 +34,6 @@ alphas <- multiTypeOU(data=monkey$data, tree=monkey$tree,
 #alphas_boot <- sfSapply(1:4, function(i) bootstrap(alphas))
 #summary(alphas, alphas_boot)
 
-
 sigmas <- multiTypeOU(data=monkey$data, tree=monkey$tree,
                       regimes=new_world,model_spec = 
                       list(alpha="fixed",sigma="indep", 

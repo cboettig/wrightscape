@@ -1,139 +1,10 @@
-######### CONSIDER IMPORTING THESE ALL FROM "mcmcTools" package instead ###########
-step_fn <- function(pars, stepsizes = rep(.02, length(pars))){
-# Sequential random updating 
-  j <- sample(1:length(pars), 1)
-  pars[j] <- rnorm(1, pars[j], stepsizes[j])
-  pars
-}
+# File: mcmc.R
+# Author: Carl Boettiger <cboettig@gmail.com>
+# Date: 2011-11-16
+# License: BSD
+#
+# These functions are stull under development, not yet exported to user
 
-## Proposal density is symmetric, so we won't need Q
-Q <- function(pars, proposed){
-  dnorm(pars, proposed, stepsizes=1, log=TRUE)
-#    alpha <- loglik(pars) + prior(pars) + Q(pars, proposed) - loglik(proposed) - prior(proposed) - Q(proposed, pars)
-}
-
-# The basic mcmc function
-mcmc_fn <- function(pars, loglik, prior, MaxTime=1e3, stepsizes=.02,
-                    write=NULL){
-# 
-# Args:
-#   pars:  parameters over which we search
-#   loglik: a function of pars returning the log likelihood
-#   prior: a function of pars to compute the prior probability
-#   MaxTime: number of mcmc steps to take
-#   stepsizes: a numeric or vector of length pars for stepsizes to use
-#   write: filename, write the output to disk instead of memory
-#   
-# 
-  if(length(stepsizes)==1)
-    stepsizes <- rep(stepsizes, length(pars))
-  if(is.null(write))
-    history <- matrix(NA, nrow=MaxTime, ncol=(1+length(pars)))
-  else
-   sink(write) 
-  for(t in 1:MaxTime){
-    Pi <- loglik(pars)+prior(pars)
-
-    if(is.null(write))
-      history[t,] <- c(Pi, pars)
-    else
-      cat(c(Pi, pars), "\n")
-
-    proposed <- step_fn(pars, stepsizes)
-    alpha <- exp(loglik(proposed)+prior(proposed) - Pi)
-    if(!is.numeric(alpha))
-      alpha <- 0
-    if (alpha > runif(1) )
-      pars <- proposed
-  }
-  if(is.null(write))
-    return(history)
-  else
-    sink()
-}
-
-
-
-
-
-beta <- function(i, Delta_T=1){
-# Heating function for MCMCMC
-  1/(1+Delta_T*(i-1))
-}
-
-
-mcmcmc_fn <- function(pars, loglik, prior, MaxTime=1e3, indep=100, stepsizes=.02, Delta_T=1, ...){
-# Metropolis Coupled Markov Chain Monte Carlo
-# Args:
-#   pars: a list of length n_chains, with numerics pars[[i]] that can be passed to loglik
-#   loglik: a function to calculate the log-likelihood of chain i at pars[[i]], 
-#   prior: a function to calculate the prior density
-#   MaxTime: length of time to run the chain
-#   indep: period of time for which chains should wander independently
-#   stepsizes: step of proposal distribution (can be numeric of length 1 or length pars)
-#   Delta_T: amount heated chains are increased, 0 = all cold.  
-# Returns:
-#   chains: list containing matrix for each chain, first col is loglik + log prior prob,
-#           remaining columns are fn parameters in order given in the pars[[i]]
-  n_chains <- length(pars)
-  n_pars <- length(pars[[1]])
-
-  # in case we want to store the complete history.  Should have the option
-  # of writing this to a file for speed? Or do that all in C...
-  chains <- lapply(1:n_chains, function(i)  matrix(NA, nrow=MaxTime, ncol=(1+n_pars)) )
-
-  # The independent intervals, lets us run chains in parallel during these periods
-  Interval <- matrix(1:MaxTime, nrow=indep)
-
-  # Note the outer time loop over intervals, and 
-  # an inner time loop that can be parallelized over chains
-  for(s in 1:(MaxTime/indep)){
-  # Evolve chains independently for "indep" time steps
-    out <- sfLapply(1:n_chains, 
-            function(i){
-              out <- matrix(NA, ncol=n_pars+1, nrow=indep)
-              # Inner time loop
-              for(t in 1:indep){
-                Pi <- loglik(pars[[i]]) + prior(pars[[i]])
-                out[t,] <- c(Pi, pars[[i]]) # more simply could print this to file, save mem
-                proposed <- step_fn(pars[[i]], stepsizes)
-                # Normal Hastings ratio weighted by temp fn beta 
-                alpha <- exp( beta(i, Delta_T) * ( loglik(proposed)+prior(proposed) - Pi ) )
-                if ( alpha  > runif(1) )
-                  pars[[i]] <- proposed
-              }
-              out
-            })
-    # write to output
-    for(i in 1:n_chains){
-      chains[[i]][Interval[,s],] <- out[[i]]
-      pars[[i]] <- out[[i]][indep,][-1] # copy parameters (but not loglik)
-    }
-    # This isn't quite precise bc this isn't being counted as a timestep yet!
-    # Propose a chain swap every "indep" time steps beween pars_i and j
-    pick <- sample(1:length(pars), 2)
-    i <- pick[1]; j <- pick[2] # for convience
-    R <- 
-      beta(i, Delta_T) * ( loglik(pars[[j]]) + prior(pars[[j]]) - loglik(pars[[i]]) - prior(pars[[i]]) ) +
-      beta(j, Delta_T) * ( loglik(pars[[i]]) + prior(pars[[i]])  - loglik(pars[[j]]) - prior(pars[[j]]) )
-    ## verbose output about swaps
-    # print(paste("swap chain", i, "with", j, "proposed, R =", exp(R)))
-    if(exp(R) > runif(1)){
-      # print("swap accepted")
-      pars[[i]] <- pars[[j]] # accept the swap
-    }
-
-  }
-  # Returns the full history of all chains
-  chains 
-}
-
-
-
-########## The actual Phylogenetic Model MCMCMC #############
-########## Depends on the above functions, could depend on mcmcTools instead ########
-
-## Should take number of chains as an option
 phylo_mcmc <- function(data, tree, regimes, model_spec =
                        list(alpha="indep", sigma="indep", theta="indep"),
                        Xo=NULL, alpha=1, sigma=1, theta=NULL, prior=NULL,
@@ -167,7 +38,6 @@ unique_names <- function(model_spec, n_regimes){
   names(tmp)
 }
 
-## Should take number of chains as an option
 phylo_mcmcmc <- function(data, tree, regimes, model_spec =
                        list(alpha="indep", sigma="indep", theta="indep"),
                        Xo=NULL, alpha=1, sigma=1, 

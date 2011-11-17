@@ -50,7 +50,7 @@ summary.multiOU <- function(modelfit, bootstrap = NULL, silent = FALSE){
   est <- rbind(alpha = modelfit$alpha, sigma = modelfit$sigma,
                theta = modelfit$theta)
   if(is.null(bootstrap)){
-    Param.SE <- "Bootstraps not provided, run bootstrap(modelfit) to get SE"
+    SE <- "Bootstraps not provided, run bootstrap(modelfit) to get SE"
     bootstrap <- "Not provided"
   } else if(is.matrix(bootstrap)){
 

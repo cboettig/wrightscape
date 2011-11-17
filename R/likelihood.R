@@ -90,16 +90,18 @@ evaluate_likelihood <- function(data, tree, regimes, model_spec =
 }
 
 
-
-
-
+#' returns the likelihood function for the chosen submodel
+#' @internal
 llik.closure <- function(data, tree, regimes, model_spec, fixed=
                          list(alpha=1e-12), neg_llik=FALSE){
   n_regimes <- length(levels(regimes))
   indices <- get_indices(model_spec, n_regimes)
   lca <- lca_calc(tree)
   f <- function(par){
-    Xo <- par[1]
+    if(is.null(model_spec$Xo)) # Force NULL Xo to assume theta of the root regime
+      Xo <- par[indices$theta_i][match(regimes[1], levels(regimes))]
+    else 
+      Xo <- par[1]
     if(any(is.null(indices$alpha_i)))
       alpha <- rep(fixed$alpha, n_regimes)
     else 
@@ -123,7 +125,8 @@ llik.closure <- function(data, tree, regimes, model_spec, fixed=
 }
 
 
-######## Helper functions to work with llik.closure indexing ######## 
+#' Helper function to work with llik.closure indexing 
+#' @internal
 get_indices <- function(model_spec, n_regimes){
 # Get the indices of the parameter vector (thing passed to the likelihood routine)
 # that correspond to the different parameters.  Inverse of setup_pars function.  
@@ -152,7 +155,8 @@ get_indices <- function(model_spec, n_regimes){
 list(alpha_i=alpha_i, sigma_i=sigma_i, theta_i=theta_i, n=n)
 }
 
-###
+#' Helper function to work with llik.closure indexing 
+#' @internal
 setup_pars <- function(data, tree, regimes, model_spec, Xo=NULL, alpha=1, 
                        sigma=1, theta=NULL){
 ## Create the parameter vector matching model_spec from specified alpha, theta, sigma
@@ -173,7 +177,8 @@ setup_pars <- function(data, tree, regimes, model_spec, Xo=NULL, alpha=1,
 }
 
 
-## Wrappers for the C functions that actually calculate the likelihood #########
+#' Wrappers for the C functions that actually calculate the likelihood
+#' @internal
 lca_calc <- function(tree){
 # Calculates the last common ancestor matrix, which is used by the likelihood algorithm
 # Because this is constant given a tree, it need not be recalculated each time.  
@@ -202,20 +207,22 @@ lca_calc <- function(tree){
     lca[[4]]
 }
 
+#' compute the likelihood by passing data to the C level function, wrightscape 
+#' @param data - ouch-style data
+#' @param tree - ouch-tree
+#' @param regimes - painting of selective regimes, as in ouch
+#' @param alpha - (vector length n_regimes) gives strength of selection in each regime
+#' @param sigma - (vector length n_regimes) gives diversification rate in each regime
+#' @param theta - (vector length n_regimes) gives optimum trait in each regime
+#' @param Xo - root value
+#' @param lca - least common ancestor matrix, from lca_calc fun
+#' @return the log likelihood at the given parameter values
+#' @details 
 #' A version of the multitype OU likelihood function that accepts the least 
 #' common ancestor matrix as a parameter.  This may increase computational speed,
 #' since the calculation needs to be done only once and is rather slow as implemented    
-#' 
-#' @param data - ouch-style data
-#  @param tree - ouch-tree
-#  @param regimes - painting of selective regimes, as in ouch
-#  @param alpha - (vector length n_regimes) gives strength of selection in each regime
-#  @param sigma - (vector length n_regimes) gives diversification rate in each regime
-#  @param theta - (vector length n_regimes) gives optimum trait in each regime
-#  @param Xo - root value
-#  @param lca - least common ancestor matrix, from lca_calc fun
-#  @return the log likelihood at the given parameter values
-## .C calls should do some error checking on the length of inputs maybe, to avoid crashes when given inappropriate calls
+#' .C calls should do some error checking on the length of inputs maybe, 
+#' to avoid crashes when given inappropriate calls
 multiOU_lik_lca <- function(data, tree, regimes, alpha=NULL, sigma=NULL, theta=NULL, Xo=NULL, lca){
 
     ## ERROR HANDLING, write this as a seperate function
@@ -273,7 +280,7 @@ multiOU_lik_lca <- function(data, tree, regimes, alpha=NULL, sigma=NULL, theta=N
 
 
 
-
+# A function that tries to guess smart starting conditions, probably overkill
 smart_multiType <- function(data, tree, regimes, model_spec =
                        list(alpha="indep", sigma="indep", theta="indep"),
                        Xo=NULL, alpha=1, sigma=1, theta=NULL, ...){
