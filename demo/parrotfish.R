@@ -25,11 +25,25 @@ fits <- sfLapply(traits, function(trait){
 
 
 
+# value   variable   regime   model
+# 0.011   alpha.e    intra    oumv
+# 0.004   alpha.se   intra    oumv
+# 1.124   sigma      intra    oumv 
+
+# rep   value   variable   regime   model
+# 1     0.011   alpha      intra    oumv
+# 2     0.014   alpha      intra    oumv
+# 1     1.124   sigma      intra    oumv 
+
+
+
+
+
 param <- "sigma"
 regime.names <- levels(intramandibular)
 
 
-
+# a handy function for errorbars on bar plots
 error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
   if(length(x) != length(y) | length(y) != 
      length(lower) | length(lower) != length(upper))
@@ -38,6 +52,7 @@ error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
          angle = 90, code = 3, length=length, ...)
 }
 
+# collate the data 
 estimate <- sapply(fits, function(x)  x$Param.est[param,])
 estimate.se <- sapply(fits, function(x)   x$Param.SE[param,])
 colnames(estimate) <- traits
@@ -53,6 +68,7 @@ png("param.png", width=600)
   error.bar(bars, estimate, estimate.se)
 dev.off()
 
+## share 
 require(socialR)
 upload("param.png", script="parrotfish.R", tag="phylogenetics")
 
