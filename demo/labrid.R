@@ -1,76 +1,60 @@
-# mcmc_demo.R
+# File: labrid.R
+# Author: Carl Boettiger <cboettig@gmail.com>
+# License: BSD 
+
 rm(list=ls())
 require(wrightscape)
 require(snowfall)
+require(ggplot2)
 
 data(labrids)
 
-spec = list(alpha = "indep", sigma = "global", theta = "indep")
-traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
-trait <- "prot.y"
+#traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+traits <- c("close", "open", "gape.y",  "prot.y")
 
-#sfInit(par=T, cpu=4)
-#sfLibrary(wrightscape)
-#sfExportAll()
+sfInit(par=T, 4)    # for debugging locally
+sfLibrary(wrightscape)
+sfExportAll()
+fits <- sfLapply(traits, function(trait){
+  alphas <- multiTypeOU(data=dat[trait], tree=tree, regimes=two_shifts, 
+    model_spec = list(alpha = "indep", sigma = "global", theta = "indep"),
+    alpha = c(.01, 10), sigma = c(.1, .1), control=list(maxit=1e5, tmax=20)) 
+  alphas_out <- replicate(10, bootstrap(alphas))
 
-#fits <- sfLapply(traits, function(trait){
+  sigmas <- multiTypeOU(data=dat[trait], tree=tree, regimes=two_shifts, 
+    model_spec = list(alpha = "global", sigma = "indep", theta = "indep"),
+    sigma = c(.1, .1),
+    control==list(maxit=1e5, tmax=20)) 
+  sigmas_out <- replicate(10, bootstrap(sigmas))
 
+  full <- multiTypeOU(data=dat[trait], tree=tree, regimes=two_shifts, 
+    model_spec = list(alpha = "global", sigma = "indep", theta = "indep"), 
+    alpha = c(.1, 10), sigma = c(.1, .1),
+    control=list(maxit=2e5, tmax=20))   
+    
+  full_out <- replicate(10, bootstrap(full))
 
-  modelfit <- multiTypeOU(data=labrid$data[trait], tree=labrid$tree, 
-  regimes=intramandibular, model_spec=spec) #,
-# method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
-
-  png("tip_plot.png", height=3*480, point=20)
-  tip_plot(modelfit) 
-  dev.off()
-
-  bootstrap <- sapply(1:40, 
-    function(i){
-      dat <- simulate(modelfit) 
-      out <- update(modelfit, dat)
-      names(out$alpha) <- paste("alpha", levels(modelfit$regimes), sep=".")
-      names(out$sigma) <- paste("sigma", levels(modelfit$regimes), sep=".")
-      names(out$theta) <- paste("theta", levels(modelfit$regimes), sep=".")
-      pars <- rep(NA, 3*length(levels(modelfit$regimes)))
-      if(out$convergence == 0) # only return values if successful
-        pars <- c(out$alpha, out$sigma, out$theta)
-      pars
-    })
-
-  est <- rbind(alpha = modelfit$alpha, sigma = modelfit$sigma,
-               theta = modelfit$theta)
-  SE <- sapply(1:dim(bootstrap)[1], function(i) sd(bootstrap[i,], na.rm=T) )
-  SE <- t(matrix(SE, nrow = length(levels(modelfit$regimes))))
-  rownames(SE) = c("alpha", "sigma", "theta") 
-  colnames(SE) = levels(modelfit$regimes)
-  colnames(est) = levels(modelfit$regimes)
-  list(Param.est = est, Param.SE = SE)
-
-
-
-
+  list(ouma=alphas_out, oumv=sigmas_out, oumva=full_out)
 })
 
+names(fits) <- traits
+data <- melt(fits)
+names(data) <- c("regimes", "param", "rep", "value", "model", "trait")
 
-regime.names <- levels(two_shifts)
-error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
-  if(length(x) != length(y) | length(y) != 
-     length(lower) | length(lower) != length(upper))
-  stop("vectors must be same length")
-  arrows(x,y + upper, x, y - lower, 
-         angle = 90, code = 3, length=length, ...)
-}
+p1 <- ggplot(subset(data,  param=="loglik")) + geom_boxplot(aes(model, value)) + facet_wrap(~ trait, scales="free_y")
+p2 <- ggplot(subset(data, value < 100 & param %in% c("sigma", "alpha", "theta"))) + geom_boxplot(aes(trait, value, fill=regimes)) + facet_grid(param ~ model, scales = "free") 
 
-alphas <- sapply(fits, function(x)  x$Param.est["alpha",])
-colnames(alphas) <- traits
-alphas.se <- sapply(fits, function(x)   x$Param.SE["alpha",])
-#### Plot alphas ###
-png("labrid_alphas.png", width=600)
-  bars <- barplot(alphas, beside=T, main="alphas", legend.text=regime.names,
-  ylim=c(0, max(alphas+alphas.se, na.rm=T)))
-  error.bar(bars, alphas, alphas.se)
-dev.off()
-
+save(list=ls(), file="parrotfish.Rdat")
+require(ggplot2)
+ggsave("parrotfish_lik.png", p1)
+ggsave("parrotfish_params.png", p2)
 require(socialR)
-upload("labrid_alphas.png", script="labrid_ou.R", tag="phylogenetics")
+upload("parrotfish_*.png", script="parrotfish.R", tag="phylogenetics")
+
+
+#p <- ggplot(subset(data, param=="alpha" & value < 100)) + geom_boxplot(aes(trait, value, fill=regimes)) + facet_grid(. ~ model) 
+#ggplot(data) + geom_boxplot(aes(trait, value, fill=regimes)) + facet_wrap(param~.)
+
+
+
 
