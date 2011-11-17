@@ -39,11 +39,11 @@ p1 <- ggplot(subset(data,  param=="loglik")) + geom_boxplot(aes(model, value)) +
 p2 <- ggplot(subset(data, value < 100 & param %in% c("sigma", "alpha", "theta"))) + geom_boxplot(aes(trait, value, fill=regimes)) + facet_grid(param ~ model, scales = "free") 
 
 save(list=ls(), file="parrotfish.Rdat")
-
-#ggsave("parrotfish_lik.png", p1)
-#ggsave("parrotfish_params.png", p2)
-#require(socialR)
-#upload("parrotfish_*.png", script="parrotfish.R", tag="phylogenetics")
+require(ggplot2)
+ggsave("parrotfish_lik.png", p1)
+ggsave("parrotfish_params.png", p2)
+require(socialR)
+upload("parrotfish_*.png", script="parrotfish.R", tag="phylogenetics")
 
 
 #p <- ggplot(subset(data, param=="alpha" & value < 100)) + geom_boxplot(aes(trait, value, fill=regimes)) + facet_grid(. ~ model) 
