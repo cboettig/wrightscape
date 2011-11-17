@@ -44,12 +44,13 @@ multiTypeOU <- function(data, tree, regimes, model_spec =
     alpha_out <- rep(1e-12, n_regimes)
   else 
     alpha_out <- optim_output$par[indices$alpha_i]
-
+  Xo_out <- optim_output$par[indices$theta_i][match(regimes[1], levels(regimes))]
   output <- list(data=data, tree=tree, regimes=regimes, 
-                 loglik=-optim_output$value, Xo=optim_output$par[1], 
+                 loglik=-optim_output$value, 
                  alpha=alpha_out, 
                  sigma=optim_output$par[indices$sigma_i],
                  theta=optim_output$par[indices$theta_i],
+                 Xo = Xo_out,
                  optim_output=optim_output, model_spec=model_spec,
                  convergence=optim_output$convergence,
                  opts=opts)
@@ -98,10 +99,7 @@ llik.closure <- function(data, tree, regimes, model_spec, fixed=
   indices <- get_indices(model_spec, n_regimes)
   lca <- lca_calc(tree)
   f <- function(par){
-#    if(is.null(model_spec$Xo)) # Force NULL Xo to assume theta of the root regime
-      Xo <- par[indices$theta_i][match(regimes[1], levels(regimes))]
-#    else 
-#      Xo <- par[1]
+     Xo <- par[indices$theta_i][match(regimes[1], levels(regimes))]  # assumes root theta
     if(any(is.null(indices$alpha_i)))
       alpha <- rep(fixed$alpha, n_regimes)
     else 
@@ -132,7 +130,7 @@ get_indices <- function(model_spec, n_regimes){
 # that correspond to the different parameters.  Inverse of setup_pars function.  
 # Examples
 #   ouch: get_indices(list(alpha="global", sigma="global", theta="indep"), 2)
-  alpha_start <- 2
+  alpha_start <- 1 # Xo is not to be estimated independently. 2 otherwise
   alpha_i <-  switch(model_spec$alpha, 
                      indep = alpha_start:(alpha_start+n_regimes-1), 
                      global = rep(alpha_start, n_regimes),
@@ -151,7 +149,7 @@ get_indices <- function(model_spec, n_regimes){
   theta_i <-  switch(model_spec$theta, 
                      indep = theta_start:(theta_start+n_regimes-1), 
                      global = rep(theta_start,n_regimes))
-  n <- max(theta_i)
+  n <- max(theta_i) # index of last parameter is number of parameters
 list(alpha_i=alpha_i, sigma_i=sigma_i, theta_i=theta_i, n=n)
 }
 
@@ -166,14 +164,11 @@ setup_pars <- function(data, tree, regimes, model_spec, Xo=NULL, alpha=1,
   pars <- numeric(indices$n)
   if(is.null(theta)) 
     theta <- mean(data, na.rm=TRUE)
-  pars[1] <- Xo
+  # pars[1] <- Xo # not to be estimated!
   if(!any(is.null(indices$alpha_i)))
     pars[indices$alpha_i] <- alpha
   pars[indices$sigma_i] <- sigma
   pars[indices$theta_i] <- theta 
-  if(is.null(Xo)) # should use phylo mean, but need to convert tree to ape type
-    Xo <- pars[indices$theta_i][match(regimes[1], levels(regimes))]
-    #Xo <- mean(data, na.rm=TRUE) 
   pars
 }
 
