@@ -4,20 +4,21 @@
 # License: BSD
 
 #' @title bootstrap: a function to compute bootstrap replicates
-#' define the generic S3 bootstrap method
+#' @details define the generic S3 bootstrap method
+#' @export
 bootstrap <- function(x, ...) UseMethod("bootstrap")
 
 #' function to bootstrap a multiOU object
 #' @param modelfit a multiOU object, (output of multiTypeOU() fn)
-#' @returns a matrix of bootstrap values. (replicates fixed values)
+#' @return a matrix of bootstrap values. (replicates fixed values)
 #' @examples
 #'  data(parrotfish)
 #'  alphas <- multiTypeOU(data=dat, tree=tree, regimes = intramandibular, 
 #'   model_spec = list(alpha = "indep",sigma = "global", theta = "indep"))
 #'  boots <- replicate(3, bootstrap(alphas))
 #'  summary(alphas, boots)
-#' @S3method bootstrap multiOU
 #' @method bootstrap multiOU
+#' @S3method bootstrap multiOU
 #' @export
 bootstrap.multiOU <- function(modelfit){
       dat <- simulate(modelfit) 
@@ -45,7 +46,8 @@ bootstrap.multiOU <- function(modelfit){
 #'   model_spec = list(alpha = "indep",sigma = "global", theta = "indep"))
 #'  boots <- replicate(3, bootstrap(alphas))
 #'  summary(alphas, boots)
-#' @S3method 
+#' @method summary multiOU
+#' @S3method summary multiOU
 summary.multiOU <- function(modelfit, bootstrap = NULL, silent = FALSE){
   est <- rbind(alpha = modelfit$alpha, sigma = modelfit$sigma,
                theta = modelfit$theta)

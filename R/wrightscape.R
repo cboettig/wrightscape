@@ -3,7 +3,7 @@
 # License: BSD
 
 # simulation function, calls the C code
-# @internal 
+# @keywords internal 
 simulate_wrightscape <- function(tree, regimes, Xo, alpha, theta, sigma,
                                  seed=NULL){
 
@@ -65,7 +65,7 @@ simulate_wrightscape <- function(tree, regimes, Xo, alpha, theta, sigma,
 #' fit the full model entirely in C code, for speed. 
 #' @details
 #' Does not allow fitting of the submodels.  Largely historical
-#' @internal 
+#' @keywords internal 
 wrightscape <- function(data, tree, regimes, alpha=1, sigma=1, 
                         theta = NULL, Xo = NULL, use_siman=0){
 

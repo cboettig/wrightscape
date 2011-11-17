@@ -91,7 +91,7 @@ evaluate_likelihood <- function(data, tree, regimes, model_spec =
 
 
 #' returns the likelihood function for the chosen submodel
-#' @internal
+#' @keywords internal
 llik.closure <- function(data, tree, regimes, model_spec, fixed=
                          list(alpha=1e-12), neg_llik=FALSE){
   n_regimes <- length(levels(regimes))
@@ -126,7 +126,7 @@ llik.closure <- function(data, tree, regimes, model_spec, fixed=
 
 
 #' Helper function to work with llik.closure indexing 
-#' @internal
+#' @keywords internal
 get_indices <- function(model_spec, n_regimes){
 # Get the indices of the parameter vector (thing passed to the likelihood routine)
 # that correspond to the different parameters.  Inverse of setup_pars function.  
@@ -156,7 +156,7 @@ list(alpha_i=alpha_i, sigma_i=sigma_i, theta_i=theta_i, n=n)
 }
 
 #' Helper function to work with llik.closure indexing 
-#' @internal
+#' @keywords internal
 setup_pars <- function(data, tree, regimes, model_spec, Xo=NULL, alpha=1, 
                        sigma=1, theta=NULL){
 ## Create the parameter vector matching model_spec from specified alpha, theta, sigma
@@ -178,7 +178,7 @@ setup_pars <- function(data, tree, regimes, model_spec, Xo=NULL, alpha=1,
 
 
 #' Wrappers for the C functions that actually calculate the likelihood
-#' @internal
+#' @keywords internal
 lca_calc <- function(tree){
 # Calculates the last common ancestor matrix, which is used by the likelihood algorithm
 # Because this is constant given a tree, it need not be recalculated each time.  

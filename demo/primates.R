@@ -23,16 +23,11 @@ new_world <- paintBranches(new_world_ancestor, monkey$tree,
 ## take a quick look at the tree
 #plot(monkey$tree, regimes=new_world, cex=.5)
 
-
 #####  Estimate the models by maximum likelihood, as in OUCH #####
 alphas <- multiTypeOU(data=monkey$data, tree=monkey$tree,
                       regimes=new_world,model_spec = 
                       list(alpha="indep",sigma="global", 
                       theta="indep"), control=list(maxit=2000))
-## simple bootstrap
-#require(snowfall); sfInit(par=T, cpu=4); sfExport("alphas"); sfLibrary(wrightscape)
-#alphas_boot <- sfSapply(1:4, function(i) bootstrap(alphas))
-#summary(alphas, alphas_boot)
 
 sigmas <- multiTypeOU(data=monkey$data, tree=monkey$tree,
                       regimes=new_world,model_spec = 
@@ -45,10 +40,12 @@ full <- multiTypeOU(data=monkey$data, tree=monkey$tree,
 #                      control = list(maxit=100000,temp=50,tmax=20))
 
 
-
+## snow cluster run
 nboot <- 64
 require(snow)
-cluster <- makeCluster(64, type="MPI")
+cluster <- makeCluster(64, type="MPI")  # for supercomputers
+#cluster < makeCluster(2, type="SOCK")    # for debugging locally
+
 clusterEvalQ(cluster, library(wrightscape))
 clusterExport(cluster, "full") # can just export ls()
 full_boot <- parSapply(cluster, 1:nboot, function(x) bootstrap(full))
@@ -59,4 +56,8 @@ save(list=ls(), file="primates.Rdat")
 
 
 
+## simple bootstrap
+#require(snowfall); sfInit(par=T, cpu=4); sfExport("alphas"); sfLibrary(wrightscape)
+#alphas_boot <- sfSapply(1:4, function(i) bootstrap(alphas))
+#summary(alphas, alphas_boot)
 

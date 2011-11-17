@@ -2,9 +2,27 @@ Package: wrightscape
 Version: 0.2-3
 Title: wrightscape
 Description: Phylogenetic comparative methods for arbitrary landscapes
-Imports: geiger, boot, snowfall, ouch
+Imports:
+    geiger,
+    boot,
+    snowfall,
+    ouch
 SystemRequirements: Gnu Scientific Library version >= 1.8
 License: GPL-2
 Author: Carl Boettiger
-Maintainer: Carl Boettiger <cboettig@ucdavis.edu> 
-Depends: mcmcTools, ape
+Maintainer: Carl Boettiger <cboettig@ucdavis.edu>
+Depends:
+    mcmcTools,
+    ape
+Collate:
+    'bootstrap.R'
+    'data_formats.R'
+    'depricated.R'
+    'likelihood.R'
+    'maticce.R'
+    'mcmc.R'
+    'methods.R'
+    'plots.R'
+    'prior_library.R'
+    'treeformats.R'
+    'wrightscape.R'
