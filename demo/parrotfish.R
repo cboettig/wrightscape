@@ -15,18 +15,18 @@ sfExportAll()
 fits <- sfLapply(traits, function(trait){
   alphas <- multiTypeOU(data=dat[trait], tree=tree, regimes=intramandibular, 
     model_spec = list(alpha = "indep", sigma = "global", theta = "indep"),
-    alpha = c(.01, 10), sigma = c(.01, .01), control=list(maxit=5000)) 
-  alphas_out <- replicate(20, bootstrap(alphas))
+    alpha = c(.01, 10), sigma = c(.01, .01), control=list(maxit=1e5, tmax=20), method="SANN") 
+  alphas_out <- replicate(10, bootstrap(alphas))
 
   sigmas <- multiTypeOU(data=dat[trait], tree=tree, regimes=intramandibular, 
     model_spec = list(alpha = "global", sigma = "indep", theta = "indep"), 
-    control=list(maxit=5000))  
-  sigmas_out <- replicate(20, bootstrap(sigmas))
+    control==list(maxit=1e5, tmax=20), method="SANN") 
+  sigmas_out <- replicate(10, bootstrap(sigmas))
 
   full <- multiTypeOU(data=dat[trait], tree=tree, regimes=intramandibular, 
     model_spec = list(alpha = "global", sigma = "indep", theta = "indep"), 
-    control=list(maxit=5000))  
-  full_out <- replicate(20, bootstrap(full))
+    control=list(maxit=2e5, tmax=20), method="SANN")   
+  full_out <- replicate(10, bootstrap(full))
 
   list(ouma=alphas_out, oumv=sigmas_out, oumva=full_out)
 })
