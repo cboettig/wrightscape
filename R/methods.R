@@ -1,4 +1,6 @@
-# Define generics if they dont exist
+# Define generics if they don't exist
+# These methods are all used internally, but could consider exporting.  
+
 getParameters <- function(x, y, ...) UseMethod("getParameters")
 
 

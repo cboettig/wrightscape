@@ -2,13 +2,12 @@
 require(wrightscape)
 require(phytools)
 require(geiger)
-require(maticce)
 
 # This data has not been released
-path = "../data/labrids/"
-labrid_tree <- read.nexus(paste(path, "labrid_tree.nex", sep=""))
+path = "labrids/"
+labrid_tree <- read.nexus("labrid_tree.nex")
+diet_data <- read.csv("labriddata_parrotfish.csv")
 #fin_data <-read.csv(paste(path,"labrid.csv", sep=""))
-diet_data <- read.csv(paste(path,"labriddata_parrotfish.csv", sep=""))
 
 corrected_data <- diet_data
 # Use the simple names from Price et al 2010
@@ -49,5 +48,14 @@ intra_ancestor <- mrcaOUCH(c("Chlorurus_sordidus", "Hipposcarus_longiceps"), lab
 intramandibular <- paintBranches(intra_ancestor, labrid$tree, c("other","intramandibular"))
 
 
+# rename the ouch-formated data 
+dat <- labrid$data
+tree <- labrid$tree
 
+# rename the ape-formatted data
+ape.phy <- ape$phy
+ape.dat <- traits
+
+
+save(list=c("intramandibular", "tree", "dat", "ape.phy", "ape.dat"), file="parrotfish.rda")
 

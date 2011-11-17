@@ -1,77 +1,54 @@
-# parrotfish.R
+# mcmc_demo.R
 rm(list=ls())
-
-RLIBS="~/R/x86_64-redhat-linux-gnu-library/2.13"
-.libPaths(c(RLIBS, .libPaths()))
-
 require(wrightscape)
-require(pmc)
+require(snowfall)
+require(ggplot2)
 
-############ Notebook logging header ##############
-require(socialR)
-script <- "parrotfish.R"
-tags="phylogenetics wrightscape labrids"
-gitopts <- list(user = "cboettig", dir = "demo", repo = "wrightscape") 
-gitaddr <- gitcommit(script, gitopts)
-hash <- gitlog()$commitID
-print(hash)
-####################################################
+data(parrotfish)
 
-source("parrotfish_data.R")
+#traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+traits <- c("close", "open", "gape.y",  "prot.y")
 
-args <- function(spec){
-	  list(data=labrid$data["prot.y"], tree=labrid$tree, 
-               regimes=intramandibular, model_spec = spec,                 
-               Xo=NULL, alpha = .1, sigma = 1, theta=NULL,
-               method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
-	  }
+sfInit(par=T, 4)    # for debugging locally
+sfLibrary(wrightscape)
+sfExportAll()
+fits <- sfLapply(traits, function(trait){
+  alphas <- multiTypeOU(data=dat[trait], tree=tree, regimes=intramandibular, 
+    model_spec = list(alpha = "indep", sigma = "global", theta = "indep"),
+    alpha = c(.01, 10), sigma = c(.01, .01), control=list(maxit=5000)) 
+  alphas_out <- replicate(20, bootstrap(alphas))
 
-alphas <- do.call(multiTypeOU, 
-          args(list(alpha="indep", sigma="global", theta="global")))
+  sigmas <- multiTypeOU(data=dat[trait], tree=tree, regimes=intramandibular, 
+    model_spec = list(alpha = "global", sigma = "indep", theta = "indep"), 
+    control=list(maxit=5000))  
+  sigmas_out <- replicate(20, bootstrap(sigmas))
 
-#ou <- hansen(data=labrid$data["prot.y"], tree=labrid$tree, 
-#	     labrid$noregimes, sqrt.alpha=sqrt(.1), sigma=1)
+  full <- multiTypeOU(data=dat[trait], tree=tree, regimes=intramandibular, 
+    model_spec = list(alpha = "global", sigma = "indep", theta = "indep"), 
+    control=list(maxit=5000))  
+  full_out <- replicate(20, bootstrap(full))
 
-## brownie hypothesis, clearly not winning (by likelihood score alone)
-sigmas <- do.call(multiTypeOU, 
-	   args(list(alpha="fixed", sigma="indep", theta="global")))
+  list(ouma=alphas_out, oumv=sigmas_out, oumva=full_out)
+})
 
-## probably same as alphas 
-sigmas2 <- do.call(multiTypeOU, 
-	   args(list(alpha="global", sigma="indep", theta="global")))
+names(fits) <- traits
+data <- melt(fits)
+names(data) <- c("regimes", "param", "rep", "value", "model", "trait")
 
-## worth attempting?
-indeps <- do.call(multiTypeOU, 
-          args(list(alpha="indep", sigma="indep", theta="indep")))
+p1 <- ggplot(subset(data,  param=="loglik")) + geom_boxplot(aes(model, value)) + facet_wrap(~ trait, scales="free_y")
+p2 <- ggplot(subset(data, value < 100 & param %in% c("sigma", "alpha", "theta"))) + geom_boxplot(aes(trait, value, fill=regimes)) + facet_grid(param ~ model, scales = "free") 
 
+save(list=ls(), file="parrotfish.Rdat")
 
-# models we are testing
-A <- sigmas2
-B <- indeps
-
-nboot <- 64*4
-require(snow)
-cluster <- makeCluster(128, type="MPI")
-clusterEvalQ(cluster, library(pmc))
-clusterEvalQ(cluster, library(wrightscape))
-clusterExport(cluster, "A")
-clusterExport(cluster, "B")
-A_sim <- parLapply(cluster, 1:nboot, function(x) 
-                   compare_models(A, B))
-B_sim <- parLapply(cluster, 1:nboot, function(x) 
-                   compare_models(B, A))
-stopCluster(cluster)
-mc <- collect(A_sim, B_sim, A, B)
-save(list=ls(), file=paste(hash, ".Rdat"))
+#ggsave("parrotfish_lik.png", p1)
+#ggsave("parrotfish_params.png", p2)
+#require(socialR)
+#upload("parrotfish_*.png", script="parrotfish.R", tag="phylogenetics")
 
 
+#p <- ggplot(subset(data, param=="alpha" & value < 100)) + geom_boxplot(aes(trait, value, fill=regimes)) + facet_grid(. ~ model) 
+#ggplot(data) + geom_boxplot(aes(trait, value, fill=regimes)) + facet_wrap(param~.)
 
-### commands reporting this run from head node; wll link to this code ###
-# require(socialR); require(wrightscape); load(paste(hash, ".Rdat"))
-# png("parrotfish.png"); plot(mc); dev.off()
-# png("Apars.png"); plot_pars(mc$null_par_dist); dev.off()
-# png("Bpars.png"); plot_pars(mc$test_par_dist); dev.off()
-# upload(c("parrotfish.png", "Apars.png", "Bpars.png"),script,git=gitaddr,tag=tags)
 
 
 

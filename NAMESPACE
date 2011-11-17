@@ -1,26 +1,12 @@
-useDynLib(wrightscape)
-
-# maticce functions in regimes.R, treeTraversal.R
-export(paintBranches, mrcaOUCH)
-
-
-# wrightscape.R
-export(wrightscape,  LR_bootstrap, pretty_plot, choose_model, fast_boot, format_data, plot.wrightboot, bootstrap.wrighttree)
-
-# methods.R
-export(update.multiOU, simulate.multiOU, loglik.multiOU, getParameters.multiOU, getParameters,simulate_wrightscape, simulate.wrighttree, update.wrighttree, loglik.wrighttree, getParameters.wrighttree) 
-
-# likelihood.R
-export(multiTypeOU, smart_multiType, evaluate_likelihood)
-
-# mcmc.R
-export(phylo_mcmc, general_prior, flat_prior_creator, plot.phylo_mcmc)
-
-# plots.R 
-export(plot_par)
-
+S3method(bootstrap,multiOU)
+S3method(summary,multiOU)
+export(bootstrap)
+export(evaluate_likelihood)
+export(format_data)
+export(mrcaOUCH)
+export(multiTypeOU)
+export(paintBranches)
+export(tip_plot)
 import(geiger)
-import(boot)
-import(snowfall)
 import(ouch)
-#import(pmc)
+useDynLib(wrightscape)

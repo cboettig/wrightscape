@@ -3,23 +3,28 @@ rm(list=ls())
 require(wrightscape)
 require(snowfall)
 
-source("labrid_data.R")
-spec = list(alpha="fixed", sigma="indep", theta="global")
+data(labrids)
+
+spec = list(alpha = "indep", sigma = "global", theta = "indep")
 traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+trait <- "prot.y"
 
-sfInit(par=T, cpu=2)
-sfLibrary(wrightscape)
-sfExportAll()
+#sfInit(par=T, cpu=4)
+#sfLibrary(wrightscape)
+#sfExportAll()
 
-fits <- sfLapply(traits, function(trait){
+#fits <- sfLapply(traits, function(trait){
 
 
   modelfit <- multiTypeOU(data=labrid$data[trait], tree=labrid$tree, 
-  regimes=pharyngeal, model_spec=spec) #,
+  regimes=intramandibular, model_spec=spec) #,
 # method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
 
+  png("tip_plot.png", height=3*480, point=20)
+  tip_plot(modelfit) 
+  dev.off()
 
-  bootstrap <- sapply(1:80, 
+  bootstrap <- sapply(1:40, 
     function(i){
       dat <- simulate(modelfit) 
       out <- update(modelfit, dat)
@@ -40,10 +45,14 @@ fits <- sfLapply(traits, function(trait){
   colnames(SE) = levels(modelfit$regimes)
   colnames(est) = levels(modelfit$regimes)
   list(Param.est = est, Param.SE = SE)
+
+
+
+
 })
 
 
-regime.names <- levels(pharyngeal)
+regime.names <- levels(two_shifts)
 error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
   if(length(x) != length(y) | length(y) != 
      length(lower) | length(lower) != length(upper))
@@ -52,37 +61,16 @@ error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
          angle = 90, code = 3, length=length, ...)
 }
 
-sigmas <- sapply(fits, function(x)  x$Param.est["sigma",])
-sigmas.se <- sapply(fits, function(x)   x$Param.SE["sigma",])
-colnames(sigmas) <- traits
-#### Plot sigmas ###
-png("labrid_sigmas.png", width=600)
-  bars <- barplot(sigmas, beside=T, main="sigmas", legend.text=regime.names,
-  ylim=c(0, max(sigmas+sigmas.se, na.rm=T)))
-  error.bar(bars, sigmas, sigmas.se)
+alphas <- sapply(fits, function(x)  x$Param.est["alpha",])
+colnames(alphas) <- traits
+alphas.se <- sapply(fits, function(x)   x$Param.SE["alpha",])
+#### Plot alphas ###
+png("labrid_alphas.png", width=600)
+  bars <- barplot(alphas, beside=T, main="alphas", legend.text=regime.names,
+  ylim=c(0, max(alphas+alphas.se, na.rm=T)))
+  error.bar(bars, alphas, alphas.se)
 dev.off()
 
 require(socialR)
-upload("labrid_sigmas.png", script="labrid.R", tag="phylogenetics")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-save(list="fits", file="parrot.Rdat")
-
-
+upload("labrid_alphas.png", script="labrid_ou.R", tag="phylogenetics")
 
