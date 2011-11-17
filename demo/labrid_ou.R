@@ -3,7 +3,8 @@ rm(list=ls())
 require(wrightscape)
 require(snowfall)
 
-source("labrid_data.R")
+data(labrids)
+
 spec = list(alpha = "indep", sigma = "global", theta = "indep")
 traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
 trait <- "prot.y"
