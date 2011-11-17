@@ -27,9 +27,12 @@ bootstrap.multiOU <- function(modelfit){
       n <- length(levels(modelfit$regimes))
       Xo <- rep(out$Xo,n) 
       loglik <- rep(out$loglik, n)
-      pars <- rep(NA, 5 * n)
-      if(out$convergence == 0) # only return values if successful
-        pars <- c(out$alpha, out$sigma, out$theta, Xo, loglik)
+
+      pars <- cbind(out$alpha, out$sigma, out$theta, Xo, loglik)
+      rownames(pars) <- levels(modelfit$regimes)
+      colnames(pars) <- c("alpha", "sigma", "theta", "Xo", "loglik")
+      if(out$convergence != 0) # only return values if successful
+        pars[,] <- NA
       pars
     }
 
@@ -65,13 +68,9 @@ summary.multiOU <- function(modelfit, bootstrap = NULL, silent = FALSE){
     warning("bootstrap type not recognized")
   }
   if(!silent){
-    print("Parameter Estimates")
-    print(est)
-    print("Standard Error Estimates")
-    print(SE)
     print(paste("log likelihood:", modelfit$loglik, "Root state Xo:", modelfit$Xo))
   }
-  list(Param.est = est, Param.SE = SE, bootstraps=bootstrap)
+  list(Param.est = est, Param.SE = SE)
 }
 
 
