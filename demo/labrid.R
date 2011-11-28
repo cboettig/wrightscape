@@ -2,75 +2,77 @@
 rm(list=ls())
 require(wrightscape)
 require(snowfall)
+require(ggplot2)
+
+# store the unique id of this script version
+require(socialR)
+gitaddr <- gitcommit("labrid.R")
+id <- gitlog()$shortID
+
+
 
 data(labrids)
-
-spec = list(alpha = "indep", sigma = "global", theta = "indep")
 traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
-trait <- "prot.y"
+#traits <- c("close", "open", "gape.y",  "prot.y")
 
-#sfInit(par=T, cpu=4)
-#sfLibrary(wrightscape)
-#sfExportAll()
+sfInit(par=T, 4)    # for debugging locally
+sfLibrary(wrightscape)
+sfExportAll()
+fits <- lapply(traits, function(trait){
 
-#fits <- sfLapply(traits, function(trait){
+  # declare function for shorthand
+  multi <- function(modelspec, reps = 20){
+    m <- multiTypeOU(data = dat[trait], tree = tree, regimes = intramandibular, 
+  		     model_spec = modelspec, 
+#		     control = list(temp = 20, tmax = 50), method = "SANN"
+		     control = list(maxit=5000)
+		    ) 
+    replicate(reps, bootstrap(m))
+  }
 
+  bm <- multi(list(alpha = "fixed", sigma = "indep", theta = "global"))
+  s1 <- multi(list(alpha = "global", sigma = "indep", theta = "global")) 
+  a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
+  s2 <- multi(list(alpha = "global", sigma = "indep", theta = "indep")) 
+  a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
 
-  modelfit <- multiTypeOU(data=labrid$data[trait], tree=labrid$tree, 
-  regimes=intramandibular, model_spec=spec) #,
-# method ="SANN", control=list(maxit=100000,temp=50,tmax=20))
-
-  png("tip_plot.png", height=3*480, point=20)
-  tip_plot(modelfit) 
-  dev.off()
-
-  bootstrap <- sapply(1:40, 
-    function(i){
-      dat <- simulate(modelfit) 
-      out <- update(modelfit, dat)
-      names(out$alpha) <- paste("alpha", levels(modelfit$regimes), sep=".")
-      names(out$sigma) <- paste("sigma", levels(modelfit$regimes), sep=".")
-      names(out$theta) <- paste("theta", levels(modelfit$regimes), sep=".")
-      pars <- rep(NA, 3*length(levels(modelfit$regimes)))
-      if(out$convergence == 0) # only return values if successful
-        pars <- c(out$alpha, out$sigma, out$theta)
-      pars
-    })
-
-  est <- rbind(alpha = modelfit$alpha, sigma = modelfit$sigma,
-               theta = modelfit$theta)
-  SE <- sapply(1:dim(bootstrap)[1], function(i) sd(bootstrap[i,], na.rm=T) )
-  SE <- t(matrix(SE, nrow = length(levels(modelfit$regimes))))
-  rownames(SE) = c("alpha", "sigma", "theta") 
-  colnames(SE) = levels(modelfit$regimes)
-  colnames(est) = levels(modelfit$regimes)
-  list(Param.est = est, Param.SE = SE)
-
-
-
-
+  list(bm=bm, s1=s1, a1=a1, s2=s2, a2=a2)
 })
 
+# Reformat and label data for plotting
+names(fits) <- traits  # each fit is a different trait (so use it for a label)
+data <- melt(fits)
+names(data) <- c("regimes", "param", "rep", "value", "model", "trait")
 
-regime.names <- levels(two_shifts)
-error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
-  if(length(x) != length(y) | length(y) != 
-     length(lower) | length(lower) != length(upper))
-  stop("vectors must be same length")
-  arrows(x,y + upper, x, y - lower, 
-         angle = 90, code = 3, length=length, ...)
-}
+#model likelihood
+p1 <- ggplot(subset(data,  param=="loglik")) + 
+      geom_boxplot(aes(model, value)) +
+      facet_wrap(~ trait, scales="free_y")
 
-alphas <- sapply(fits, function(x)  x$Param.est["alpha",])
-colnames(alphas) <- traits
-alphas.se <- sapply(fits, function(x)   x$Param.SE["alpha",])
-#### Plot alphas ###
-png("labrid_alphas.png", width=600)
-  bars <- barplot(alphas, beside=T, main="alphas", legend.text=regime.names,
-  ylim=c(0, max(alphas+alphas.se, na.rm=T)))
-  error.bar(bars, alphas, alphas.se)
-dev.off()
+# paramater estimates
+p2 <- ggplot(subset(data, param %in% c("sigma", "alpha"))) +
+      geom_boxplot(aes(trait, value, fill=regimes)) + 
+      facet_grid(param ~ model, scales = "free") + scale_y_log() 
 
-require(socialR)
-upload("labrid_alphas.png", script="labrid_ou.R", tag="phylogenetics")
+p3 <- ggplot(subset(data, param %in% c("sigma", "alpha"))) +
+      geom_boxplot(aes(model, value, fill=regimes)) + 
+      facet_grid(trait ~ param, scales = "free") 
+
+save(list=ls(), file=sprintf("%s.Rdat", id))
+ggsave(sprintf("%s_lik.png", id), p1)
+ggsave(sprintf("%s_params_p2.png", id),  p2)
+ggsave(sprintf("%s_params_p3.png", id),  p3)
+
+
+## For uploading plots at end  
+#require(socialR); require(ggplot2); require(wrightscape)
+#load(file=".Rdat") # must look up manually 
+#upload(sprintf("%s_*.png", id), gitaddr=gitaddr, tag="phylogenetics")
+
+
+#p <- ggplot(subset(data, param=="alpha" & value < 100)) + geom_boxplot(aes(trait, value, fill=regimes)) + facet_grid(. ~ model) 
+#ggplot(data) + geom_boxplot(aes(trait, value, fill=regimes)) + facet_wrap(param~.)
+
+
+
 
