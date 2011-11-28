@@ -12,8 +12,8 @@ id <- gitlog()$shortID
 
 
 data(parrotfish)
-#traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
-traits <- c("close", "open", "gape.y",  "prot.y")
+traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+#traits <- c("close", "open", "gape.y",  "prot.y")
 
 sfInit(par=T, 4)    # for debugging locally
 sfLibrary(wrightscape)
@@ -44,21 +44,29 @@ names(fits) <- traits  # each fit is a different trait (so use it for a label)
 data <- melt(fits)
 names(data) <- c("regimes", "param", "rep", "value", "model", "trait")
 
+#model likelihood
 p1 <- ggplot(subset(data,  param=="loglik")) + 
       geom_boxplot(aes(model, value)) +
       facet_wrap(~ trait, scales="free_y")
 
-p2 <- ggplot(subset(data, value < 100 & param %in% c("sigma", "alpha", "theta"))) +
+# paramater estimates
+p2 <- ggplot(subset(data, param %in% c("sigma", "alpha"))) +
       geom_boxplot(aes(trait, value, fill=regimes)) + 
-      facet_grid(param ~ model, scales = "free") 
+      facet_grid(param ~ model, scales = "free") + scale_y_log() 
+
+p3 <- ggplot(subset(data, param %in% c("sigma", "alpha"))) +
+      geom_boxplot(aes(model, value, fill=regimes)) + 
+      facet_grid(trait ~ param, scales = "free") 
 
 save(list=ls(), file=sprintf("%s.Rdat", id))
 ggsave(sprintf("%s_lik.png", id), p1)
-ggsave(sprintf("%s_params.png", id),  p2)
+ggsave(sprintf("%s_params_p2.png", id),  p2)
+ggsave(sprintf("%s_params_p3.png", id),  p3)
 
 
-require(socialR)
-#load(file=sprintf("%s.Rdat", id))
+## For uploading plots at end  
+#require(socialR); require(ggplot2); require(wrightscape)
+#load(file=".Rdat") # must look up manually 
 #upload(sprintf("%s_*.png", id), gitaddr=gitaddr, tag="phylogenetics")
 
 
