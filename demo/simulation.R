@@ -23,7 +23,7 @@ dat[["simulated_a1"]] <-simulate(a1)[[1]]
 s1_spec  <- list(alpha = "global", sigma = "indep", theta = "global")
 s1 <- multiTypeOU(data = dat["close"], tree = tree, regimes = pharyngeal, 
 	     model_spec = s1_spec,  control = list(maxit=5000))
-names(s1$alpha) <- levels(pharyngeal)
+names(s1$sigma) <- levels(pharyngeal)
 s1$sigma["other"] <- .01
 s1$sigma["pharyngeal"] <- .10
 
