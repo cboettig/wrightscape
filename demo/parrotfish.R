@@ -54,14 +54,20 @@ p2 <- ggplot(subset(data, param %in% c("sigma", "alpha"))) +
       geom_boxplot(aes(trait, value, fill=regimes)) + 
       facet_grid(param ~ model, scales = "free") + scale_y_log() 
 
-p3 <- ggplot(subset(data, param %in% c("sigma", "alpha"))) +
+p3 <- ggplot(subset(data, param %in% c("sigma"))) +
       geom_boxplot(aes(model, value, fill=regimes)) + 
-      facet_grid(trait ~ param, scales = "free") 
+      facet_wrap(trait ~ param, scales = "free_y") 
+
+p4 <- ggplot(subset(data, param %in% c("alpha"))) +
+      geom_boxplot(aes(model, value, fill=regimes)) + 
+      facet_wrap(trait ~ param, scales = "free_y") 
+
 
 save(list=ls(), file=sprintf("%s.Rdat", id))
 ggsave(sprintf("%s_lik.png", id), p1)
 ggsave(sprintf("%s_params_p2.png", id),  p2)
 ggsave(sprintf("%s_params_p3.png", id),  p3)
+ggsave(sprintf("%s_params_p3.png", id),  p4)
 
 
 ## For uploading plots at end  
