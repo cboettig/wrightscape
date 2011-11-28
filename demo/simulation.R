@@ -1,82 +1,90 @@
-# labrid example
-require(phytools)
-require(geiger)
+# simulation.R
+rm(list=ls())
 require(wrightscape)
-# This data has not been released
-labrid_tree <- read.nexus("labrid_tree.nex")
-#fin_data <-read.csv(paste(path,"labrid.csv", sep="")) # not actually being used
-diet_data <- read.csv("labriddata_parrotfish.csv")
+require(snowfall)
+require(ggplot2)
 
-#### size correct length and weight as fraction of body mass ####
-#for(i in c(3,4,6,7,8)){
-#	diet_data[i] <- diet_data[i]/diet_data[5]
-#}
-#diet_data[5] <- log(diet_data[5]) 
-
-corrected_data <- diet_data
-# Use the simple names from Price et al 2010
-traitnames <- c("Species", "group", "gape", "prot", "bodymass", "AM", "SH", "LP", "close", "open", "kt")
-names(corrected_data) <- traitnames
-# Lengths are log transformed 
-corrected_data[["gape"]] <- log(corrected_data[["gape"]])
-corrected_data[["prot"]] <- log(corrected_data[["prot"]])
-#masses are log(cube-root) transformed
-corrected_data[["bodymass"]] <- log(corrected_data[["bodymass"]])/3
-corrected_data[["AM"]] <- log(corrected_data[["AM"]])/3
-corrected_data[["SH"]] <- log(corrected_data[["SH"]])/3
-corrected_data[["LP"]] <- log(corrected_data[["LP"]])/3
-# ratios are fine as they are
-
-# Drop any unmatched tip-traits
-ape <- treedata(labrid_tree, corrected_data[,3:11], corrected_data[,1])
-
-# Run Revell's phylogenetic size corrections
-ape$data["bodysize"]
-out <- phyl.resid(ape$phy, ape$data[,"bodymass"], ape$data[,c("gape", "prot","AM", "SH", "LP")] )
-## phyl.resid changes order of species listing. Merge for a set of uncorrected and corrected traits.  
-traits <- merge(ape$data, out$resid, by="row.names")
-# columns that are transformed now have gape.x for untransformed, gape.y for transformed.  
-
-# format_data() gets regimes from column specified in
-# "regimes" (e.g. this is a column id, not a # of regimes)
-# This also converts the tree and data into ouch format
-## Could just hand it all traits, but these are just the tranformed and size-corrected ones
-labrid <- format_data(labrid_tree, traits[,2:length(traits)], species_names=traits[,1])  
-
-############### PAINTING REGIMES #################
-# Select common ancestor of a Chlorurus and a Hipposcarus as the changepoint
-intra_ancestor <- mrcaOUCH(c("Chlorurus_sordidus", "Hipposcarus_longiceps"), labrid$tree)
-intramandibular <- paintBranches(intra_ancestor, labrid$tree, c("other","intramandibular"))
-# Select common ancestor for all parrot fish
-pharyngeal_ancestor<-mrcaOUCH(c("Bolbometopon_muricatum", "Sparisoma_radians"), labrid$tree)
-pharyngeal <- paintBranches(pharyngeal_ancestor, labrid$tree, c("other","pharyngeal"))
-two_shifts <- paintBranches(c(pharyngeal_ancestor, intra_ancestor), labrid$tree, c("wrasses", "pharyngeal", "intramandibular") )
-
-## This leaves the branch on which the second transition occurs unspecified (fourth regime).  
-## We have to fix this manually
-two_shifts[as.numeric(intra_ancestor)] <- "intramandibular"
-two_shifts <- as.factor(as.character(two_shifts))
-names(two_shifts) <- names(intramandibular)
-
-# rename the ouch-formated data 
-dat <- labrid$data
-tree <- labrid$tree
-
-# rename the ape-formatted data
-ape.phy <- ape$phy
-ape.dat <- traits
+# store the unique id of this script version
+require(socialR)
+gitaddr <- gitcommit("simulation.R")
+id <- gitlog()$shortID
 
 
-save(list=c("intramandibular", "pharyngeal", "two_shifts", "tree", "dat", "ape.phy", "ape.dat"), file="labrids.rda")
+data(labrids)
+a1_spec  <- list(alpha = "indep", sigma = "global", theta = "global")
+a1 <- multiTypeOU(data = dat["close"], tree = tree, regimes = pharyngeal, 
+	     model_spec = a1_spec,  control = list(maxit=5000))
+names(a1$alpha) <- levels(pharyngeal)
+a1$alpha["other"] <- 10
+a1$alpha["pharyngeal"] <- .01
+dat[["simulated_a1"]] <-simulate(a1)[[1]]
 
-### We now have access to the following configurations:
-## intramandibular, pharyngeal and two_shifts paintings, (and labrid$noregimes),
-## and tree in labrid$tree
+
+s1_spec  <- list(alpha = "global", sigma = "indep", theta = "global")
+s1 <- multiTypeOU(data = dat["close"], tree = tree, regimes = pharyngeal, 
+	     model_spec = s1_spec,  control = list(maxit=5000))
+names(s1$alpha) <- levels(pharyngeal)
+s1$sigma["other"] <- .01
+s1$sigma["pharyngeal"] <- .10
+
+dat[["simulated_s1"]] <-simulate(s1)[[1]]
 
 
-  ## Note that this will converge poorly with the .01, .01 starting conditions
-  #  ou3 <- hansen(trait, labrid$tree, regime=two_shifts, .01, .01 )
-  #  loglik(ou3) - loglik(ou2_phar)
 
+traits <- c("simulated_a1", "simulated_s1")
+
+sfInit(par=T, 2)    # for debugging locally
+sfLibrary(wrightscape)
+sfExportAll()
+fits <- lapply(traits, function(trait){
+
+  # declare function for shorthand
+  multi <- function(modelspec, reps = 20){
+    m <- multiTypeOU(data = dat[[trait]], tree = tree, regimes = pharyngeal, 
+  		     model_spec = modelspec, 
+#		     control = list(temp = 20, tmax = 50), method = "SANN"
+		     control = list(maxit=5000)
+		    ) 
+    replicate(reps, bootstrap(m))
+  }
+
+  bm <- multi(list(alpha = "fixed", sigma = "indep", theta = "global"))
+  s1 <- multi(list(alpha = "global", sigma = "indep", theta = "global")) 
+  a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
+  s2 <- multi(list(alpha = "global", sigma = "indep", theta = "indep")) 
+  a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
+
+  list(bm=bm, s1=s1, a1=a1, s2=s2, a2=a2)
+})
+
+# Reformat and label data for plotting
+names(fits) <- traits  # each fit is a different trait (so use it for a label)
+data <- melt(fits)
+names(data) <- c("regimes", "param", "rep", "value", "model", "trait")
+#model likelihood
+p1 <- ggplot(subset(data,  param=="loglik")) + 
+      geom_boxplot(aes(model, value)) +
+      facet_wrap(~ trait, scales="free_y")
+
+# paramater estimates
+p2 <- ggplot(subset(data, param %in% c("sigma", "alpha"))) +
+      geom_boxplot(aes(trait, value, fill=regimes)) + 
+      facet_grid(param ~ model, scales = "free") + scale_y_log() 
+
+p3 <- ggplot(subset(data, param %in% c("sigma"))) +
+      geom_boxplot(aes(model, value, fill=regimes)) + 
+      facet_wrap(trait ~ param, scales = "free_y") 
+
+p4 <- ggplot(subset(data, param %in% c("alpha"))) +
+      geom_boxplot(aes(model, value, fill=regimes)) + 
+      facet_wrap(trait ~ param, scales = "free_y") 
+
+
+ggsave(sprintf("%s_lik.png", id), p1)
+ggsave(sprintf("%s_params_p2.png", id),  p2)
+ggsave(sprintf("%s_params_p3.png", id),  p3)
+ggsave(sprintf("%s_params_p4.png", id),  p4)
+
+#upload(sprintf("%s_*.png", id), gitaddr=gitaddr, tag="phylogenetics", save=FALSE)
 
 
