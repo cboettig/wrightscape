@@ -22,7 +22,7 @@ fits <- lapply(traits, function(trait){
 
   # declare function for shorthand
   multi <- function(modelspec, reps = 20){
-    m <- multiTypeOU(data = dat[trait], tree = tree, regimes = two_regimes, 
+    m <- multiTypeOU(data = dat[trait], tree = tree, regimes = two_shifts, 
   		     model_spec = modelspec, 
 #		     control = list(temp = 20, tmax = 50), method = "SANN"
 		     control = list(maxit=5000)
