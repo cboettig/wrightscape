@@ -1,4 +1,4 @@
-# mcmc_demo.R
+# simulation.R
 rm(list=ls())
 require(wrightscape)
 require(snowfall)
@@ -6,23 +6,41 @@ require(ggplot2)
 
 # store the unique id of this script version
 require(socialR)
-gitaddr <- gitcommit("parrotfish.R")
+gitaddr <- gitcommit("simulation.R")
 id <- gitlog()$shortID
 
 
+data(labrids)
+a1_spec  <- list(alpha = "indep", sigma = "global", theta = "global")
+a1 <- multiTypeOU(data = dat["close"], tree = tree, regimes = pharyngeal, 
+	     model_spec = a1_spec,  control = list(maxit=5000))
+names(a1$alpha) <- levels(pharyngeal)
+a1$alpha["other"] <- 10
+a1$alpha["pharyngeal"] <- .01
+dat[["simulated_a1"]] <-simulate(a1)[[1]]
 
-data(parrotfish)
-traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
-#traits <- c("close", "open", "gape.y",  "prot.y")
 
-sfInit(par=T, 4)    # for debugging locally
+s1_spec  <- list(alpha = "global", sigma = "indep", theta = "global")
+s1 <- multiTypeOU(data = dat["close"], tree = tree, regimes = pharyngeal, 
+	     model_spec = s1_spec,  control = list(maxit=5000))
+names(s1$sigma) <- levels(pharyngeal)
+s1$sigma["other"] <- .01
+s1$sigma["pharyngeal"] <- .10
+
+dat[["simulated_s1"]] <-simulate(s1)[[1]]
+
+
+
+traits <- c("simulated_a1", "simulated_s1")
+
+sfInit(par=T, 2)    # for debugging locally
 sfLibrary(wrightscape)
 sfExportAll()
 fits <- lapply(traits, function(trait){
 
   # declare function for shorthand
   multi <- function(modelspec, reps = 20){
-    m <- multiTypeOU(data = dat[trait], tree = tree, regimes = intramandibular, 
+    m <- multiTypeOU(data = dat[[trait]], tree = tree, regimes = pharyngeal, 
   		     model_spec = modelspec, 
 #		     control = list(temp = 20, tmax = 50), method = "SANN"
 		     control = list(maxit=5000)
@@ -43,7 +61,6 @@ fits <- lapply(traits, function(trait){
 names(fits) <- traits  # each fit is a different trait (so use it for a label)
 data <- melt(fits)
 names(data) <- c("regimes", "param", "rep", "value", "model", "trait")
-
 #model likelihood
 p1 <- ggplot(subset(data,  param=="loglik")) + 
       geom_boxplot(aes(model, value)) +
@@ -63,22 +80,11 @@ p4 <- ggplot(subset(data, param %in% c("alpha"))) +
       facet_wrap(trait ~ param, scales = "free_y") 
 
 
-save(list=ls(), file=sprintf("%s.Rdat", id))
 ggsave(sprintf("%s_lik.png", id), p1)
 ggsave(sprintf("%s_params_p2.png", id),  p2)
 ggsave(sprintf("%s_params_p3.png", id),  p3)
-ggsave(sprintf("%s_params_p3.png", id),  p4)
+ggsave(sprintf("%s_params_p4.png", id),  p4)
 
-
-## For uploading plots at end  
-#require(socialR); require(ggplot2); require(wrightscape)
-#load(file=".Rdat") # must look up manually 
-#upload(sprintf("%s_*.png", id), gitaddr=gitaddr, tag="phylogenetics")
-
-
-#p <- ggplot(subset(data, param=="alpha" & value < 100)) + geom_boxplot(aes(trait, value, fill=regimes)) + facet_grid(. ~ model) 
-#ggplot(data) + geom_boxplot(aes(trait, value, fill=regimes)) + facet_wrap(param~.)
-
-
+#upload(sprintf("%s_*.png", id), gitaddr=gitaddr, tag="phylogenetics", save=FALSE)
 
 
