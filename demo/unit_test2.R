@@ -1,4 +1,6 @@
 # unit_test2.R
+rm(list=ls())
+
 require(wrightscape)
 data(labrids)
 
@@ -26,7 +28,7 @@ data <- testcase
 lca <- lca_calc(tree)
 
 # expect higher alpha on "other" (alpha2) to be best, higher on alpha1 is worst
-# BUT NO!
+# BUT NO!  FIXME -- check out means of the two groups!!
 multiOU_lik_lca(testcase, tree, intramandibular, alpha=c(2,2), sigma=c(5,5), theta=c(0.5, 0.5), Xo=0.5, lca)
 multiOU_lik_lca(testcase, tree, intramandibular, alpha=c(5,2), sigma=c(5,5), theta=c(0.5, 0.5), Xo=0.5, lca)
 multiOU_lik_lca(testcase, tree, intramandibular, alpha=c(2,5), sigma=c(5,5), theta=c(0.5, 0.5), Xo=0.5, lca)

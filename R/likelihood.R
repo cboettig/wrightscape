@@ -236,7 +236,7 @@ multiOU_lik_lca <- function(data, tree, regimes, alpha=NULL, sigma=NULL, theta=N
     ## CONVERT tree elements into C formats 
 	
 	## root state conditioning handled elsewhere
-	# if(is.null(Xo)){ Xo <- mean(data, na.rm=TRUE) }
+	if(is.null(Xo)){ Xo <- mean(data, na.rm=TRUE) }
 
 	# NAs on the internal nodes are made into zeros 
 	# C object doesn't support NA in type "double"
@@ -264,7 +264,10 @@ multiOU_lik_lca <- function(data, tree, regimes, alpha=NULL, sigma=NULL, theta=N
 	if(length(sigma) == 1) { sigma <- rep(sigma, n_regimes) }
 	if(is.null(theta)) { theta <- rep(Xo, n_regimes) }
 
-	# Maps the regimes to numbers alphabetically.  
+	# assumes root theta
+	# Xo <- theta[match(regimes[1], levels(regimes))]  
+	# Maps the regimes to numbers alphabetically. 
+ 
 	levels(regimes) <- 1:n_regimes
 	regimes <- as.integer(regimes)-1  # convert to C-style indexing
 
