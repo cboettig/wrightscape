@@ -26,3 +26,4 @@ Collate:
     'treeformats.R'
     'wrightscape.R'
     'format_data.R'
+    'data.R'
