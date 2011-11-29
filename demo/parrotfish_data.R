@@ -4,10 +4,8 @@ require(phytools)
 require(geiger)
 
 # This data has not been released
-path = "labrids/"
-labrid_tree <- read.nexus("labrid_tree.nex")
-diet_data <- read.csv("labriddata_parrotfish.csv")
-#fin_data <-read.csv(paste(path,"labrid.csv", sep=""))
+labrid_tree <- read.nexus("../data/labrid_tree.nex")
+diet_data <- read.csv("../data/labriddata_parrotfish.csv")
 
 corrected_data <- diet_data
 # Use the simple names from Price et al 2010
