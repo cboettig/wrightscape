@@ -106,11 +106,11 @@ wrightscape <- function(data, tree, regimes, alpha=1, sigma=1,
 	n_nodes <- length(branch_length)
 	n_regimes <- length(levels(regimes))
 
-  # rep these if not specified
+  	# rep these if not specified
 	if(length(alpha) == 1){ alpha <- rep(alpha, n_regimes) }
-	if(is.null(theta)) { theta <- rep(Xo, n_regimes) }
+	if(length(theta) == 1) { theta <- rep(theta, n_regimes) }
 	if(length(sigma) == 1) { sigma <- rep(sigma, n_regimes) }
-
+	if(is.null(theta)) { theta <- rep(Xo, n_regimes) }
 
 	levels(regimes) <- 1:n_regimes
 	regimes <- as.integer(regimes)-1  # convert to C-style indexing
