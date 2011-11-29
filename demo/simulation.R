@@ -10,26 +10,93 @@ gitaddr <- gitcommit("simulation.R")
 id <- gitlog()$shortID
 
 
+
+
+
+
+
+
+
+data(labrids)
+a1_spec  <- list(alpha = "indep", sigma = "global", theta = "global")
+a1 <- multiTypeOU(data = dat["close"], tree = tree, regimes = intramandibular, 
+	     model_spec = a1_spec,  control = list(maxit=5000))
+names(a1$alpha) <- levels(intramandibular)
+a1$alpha["other"] <- 10
+a1$alpha["intramandibular"] <- 1e-10
+a1$sigma <- c(15, 15)
+a1$theta <- c(0,0)
+dat[["simulated_a1"]] <-simulate(a1)[[1]]
+dummy <- update(a1, dat[["simulated_a1"]]) 
+
+testcase <- dat[["simulated_a1"]]
+testcase[intramandibular=="other" & !is.na(testcase) & testcase != 0] -> lowvar
+testcase[intramandibular!="other" & !is.na(testcase) & testcase != 0] -> highvar
+
+var(lowvar)
+var(highvar)
+
+dummy$alpha
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 data(labrids)
 a1_spec  <- list(alpha = "indep", sigma = "global", theta = "global")
 a1 <- multiTypeOU(data = dat["close"], tree = tree, regimes = pharyngeal, 
 	     model_spec = a1_spec,  control = list(maxit=5000))
 names(a1$alpha) <- levels(pharyngeal)
 a1$alpha["other"] <- 10
-a1$alpha["pharyngeal"] <- .01
+a1$alpha["pharyngeal"] <- 1e-12
+a1$sigma <- c(5,5)
 dat[["simulated_a1"]] <-simulate(a1)[[1]]
+dummy <- update(a1, dat[["simulated_a1"]]) 
+
+testcase <- dat[["simulated_a1"]]
+testcase[pharyngeal=="other" & !is.na(testcase) & testcase != 0 ] -> lowvar 
+testcase[pharyngeal!="other" & !is.na(testcase) & testcase != 0 ] -> highvar
+var(lowvar)
+var(highvar)
+dummy$alpha
+
 
 
 s1_spec  <- list(alpha = "global", sigma = "indep", theta = "global")
 s1 <- multiTypeOU(data = dat["close"], tree = tree, regimes = pharyngeal, 
 	     model_spec = s1_spec,  control = list(maxit=5000))
+# Order of entries in sigma is the order regime names are given by levels (alphabetical)
 names(s1$sigma) <- levels(pharyngeal)
-s1$sigma["other"] <- .01
-s1$sigma["pharyngeal"] <- .10
+s1$sigma["other"] <- .1
+s1$sigma["pharyngeal"] <- 10
+testcase <- simulate(s1)[[1]]
+testcase[pharyngeal=="other" & !is.na(testcase) & testcase != 0 ] -> lowvar
+testcase[pharyngeal!="other" & !is.na(testcase) & testcase != 0 ] -> highvar
+var(lowvar)
+var(highvar)
+
+# and the recovered estimates are pretty close to the underlying simulation parameters
+dummy <- update(s1, testcase)
+dummy$sigma
+
+
+
+
 
 dat[["simulated_s1"]] <-simulate(s1)[[1]]
-
-
 
 traits <- c("simulated_a1", "simulated_s1")
 
@@ -78,6 +145,8 @@ p3 <- ggplot(subset(data, param %in% c("sigma"))) +
 p4 <- ggplot(subset(data, param %in% c("alpha"))) +
       geom_boxplot(aes(model, value, fill=regimes)) + 
       facet_wrap(trait ~ param, scales = "free_y") 
+
+save(list=ls(), file=sprintf("%s_lik.Rdat", id))
 
 
 ggsave(sprintf("%s_lik.png", id), p1)

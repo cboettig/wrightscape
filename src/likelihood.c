@@ -272,6 +272,17 @@ void calc_lik (const double *Xo, const double alpha[], const double theta[],
 
 	int * tips = alloc_tips(*n_nodes, ancestor);
 
+/*
+	// DEBUG CHECK
+	printf("alphas: %.1lf, %.1lf\n", alpha[0], alpha[1]);
+	printf("sigmas: %.1lf, %.1lf\n", sigma[0], sigma[1]);
+	printf("Debugging alpha assignments: regime, sigma alpha\n");
+	for(i=0; i < *n_nodes; i++){
+		printf("%d\t %d\t\t %.1lf\t %.1lf\n", i, regimes[i], 
+			sigma[regimes[i]], alpha[regimes[i]]);
+	}
+*/
+
     /* Calculate the mean square differences */
 	for(i = 0; i < n_tips; i++){
 		ki = tips[i];
@@ -280,7 +291,7 @@ void calc_lik (const double *Xo, const double alpha[], const double theta[],
 		X_EX[i] = traits[ki] - mean;
 		gamma_vec[ki] = gamma_i;
 	}
-    /* Calculate the varainces */
+    /* Calculate the variances */
 	for(i=0; i < n_tips; i++){
 		ki = tips[i];
 		for(j=0; j< n_tips; j++){

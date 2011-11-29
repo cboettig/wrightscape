@@ -111,12 +111,6 @@ wrightscape <- function(data, tree, regimes, alpha=1, sigma=1,
 	if(is.null(theta)) { theta <- rep(Xo, n_regimes) }
 	if(length(sigma) == 1) { sigma <- rep(sigma, n_regimes) }
 
-  ## shouldn't be necessary
-  if(is.list(alpha)) unlist(alpha)
-  if(is.list(theta)) unlist(theta)
-  if(is.list(sigma)) unlist(sigma)
-  if(is.list(Xo)) unlist(Xo)
-
 
 	levels(regimes) <- 1:n_regimes
 	regimes <- as.integer(regimes)-1  # convert to C-style indexing

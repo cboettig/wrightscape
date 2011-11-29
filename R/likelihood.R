@@ -31,7 +31,7 @@ multiTypeOU <- function(data, tree, regimes, model_spec =
                        Xo=NULL, alpha=1, sigma=1, theta=NULL, ...){
   opts=list(...)
 
-  myCall <- match.call()
+  myCall <- match.call() # can be used to call the function as it was called
   n_regimes <- length(levels(regimes))
   par <- setup_pars(data, tree, regimes, model_spec, Xo=Xo, 
                     alpha=alpha, sigma=sigma, theta=theta)
@@ -99,7 +99,7 @@ llik.closure <- function(data, tree, regimes, model_spec, fixed=
   indices <- get_indices(model_spec, n_regimes)
   lca <- lca_calc(tree)
   f <- function(par){
-     Xo <- par[indices$theta_i][match(regimes[1], levels(regimes))]  # assumes root theta
+    Xo <- par[indices$theta_i][match(regimes[1], levels(regimes))]  # assumes root theta
     if(any(is.null(indices$alpha_i)))
       alpha <- rep(fixed$alpha, n_regimes)
     else 
@@ -204,7 +204,7 @@ lca_calc <- function(tree){
 }
 
 #' compute the likelihood by passing data to the C level function, wrightscape 
-#' @param data - ouch-style data
+#' @param data - ouch-style data -- a numeric, in the same order as nodes given in "tree"
 #' @param tree - ouch-tree
 #' @param regimes - painting of selective regimes, as in ouch
 #' @param alpha - (vector length n_regimes) gives strength of selection in each regime
@@ -229,31 +229,47 @@ multiOU_lik_lca <- function(data, tree, regimes, alpha=NULL, sigma=NULL, theta=N
 		if( !is(data, "numeric")) {stop("data should be data frame or numeric") }
 	}
 	# regimes should be a factor instead of data.frame
-	regimesIn <- regimes
-	if(is(regimes, "data.frame")) { 
-		regimes <- regimes[[1]]
-		if( !is(regimes, "factor")) {stop("unable to interpret regimes") }
+	if(!is(regimes, "factor")) { 
+		error("regimes should be a factor")
 	}
 
     ## CONVERT tree elements into C formats 
-	if(is.null(Xo)){ Xo <- mean(data, na.rm=TRUE) }
-	data[is.na(data)] = 0 
+	
+	## root state conditioning handled elsewhere
+	# if(is.null(Xo)){ Xo <- mean(data, na.rm=TRUE) }
+
+	# NAs on the internal nodes are made into zeros 
+	# C object doesn't support NA in type "double"
+	data[is.na(data)] = 0
+
+
+	# Tree is defined as an ancestor list and a branch_length list 
 	ancestor <- as.numeric(tree@ancestors)
-	ancestor[is.na(ancestor)] = 0 
-	ancestor <- ancestor-1  # C-style indexing
-	## ouch gives cumulative time, not branch-length!!
+	ancestor[is.na(ancestor)] = 0 # NA on root to zero 
+	ancestor <- ancestor-1        # C-style indexing
+
+
+	# Calculate branch lengths (ouch gives cumulative time, not branch-length)
 	anc <- as.integer(tree@ancestors[!is.na(tree@ancestors)])
 	lengths <- c(0, tree@times[!is.na(tree@ancestors)] - tree@times[anc] )
 	branch_length <- lengths/max(tree@times)
+
+	# C must know the length of vectors
 	n_nodes <- length(branch_length)
 	n_regimes <- length(levels(regimes))
+
 	if(length(alpha) == 1){ alpha <- rep(alpha, n_regimes) }
 	if(is.null(theta)) { theta <- rep(Xo, n_regimes) }
 	if(length(sigma) == 1) { sigma <- rep(sigma, n_regimes) }
+
+
+	# Maps the regimes to numbers alphabetically.  
 	levels(regimes) <- 1:n_regimes
 	regimes <- as.integer(regimes)-1  # convert to C-style indexing
 
     llik <- 0
+
+
     ## calculate the likelihood
 	o<- .C("calc_lik", as.double(Xo), as.double(alpha), as.double(theta),
             as.double(sigma), as.integer(regimes), as.integer(ancestor),
