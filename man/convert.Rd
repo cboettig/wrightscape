@@ -9,8 +9,9 @@
   "ouchtree"}
 
   \item{regimes}{optional list of regimes for an ouchtree}
-
-  \item{the}{}
+}
+\value{
+  a phylogenetic tree in the alternative format
 }
 \description{
   toggles between ouch and ape format trees

@@ -6,7 +6,8 @@
     sigma = NULL, theta = NULL, Xo = NULL, lca)
 }
 \arguments{
-  \item{data}{- ouch-style data}
+  \item{data}{- ouch-style data -- a numeric, in the same
+  order as nodes given in "tree"}
 
   \item{tree}{- ouch-tree}
 
