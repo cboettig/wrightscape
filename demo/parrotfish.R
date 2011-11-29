@@ -1,4 +1,4 @@
-# mcmc_demo.R
+# parrotfish.R
 rm(list=ls())
 require(wrightscape)
 require(snowfall)
