@@ -1,3 +1,8 @@
+
+## CHECK branchlength times alpha
+## CHECK lca_calc!!!
+
+
 rm(list=ls())
 require(wrightscape)
 data(labrids)
