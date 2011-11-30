@@ -5,7 +5,7 @@
 # simulation function, calls the C code
 # @keywords internal 
 simulate_wrightscape <- function(tree, regimes, Xo, alpha, theta, sigma,
-                                 seed=NULL){
+                                 seed=NULL, scale=max(tree@times)){
 
 	# regimes should be a factor instead of data.frame
 	regimesIn <- regimes
@@ -21,7 +21,7 @@ simulate_wrightscape <- function(tree, regimes, Xo, alpha, theta, sigma,
 	## ouch gives cumulative time, not branch-length!!
 	anc <- as.integer(tree@ancestors[!is.na(tree@ancestors)])
 	lengths <- c(0, tree@times[!is.na(tree@ancestors)] - tree@times[anc] )
-	branch_length <- lengths/max(tree@times)
+	branch_length <- lengths/scale 
 
 	n_nodes <- length(branch_length)
 	n_regimes <- length(levels(regimes))

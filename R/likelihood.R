@@ -212,6 +212,7 @@ lca_calc <- function(tree){
 #' @param theta - (vector length n_regimes) gives optimum trait in each regime
 #' @param Xo - root value
 #' @param lca - least common ancestor matrix, from lca_calc fun
+#' @param scale normalize branch lengths by this amount
 #' @return the log likelihood at the given parameter values
 #' @details 
 #' A version of the multitype OU likelihood function that accepts the least 
@@ -219,11 +220,10 @@ lca_calc <- function(tree){
 #' since the calculation needs to be done only once and is rather slow as implemented    
 #' .C calls should do some error checking on the length of inputs maybe, 
 #' to avoid crashes when given inappropriate calls
-multiOU_lik_lca <- function(data, tree, regimes, alpha=NULL, sigma=NULL, theta=NULL, Xo=NULL, lca){
+multiOU_lik_lca <- function(data, tree, regimes, alpha=NULL, sigma=NULL, theta=NULL, Xo=NULL, lca, scale=max(tree@times)){
 
     ## ERROR HANDLING, write this as a seperate function
 	# data should be a numeric instead of data.frame.  Should check node names or node order too!
-	dataIn <- data
 	if(is(data, "data.frame") | is(data, "list")) { 
 		data <- data[[1]]
 		if( !is(data, "numeric")) {stop("data should be data frame or numeric") }
@@ -252,7 +252,7 @@ multiOU_lik_lca <- function(data, tree, regimes, alpha=NULL, sigma=NULL, theta=N
 	# Calculate branch lengths (ouch gives cumulative time, not branch-length)
 	anc <- as.integer(tree@ancestors[!is.na(tree@ancestors)])
 	lengths <- c(0, tree@times[!is.na(tree@ancestors)] - tree@times[anc] )
-	branch_length <- lengths/max(tree@times)
+	branch_length <- lengths/scale #/ ## don't normalize?
 
 	# C must know the length of vectors
 	n_nodes <- length(branch_length)

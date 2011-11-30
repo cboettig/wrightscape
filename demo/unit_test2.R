@@ -45,15 +45,3 @@ a1$alpha
 
 
 
-
-# Test of single OU
-test <- dat[["prot.y"]]
-test[!is.na(test)] <- rnorm(sum(!is.na(test)), sd=10)
-ou  <- list(alpha = "global", sigma = "global", theta = "global")
-m1 <- multiTypeOU(data=test, tree=tree, regimes=intramandibular, model_spec=ou)
-test[!is.na(test)] <- rnorm(sum(!is.na(test)), sd=.1)
-m2 <- multiTypeOU(data=test, tree=tree, regimes=intramandibular, model_spec=ou)
-m1$alpha # larger variance has smaller alpha
-m2$alpha
-
-
