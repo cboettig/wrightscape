@@ -35,39 +35,39 @@
  */
 int 
 get_lca(int i, int j, int n_nodes, const int * ancestor, 
-            const double * branch_length, double * sep)
+        const double * branch_length, double * sep)
 {
-	int * ancestor_list = (int *) malloc(n_nodes * sizeof(int));
-	int k = 0, s = 0;
-	double * time_to_ancestor = (double *) calloc(n_nodes, sizeof(double));
+  int * ancestor_list = (int *) malloc(n_nodes * sizeof(int));
+  int k = 0, s = 0;
+  double * time_to_ancestor = (double *) calloc(n_nodes, sizeof(double));
 
-	for(k=0; k<n_nodes; k++)
-	{
-		ancestor_list[k]=0;
-	}
-	k = 0;
-	while(1){
-		ancestor_list[k] = i;
-		time_to_ancestor[k+1] = time_to_ancestor[k] + branch_length[i];
-		if(i==0) break;
-		i = ancestor[i];
-		k++;
-	}
-	while(1){
-		for(k=0; k<n_nodes; k++){
-			if(j == ancestor_list[k]){ 
-				s = j;
-				j = 0;
-				break; 
-			}
-		}
-		if(j==0) break;
-		j = ancestor[j];
-	}
-	*sep = time_to_ancestor[k];
-	free(time_to_ancestor);
-	free(ancestor_list);
-	return s;	
+  for(k=0; k<n_nodes; k++)
+  {
+    ancestor_list[k]=0;
+  }
+  k = 0;
+  while(1){
+    ancestor_list[k] = i;
+    time_to_ancestor[k+1] = time_to_ancestor[k] + branch_length[i];
+    if(i==0) break;
+    i = ancestor[i];
+    k++;
+  }
+  while(1){
+    for(k=0; k<n_nodes; k++){
+      if(j == ancestor_list[k]){ 
+        s = j;
+        j = 0;
+        break; 
+      }
+    }
+    if(j==0) break;
+    j = ancestor[j];
+  }
+  *sep = time_to_ancestor[k];
+  free(time_to_ancestor);
+  free(ancestor_list);
+  return s; 
 }
 
 /** Simple function to compute the age of a node measured from root, forward 
@@ -75,13 +75,13 @@ get_lca(int i, int j, int n_nodes, const int * ancestor,
 double 
 node_age(int i, const int * ancestor, const double * branch_length)
 {
-	double time=0;
-	while(ancestor[i] >= 0 )
-	{
-		time += branch_length[i];
-		i = ancestor[i];
-	}
-	return time; 
+  double time=0;
+  while(ancestor[i] >= 0 )
+  {
+    time += branch_length[i];
+    i = ancestor[i];
+  }
+  return time; 
 }
 
 /**
@@ -95,143 +95,125 @@ node_age(int i, const int * ancestor, const double * branch_length)
 */
 double log_normal_lik(int n, double * X_EX, double * V)
 {
-	gsl_matrix * V_inverse = gsl_matrix_alloc(n,n);
+  gsl_matrix * V_inverse = gsl_matrix_alloc(n,n);
     gsl_permutation * p = gsl_permutation_alloc (n);
-	gsl_matrix * ANS = gsl_matrix_alloc(1,n);
-	gsl_matrix * ANS2 = gsl_matrix_alloc(1,1);
-	double V_det, Xt_Vi_X;
-	int signum;
+  gsl_matrix * ANS = gsl_matrix_alloc(1,n);
+  gsl_matrix * ANS2 = gsl_matrix_alloc(1,1);
+  double V_det, Xt_Vi_X;
+  int signum;
 
-	gsl_matrix_view V_view = gsl_matrix_view_array(V, n, n);
-	gsl_matrix_view DIFF = gsl_matrix_view_array(X_EX, n, 1);
-	gsl_linalg_LU_decomp (&V_view.matrix, p, &signum);
-	gsl_linalg_LU_invert(&V_view.matrix, p, V_inverse);
-	V_det = gsl_linalg_LU_det(&V_view.matrix,signum);
+  gsl_matrix_view V_view = gsl_matrix_view_array(V, n, n);
+  gsl_matrix_view DIFF = gsl_matrix_view_array(X_EX, n, 1);
+  gsl_linalg_LU_decomp (&V_view.matrix, p, &signum);
+  gsl_linalg_LU_invert(&V_view.matrix, p, V_inverse);
+  V_det = gsl_linalg_LU_det(&V_view.matrix,signum);
 
-	/** @f$ -2 \log L = (X - E(X) )^T V^{-1} (X-E(X) ) + N\log(2\pi) + \log(\det V) @f$ */
-	// Consider using appropriate blas optimized multiplication, not general matrix-matrix method!!
-	gsl_blas_dgemm (CblasTrans, CblasNoTrans,
-				   1.0, &DIFF.matrix, V_inverse,
-				   0.0, ANS);
-	gsl_blas_dgemm (CblasNoTrans, CblasNoTrans,
-				   1.0, ANS, &DIFF.matrix,
-				   0.0, ANS2);
-	Xt_Vi_X = gsl_matrix_get(ANS2, 0, 0);
+  /** @f$ -2 \log L = (X - E(X) )^T V^{-1} (X-E(X) ) + N\log(2\pi) + \log(\det V) @f$ */
+  // Consider using appropriate blas optimized multiplication, not general matrix-matrix method!!
+  gsl_blas_dgemm (CblasTrans, CblasNoTrans,
+           1.0, &DIFF.matrix, V_inverse,
+           0.0, ANS);
+  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans,
+           1.0, ANS, &DIFF.matrix,
+           0.0, ANS2);
+  Xt_Vi_X = gsl_matrix_get(ANS2, 0, 0);
 
-	gsl_matrix_free(ANS);
-	gsl_matrix_free(ANS2);
-	gsl_matrix_free(V_inverse);
-	gsl_permutation_free(p);
+  gsl_matrix_free(ANS);
+  gsl_matrix_free(ANS2);
+  gsl_matrix_free(V_inverse);
+  gsl_permutation_free(p);
 
-	return -Xt_Vi_X/2. -  n*log(2*M_PI)/2. - log(V_det)/2.;
+  return -Xt_Vi_X/2. -  n*log(2*M_PI)/2. - log(V_det)/2.;
 }
 
-
-/** Calculate mean for likelihood computation, 
- * @brief Calculates the mean and the gamma
- * @param i focal node
- * @param Xo root state
- * @param alpha  value of alpha in each regime, length n_regimes
- * @param theta value of theta in each regime
- * @param regimes specification of the regimes (paintings), length n_nodes
- * @param ancestor ancestor of the node, length n_nodes
- * @param branch_length length ancestral to the node, length n_nodes
- * @param output_gamma a handle to the output value of gamma calculated
- * @return returns the mean
- *
- * @f[ E(X_t) = \exp \left( - \sum \alpha_i \Delta t_i \right)
- * \left( X_{t_i} + \sum \theta_i \left(
- * e^{\alpha_i t_i}-e^{\alpha_i t_{i-1} } \right) \right) @f] 
- *
- * Define the following:
- * @f[ \gamma_i = \alpha_i * t @f]
- * @f[ \omega_i = \alpha_i * t @f]
- * @f[ (\omega + Xo) e^{\gamma} \]
- * */ 
-double calc_mean(int i, double Xo,	const double * alpha, const double * theta, 
-                 const int * regimes, const int * ancestor, 
-                 const double * branch_length, 	double * output_gamma	)
+/** Calculate the row of the gamma matrix for tip i
+ * @param tips a vector giving the node number of each tip (data)
+ * @param n_tips the number of tips (data)
+ * @param alpha vector of alpha parameters for each regime (data)
+ * @param regimes the regime of each branch (data)
+ * @param branch_length vector of branch lengths of each node (data)
+ * @param gamma_matrix the returned matrix (well, a pointer to it)
+ * @details in gamma_matrix[i,j], i is the node-number of the tip
+ * whose history we are tracking, j is any other node.  Only for j's
+ * in the ancestry of i will gamma[i,j] have entries.  Those entries
+ * are simply the sum of branch lengths times alpha values of that node */
+void calc_gamma_matrix(const int * tips, const int n_tips, 
+                       const double * alpha, const int * regimes, 
+                       const int * ancestor, const double * branch_length,
+                       gsl_matrix * gamma_matrix)
 {
-	int ri;
-	/* Find the time until the root, which must have ancestor -1 */
-	double time = node_age(i, ancestor, branch_length);
-	double prev_time;
-
-	/* Compute E(X_i) */
-	long double gamma=0, omega=0;
-	while( ancestor[i] >= 0 )
-	{
-		prev_time = time - branch_length[i]; 
-		ri = regimes[i];
-		gamma += alpha[ri] * branch_length[i];
-		omega += theta[ri] * ( exp(alpha[ri]*time) - exp(alpha[ri] * prev_time) );
-		i = ancestor[i];
-		time = prev_time;
-	}
-	*output_gamma = gamma;
-
-	return exp(-gamma)*(Xo + omega);
-}
-
-
-
-/**
- * @brief Calculate the variance matrix for the multivariate normal likelihood
- * @details
- * @f[ \omega = \frac{\sigma^2}{2 \alpha } 
- *     \left( e^{2\alpha t_i} - e^{2 \alpha t_{i-1} \right)} @f]
- * @f[ \langle x_i, x_i \rangle = \omega exp( \alpha_i t_i - \alpha_j t_j) @f]
- */
-double calc_var(
-	int i, int j, ///< nodes being compared
-	int lca, ///< last common ancestor, pass to avoid recalculating
-	const double * alpha, ///< value of alpha in each regime, length n_regimes
-	const double * sigma, ///< value of sigma in each regime
-	const int * regimes, ///< specification of the regimes (paintings), length n_nodes
-	const int * ancestor, ///< ancestor of the node, length n_nodes
-	const double * branch_length, ///< branch length ancestral to the node, length n_nodes
-	const double * gamma_vec ///< alpha_i * 
-	)
-{
-
-	double gamma_i = gamma_vec[i], gamma_j = gamma_vec[j];
-
-  /* Calculate the age of MRCA of i & j, measured from the root */
-	double time = node_age(lca, ancestor, branch_length); 
-	double prev_time;
-	int ri;
-	long double omega=0;
-
-	i = lca;
-	while( ancestor[i] >= 0) 
-	{
-		ri = regimes[i];
-		prev_time = time - branch_length[i];
-		omega += gsl_pow_2( sigma[ri] ) / (2 * alpha[ri] ) * (
-			exp( 2 * alpha[ri] * time ) - exp( 2 * alpha[ri] * prev_time ) ) *
-      kappa_i * kappa_j;
-		time = prev_time;
-		i = ancestor[i];
-	}
-	return omega;
-}
-
-
-// Should compute this as a matrix once and store it
-// kappa_i = sum_{j=i+1}^{n} alpha[ri] * branch_length[i] //n is the tip
-double kappa(int i,	const double * alpha, ///< value of alpha in each regime, length n_regimes
-	const int * regimes, ///< specification of the regimes (paintings), length n_nodes
-	const int * ancestor, ///< ancestor of the node, length n_nodes
-	const double * branch_length ///< branch length ancestral to the node, length n_nodes
-){
-  int node = i;
-    while( ancestor[node] != i){
-  	  ri = regimes[i];
-      kappa[i] += branch_length[node] * alpha[ri]
-      node <- ancestor[node]
+  double value = 0;
+  int i, j, k, rj;
+  for(k = 0; k < n_tips; k++)
+  {
+    i = tips[k]; 
+    j = ancestor[i];
+    while( ancestor[j] != 0)
+    {
+      rj = regimes[j];
+      value += branch_length[j] * alpha[rj];
+      gsl_matrix_set(gamma_matrix, i, j, value);
+      j = ancestor[j];
     }
+  }
 }
  
+double calc_mean(int i, double Xo,  const double * alpha, 
+                 const double * theta, const int * regimes, 
+                 const int * ancestor, const double * branch_length, 
+                 const gsl_matrix * gamma_matrix)
+{
+  int tip = i; // remember the tip value
+  int ri;
+  long double omega=0;
+  while( ancestor[i] >= 0 )
+  {
+    ri = regimes[i];
+    omega += theta[ri] * (1 - exp(- alpha[ri] * branch_length[i])) *
+             gsl_matrix_get(gamma_matrix, tip, i);
+    i = ancestor[i];
+  }
+  return Xo * gsl_matrix_get(gamma_matrix, tip, 0) + omega;
+}
+
+
+
+/** Calculate the covariance between tips i & j
+ * @f[ \gamma_{i,k} \gamma_{j_k} \frac{\sigma_k^2}{2 \alpha_k} 
+ *     \left(e^{2\alpha_k T } - e^{2 \alpha_k (T - l)} \right) @f]
+ *  where T is the age of the node and l the length of the branch under it
+ */
+double calc_var(
+  int i, int j, ///< nodes being compared
+  int lca, ///< last common ancestor, pass to avoid recalculating
+  const double * alpha, ///< value of alpha in each regime, length n_regimes
+  const double * sigma, ///< value of sigma in each regime
+  const int * regimes, ///< specification of the regimes (paintings), length n_nodes
+  const int * ancestor, ///< ancestor of the node, length n_nodes
+  const double * branch_length, ///< branch length ancestral to the node, length n_nodes
+  gsl_matrix * gamma_matrix 
+  )
+{
+  /* Calculate the age of MRCA of i & j, measured from the root */
+  double time = node_age(lca, ancestor, branch_length); 
+  double prev_time;
+  int k = lca;
+  int rk;
+  long double omega=0;
+
+  while( ancestor[k] >= 0) 
+  {
+    rk = regimes[k];
+    prev_time = time - branch_length[k];
+    omega += gsl_pow_2( sigma[rk] ) / (2 * alpha[rk] ) * (
+      exp( 2 * alpha[rk] * time ) - exp( 2 * alpha[rk] * prev_time ) ) *
+      gsl_matrix_get(gamma_matrix, i, k) * gsl_matrix_get(gamma_matrix, j, k);
+    time = prev_time;
+    k = ancestor[k];
+  }
+  return omega;
+}
+
 
 /**
 * @brief Create a vector of length n tips with the identies of the tip nodes
@@ -242,27 +224,27 @@ double kappa(int i,	const double * alpha, ///< value of alpha in each regime, le
 * @return an integer array of the tip nodes
 */
 int * alloc_tips(int n_nodes, const int * ancestor){
-	int n_tips = (n_nodes+1)/2;
-	int * child = (int *) calloc(n_nodes,sizeof(int) );
-	int * tips = (int *) calloc(n_tips,sizeof(int) );
-	int i, j, k=0, empty;
-	for(i=0; i < n_nodes; i++){ 
-		empty = 1;
-		for(j=0; j < n_nodes; j++){
-			if(i == ancestor[j] ){
-				if(empty){ 
-					child[i] = j;
-					empty = 0;
-				}
-			}
-		}
-		if (child[i] == 0){
-			tips[k] = i;
-			k++;
-		}
-	}
-	free(child);
-	return tips;
+  int n_tips = (n_nodes+1)/2;
+  int * child = (int *) calloc(n_nodes,sizeof(int) );
+  int * tips = (int *) calloc(n_tips,sizeof(int) );
+  int i, j, k=0, empty;
+  for(i=0; i < n_nodes; i++){ 
+    empty = 1;
+    for(j=0; j < n_nodes; j++){
+      if(i == ancestor[j] ){
+        if(empty){ 
+          child[i] = j;
+          empty = 0;
+        }
+      }
+    }
+    if (child[i] == 0){
+      tips[k] = i;
+      k++;
+    }
+  }
+  free(child);
+  return tips;
 }
 
 
@@ -289,50 +271,51 @@ int * alloc_tips(int n_nodes, const int * ancestor){
 *
 */
 void calc_lik (const double *Xo, const double alpha[], const double theta[], 
-	             const double sigma[], const int regimes[], const int ancestor[],
+               const double sigma[], const int regimes[], const int ancestor[],
                  const double branch_length[], const double traits[], 
                  int *n_nodes, int lca_matrix[], double *llik)
 {
-	gsl_set_error_handler_off ();
+  /* gsl_set_error_handler_off (); /* Comment out this line to assist debugging */
 
   /* Declare variables */
-	int i, j, ki, kj;
-	int n_tips = (*n_nodes+1)/2;
-	double *X_EX = (double *) malloc(n_tips * sizeof(double));
-	double *V = (double *) malloc(n_tips * n_tips * sizeof(double));
-	double *gamma_vec = (double *) calloc(*n_nodes, sizeof(double));
-	double mean, gamma_i;
-	int lca;
+  int i, j, ki, kj;
+  int n_tips = (*n_nodes+1)/2;
+  double *X_EX = (double *) malloc(n_tips * sizeof(double));
+  double *V = (double *) malloc(n_tips * n_tips * sizeof(double));
+  gsl_matrix * gamma_matrix = gsl_matrix_alloc(n_tips,*n_nodes);
+  double mean;
+  int lca;
+  int * tips = alloc_tips(*n_nodes, ancestor);
 
-	int * tips = alloc_tips(*n_nodes, ancestor);
+  /* Calculate the gamma matrix */
+  calc_gamma_matrix(tips, n_tips, alpha, regimes, ancestor,
+                    branch_length, gamma_matrix);
 
   /* Calculate the mean square differences */
-	for(i = 0; i < n_tips; i++){
-		ki = tips[i];
-		mean = calc_mean(ki, *Xo, alpha, theta, regimes, ancestor,
-                         branch_length, &gamma_i);
-		X_EX[i] = traits[ki] - mean;
-		gamma_vec[ki] = gamma_i;
-	}
-    /* Calculate the variances */
-	for(i=0; i < n_tips; i++){
-		ki = tips[i];
-		for(j=0; j< n_tips; j++){
-			kj = tips[j];
+  for(i = 0; i < n_tips; i++){
+    ki = tips[i];
+    mean = calc_mean(ki, *Xo, alpha, theta, regimes, ancestor,
+                     branch_length, gamma_matrix);
+    X_EX[i] = traits[ki] - mean;
+  }
+  /* Calculate the variances */
+  for(i=0; i < n_tips; i++){
+    ki = tips[i];
+    for(j=0; j< n_tips; j++){
+      kj = tips[j];
       /* Identify which node is last common ancestor of the tips*/
-			lca = lca_matrix[ki * *n_nodes + kj];
+      lca = lca_matrix[ki * *n_nodes + kj];
       /* get the covariance between all possible pairs of tips */
-			V[n_tips*i+j] = calc_var(ki, kj, lca, alpha, sigma, regimes,
-                                     ancestor, branch_length, gamma_vec);
-		}
-	}
+      V[n_tips*i+j] = calc_var(ki, kj, lca, alpha, sigma, regimes,
+                               ancestor, branch_length, gamma_matrix);
+    }
+  }
 
-
-	*llik = log_normal_lik(n_tips, X_EX, V);
-	free(gamma_vec);
-	free(X_EX); 
-	free(V);
-	free(tips);
+  *llik = log_normal_lik(n_tips, X_EX, V);
+  free(gamma_matrix);
+  free(X_EX); 
+  free(V);
+  free(tips);
 }
 
 
@@ -345,53 +328,60 @@ void calc_lik (const double *Xo, const double alpha[], const double theta[],
 */
 void simulate (const gsl_rng * rng, tree * mytree)
 {
+  /* Allocate memory */
   int i,j,ki, kj;
   int n_tips = (mytree->n_nodes+1)/2;
   gsl_vector * EX = gsl_vector_alloc(n_tips);
   gsl_matrix * V = gsl_matrix_alloc(n_tips,n_tips);
   gsl_vector * simdata = gsl_vector_alloc(n_tips);
-  double * gamma_vec = (double *) calloc(mytree->n_nodes,sizeof(double));
+  gsl_matrix * gamma_matrix = gsl_matrix_alloc(n_tips,mytree->n_nodes);
   int * tips = alloc_tips(mytree->n_nodes, mytree->ancestor);
-
-  double gamma_i;
   int lca;
 
+  /* Calculate the gamma matrix */
+  calc_gamma_matrix(tips, n_tips, mytree->alpha, mytree->regimes,
+                    mytree->ancestor, mytree->branch_length, 
+                    gamma_matrix);
+
+  /* Calculate means */
   for(i = 0; i < n_tips; i++){
     ki = tips[i];
-    gsl_vector_set( EX,
-                    i,
+    gsl_vector_set(EX, i,
                     calc_mean(ki, *(mytree->Xo), mytree->alpha, 
                               mytree->theta, mytree->regimes, 
                               mytree->ancestor, mytree->branch_length, 
-                              &gamma_i));
-    gamma_vec[ki] = gamma_i;
+                              gamma_matrix));
   }
+  /* Calculate Variances */
   for(i=0; i < n_tips; i++){
     ki = tips[i];
     for(j=0; j< n_tips; j++){
       kj = tips[j];
-      lca = mytree->lca_matrix[ki*mytree->n_nodes+kj];
-      gsl_matrix_set(	V, i, j, 
+      lca = mytree->lca_matrix[ki * mytree->n_nodes + kj];
+      gsl_matrix_set( V, i, j, 
                       calc_var(ki,kj,lca, mytree->alpha, 
                                mytree->sigma, mytree->regimes, 
                                mytree->ancestor, mytree->branch_length, 
-                               gamma_vec));
+                               gamma_matrix));
     }
   }
 
+  /* Calculate simulated data as multivariate normal random numbers */
   mvn(rng, EX, V, simdata);
 
+  /* Write that data to the tip states */
   for(i=0; i< n_tips; i++){
       ki = tips[i];
       mytree->traits[ki] = gsl_vector_get(simdata,i);
   }
 
+  /* Clean up */
   gsl_vector_free(EX);
   gsl_matrix_free(V);
   gsl_vector_free(simdata);
-  free(gamma_vec);
+  free(gamma_matrix);
   free(tips);
-  }
+}
 
 
 
