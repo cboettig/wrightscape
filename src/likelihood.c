@@ -70,7 +70,7 @@ get_lca(int i, int j, int n_nodes, const int * ancestor,
 	return s;	
 }
 
-/** Simple function to compute the age of a node 
+/** Simple function to compute the age of a node measured from root, forward 
  *  Called by calc_mean and calc_var */
 double 
 node_age(int i, const int * ancestor, const double * branch_length)
@@ -196,7 +196,7 @@ double calc_var(
 
 	double gamma_i = gamma_vec[i], gamma_j = gamma_vec[j];
 
-  /* Calculate the age of MRCA of i & j */
+  /* Calculate the age of MRCA of i & j, measured from the root */
 	double time = node_age(lca, ancestor, branch_length); 
 	double prev_time;
 	int ri;
@@ -207,16 +207,31 @@ double calc_var(
 	{
 		ri = regimes[i];
 		prev_time = time - branch_length[i];
-// kappa_i = sum_j alpha[ri] * branch_i
-
 		omega += gsl_pow_2( sigma[ri] ) / (2 * alpha[ri] ) * (
-			exp( 2 * alpha[ri] * time ) - exp( 2 * alpha[ri] * prev_time ) );
+			exp( 2 * alpha[ri] * time ) - exp( 2 * alpha[ri] * prev_time ) ) *
+      kappa_i * kappa_j;
 		time = prev_time;
 		i = ancestor[i];
 	}
-	return exp(-gamma_i - gamma_j) * omega;
+	return omega;
 }
 
+
+// Should compute this as a matrix once and store it
+// kappa_i = sum_{j=i+1}^{n} alpha[ri] * branch_length[i] //n is the tip
+double kappa(int i,	const double * alpha, ///< value of alpha in each regime, length n_regimes
+	const int * regimes, ///< specification of the regimes (paintings), length n_nodes
+	const int * ancestor, ///< ancestor of the node, length n_nodes
+	const double * branch_length ///< branch length ancestral to the node, length n_nodes
+){
+  int node = i;
+    while( ancestor[node] != i){
+  	  ri = regimes[i];
+      kappa[i] += branch_length[node] * alpha[ri]
+      node <- ancestor[node]
+    }
+}
+ 
 
 /**
 * @brief Create a vector of length n tips with the identies of the tip nodes
