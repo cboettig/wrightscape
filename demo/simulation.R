@@ -13,10 +13,6 @@ id <- gitlog()$shortID
 
 
 
-
-
-
-
 data(labrids)
 a1_spec  <- list(alpha = "indep", sigma = "global", theta = "global")
 a1 <- multiTypeOU(data = dat["close"], tree = tree, regimes = intramandibular, 
@@ -24,15 +20,14 @@ a1 <- multiTypeOU(data = dat["close"], tree = tree, regimes = intramandibular,
 names(a1$alpha) <- levels(intramandibular)
 a1$alpha["other"] <- 10
 a1$alpha["intramandibular"] <- 1e-10
-a1$sigma <- c(15, 15)
-a1$theta <- c(0,0)
+#a1$sigma <- c(15, 15)
+#a1$theta <- c(0,0)
 dat[["simulated_a1"]] <-simulate(a1)[[1]]
 dummy <- update(a1, dat[["simulated_a1"]]) 
 
 testcase <- dat[["simulated_a1"]]
 testcase[intramandibular=="other" & !is.na(testcase) & testcase != 0] -> lowvar
 testcase[intramandibular!="other" & !is.na(testcase) & testcase != 0] -> highvar
-
 var(lowvar)
 var(highvar)
 
@@ -43,19 +38,6 @@ dummy$alpha
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-data(labrids)
 a1_spec  <- list(alpha = "indep", sigma = "global", theta = "global")
 a1 <- multiTypeOU(data = dat["close"], tree = tree, regimes = pharyngeal, 
 	     model_spec = a1_spec,  control = list(maxit=5000))
