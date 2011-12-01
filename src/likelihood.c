@@ -389,7 +389,7 @@ void simulate (const gsl_rng * rng, tree * mytree)
   gsl_vector * EX = gsl_vector_alloc(n_tips);
   gsl_matrix * V = gsl_matrix_alloc(n_tips,n_tips);
   gsl_vector * simdata = gsl_vector_alloc(n_tips);
-  gsl_matrix * gamma_matrix = gsl_matrix_alloc(n_tips,mytree->n_nodes);
+  gsl_matrix * gamma_matrix = gsl_matrix_alloc(mytree->n_nodes,mytree->n_nodes);
   int * tips = alloc_tips(mytree->n_nodes, mytree->ancestor);
   int lca;
 
