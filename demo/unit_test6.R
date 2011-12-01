@@ -5,7 +5,7 @@
 
 rm(list=ls())
 require(wrightscape)
-data(labrids)
+load("../data/labrids.rda")
 regimes <- intramandibular
 
 
@@ -27,10 +27,10 @@ Xo <- theta
 
 ou  <- list(alpha = "global", sigma = "global", theta = "global")
 
-m1 <- multiTypeOU(data=test, tree=tree, regimes=regimes, model_spec=ou)
+m1 <- multiTypeOU(data=test, tree=tree, regimes=regimes, alpha=alpha, sigma=sigma, theta=theta, Xo=Xo, model_spec=ou)
 tree <- convert(lambdaTree(convert(tree), .001))
-m2 <- multiTypeOU(data=test, tree=tree, regimes=regimes, model_spec=ou)
-m1$alpha # larger variance has smaller alpha
-m2$alpha
+m2 <- multiTypeOU(data=test, tree=tree, regimes=regimes, alpha=alpha, sigma=sigma, theta=theta, Xo=Xo, model_spec=ou)
+print(m1$alpha) # larger variance has smaller alpha
+print(m2$alpha)
 
 

@@ -207,6 +207,8 @@ double calc_var(
 	{
 		ri = regimes[i];
 		prev_time = time - branch_length[i];
+// kappa_i = sum_j alpha[ri] * branch_i
+
 		omega += gsl_pow_2( sigma[ri] ) / (2 * alpha[ri] ) * (
 			exp( 2 * alpha[ri] * time ) - exp( 2 * alpha[ri] * prev_time ) );
 		time = prev_time;
