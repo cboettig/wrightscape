@@ -128,17 +128,29 @@ double log_normal_lik(int n, double * X_EX, double * V)
 
 
 /** Calculate mean for likelihood computation, 
- */
-double calc_mean(
-	int i,
-	double Xo, ///< root state
-	const double * alpha, ///< value of alpha in each regime, length n_regimes
-	const double * theta, ///< value of theta in each regime
-	const int * regimes, ///< specification of the regimes (paintings), length n_nodes
-	const int * ancestor, ///< ancestor of the node, length n_nodes
-	const double * branch_length, ///< branch length ancestral to the node, length n_nodes
-	double * output_gamma
-	)
+ * @brief Calculates the mean and the gamma
+ * @param i focal node
+ * @param Xo root state
+ * @param alpha  value of alpha in each regime, length n_regimes
+ * @param theta value of theta in each regime
+ * @param regimes specification of the regimes (paintings), length n_nodes
+ * @param ancestor ancestor of the node, length n_nodes
+ * @param branch_length length ancestral to the node, length n_nodes
+ * @param output_gamma a handle to the output value of gamma calculated
+ * @return returns the mean
+ *
+ * @f[ E(X_t) = \exp \left( - \sum \alpha_i \Delta t_i \right)
+ * \left( X_{t_i} + \sum \theta_i \left(
+ * e^{\alpha_i t_i}-e^{\alpha_i t_{i-1} } \right) \right) @f] 
+ *
+ * Define the following:
+ * @f[ \gamma_i = \alpha_i * t @f]
+ * @f[ \omega_i = \alpha_i * t @f]
+ * @f[ (\omega + Xo) e^{\gamma} \]
+ * */ 
+double calc_mean(int i, double Xo,	const double * alpha, const double * theta, 
+                 const int * regimes, const int * ancestor, 
+                 const double * branch_length, 	double * output_gamma	)
 {
 	int ri;
 	/* Find the time until the root, which must have ancestor -1 */
@@ -164,9 +176,11 @@ double calc_mean(
 
 
 /**
- * Calculate the variance matrix for the multivariate normal likelihood
- * Function would be faster if it could reuse the gamma values calculated for the means.  
- * Function would be much faster if it stored gamma
+ * @brief Calculate the variance matrix for the multivariate normal likelihood
+ * @details
+ * @f[ \omega = \frac{\sigma^2}{2 \alpha } 
+ *     \left( e^{2\alpha t_i} - e^{2 \alpha t_{i-1} \right)} @f]
+ * @f[ \langle x_i, x_i \rangle = \omega exp( \alpha_i t_i - \alpha_j t_j) @f]
  */
 double calc_var(
 	int i, int j, ///< nodes being compared
@@ -176,15 +190,13 @@ double calc_var(
 	const int * regimes, ///< specification of the regimes (paintings), length n_nodes
 	const int * ancestor, ///< ancestor of the node, length n_nodes
 	const double * branch_length, ///< branch length ancestral to the node, length n_nodes
-	const double * gamma_vec
+	const double * gamma_vec ///< alpha_i * 
 	)
 {
-/** 
- * @f[ E(X_t) = \exp \left( - \sum \alpha_i \Delta t_i \right)
- * \left( X_{t_i} + \sum \theta_i \left(
- * e^{\alpha_i t_i}-e^{\alpha_i t_{i-1} } \right) \right) @f] */
+
 	double gamma_i = gamma_vec[i], gamma_j = gamma_vec[j];
 
+  /* Calculate the age of MRCA of i & j */
 	double time = node_age(lca, ancestor, branch_length); 
 	double prev_time;
 	int ri;
@@ -200,7 +212,7 @@ double calc_var(
 		time = prev_time;
 		i = ancestor[i];
 	}
-	return exp(-gamma_i - gamma_j)*omega;
+	return exp(-gamma_i - gamma_j) * omega;
 }
 
 
@@ -254,6 +266,10 @@ int * alloc_tips(int n_nodes, const int * ancestor){
 * @param lca_matrix[] a n_nodes^2 matrix of least common ancestor for each pair,
 *  computed by the lca_calc function once per tree for efficiency.
 * @param llik the likelihood returned by the function
+*
+* @details 
+*  Calculates the expected value and the convariance matrix for each tip.  
+*
 */
 void calc_lik (const double *Xo, const double alpha[], const double theta[], 
 	             const double sigma[], const int regimes[], const int ancestor[],
@@ -262,7 +278,8 @@ void calc_lik (const double *Xo, const double alpha[], const double theta[],
 {
 	gsl_set_error_handler_off ();
 
-	int i,j,ki, kj;
+  /* Declare variables */
+	int i, j, ki, kj;
 	int n_tips = (*n_nodes+1)/2;
 	double *X_EX = (double *) malloc(n_tips * sizeof(double));
 	double *V = (double *) malloc(n_tips * n_tips * sizeof(double));
@@ -272,18 +289,7 @@ void calc_lik (const double *Xo, const double alpha[], const double theta[],
 
 	int * tips = alloc_tips(*n_nodes, ancestor);
 
-/*
-	// DEBUG CHECK
-	printf("alphas: %.1lf, %.1lf\n", alpha[0], alpha[1]);
-	printf("sigmas: %.1lf, %.1lf\n", sigma[0], sigma[1]);
-	printf("Debugging alpha assignments: regime, sigma alpha\n");
-	for(i=0; i < *n_nodes; i++){
-		printf("%d\t %d\t %.1lf\t %.1lf %.1lf\n", i, regimes[i], 
-			sigma[regimes[i]], alpha[regimes[i]], theta[regimes[i]]);
-	}
-*/
-
-    /* Calculate the mean square differences */
+  /* Calculate the mean square differences */
 	for(i = 0; i < n_tips; i++){
 		ki = tips[i];
 		mean = calc_mean(ki, *Xo, alpha, theta, regimes, ancestor,
@@ -296,7 +302,9 @@ void calc_lik (const double *Xo, const double alpha[], const double theta[],
 		ki = tips[i];
 		for(j=0; j< n_tips; j++){
 			kj = tips[j];
+      /* Identify which node is last common ancestor of the tips*/
 			lca = lca_matrix[ki * *n_nodes + kj];
+      /* get the covariance between all possible pairs of tips */
 			V[n_tips*i+j] = calc_var(ki, kj, lca, alpha, sigma, regimes,
                                      ancestor, branch_length, gamma_vec);
 		}
