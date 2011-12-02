@@ -3,7 +3,8 @@
 \title{compute the likelihood by passing data to the C level function, wrightscape}
 \usage{
   multiOU_lik_lca(data, tree, regimes, alpha = NULL,
-    sigma = NULL, theta = NULL, Xo = NULL, lca)
+    sigma = NULL, theta = NULL, Xo = NULL, lca,
+    scale = max(tree@times))
 }
 \arguments{
   \item{data}{- ouch-style data -- a numeric, in the same
@@ -27,6 +28,8 @@
 
   \item{lca}{- least common ancestor matrix, from lca_calc
   fun}
+
+  \item{scale}{normalize branch lengths by this amount}
 }
 \value{
   the log likelihood at the given parameter values
