@@ -61,10 +61,21 @@ update.multiOU <- function(model, data){
 }
 
 
-#' Internal, extending the method to multiOU class
+#' Internal use mostly extending the method to multiOU class
+#' exported for use by PMC
+#' @param a multiOU class object (model fit)
+#' @return extracts the log likelihood value
+#' @method loglik multiOU
+#' @S3method loglik multiOU
+#' @export
 loglik.multiOU <- loglik.wrighttree
 
 #' Internal, extends method to mulitOU class
+#' @param a multiOU class object
+#' @return a vector of all the model parameter estimates
+#' @method getParameters multiOU
+#' @S3method getParameters multiOU
+#' @export
 getParameters.multiOU <- getParameters.wrighttree
 
 
