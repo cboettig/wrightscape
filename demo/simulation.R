@@ -68,9 +68,9 @@ dat[["simulated_s1"]] <-simulate(s1)[[1]]
 ## Can we correctly identify each??
 
 traits <- c("simulated_a1", "simulated_s1")
-sfInit(par=T, 2)    # for debugging locally
-sfLibrary(wrightscape)
-sfExportAll()
+#sfInit(par=T, 2)    # for debugging locally
+#sfLibrary(wrightscape)
+#sfExportAll()
 fits <- lapply(traits, function(trait){
   # declare function for shorthand
   multi <- function(modelspec, reps = 20){
