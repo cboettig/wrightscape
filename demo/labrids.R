@@ -9,19 +9,25 @@ require(ggplot2)
 
 # store the unique id of this script version
 require(socialR)
-gitaddr <- gitcommit("labrid.R")
+gitaddr <- gitcommit("labrids.R")
 id <- gitlog()$shortID
+
+print(id)
 
 
 data(labrids)
 traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
 #traits <- c("close", "open", "gape.y",  "prot.y")
 
-fits <- lapply(traits, function(trait){
+
+sfInit(par=T, 9)    # for debugging locally
+sfLibrary(wrightscape)
+sfExportAll()
+fits <- sfLapply(traits, function(trait){
 
   # declare function for shorthand
   multi <- function(modelspec, reps = 20){
-    m <- multiTypeOU(data = dat[trait], tree = tree, regimes = intramandibular, 
+    m <- multiTypeOU(data = dat[trait], tree = tree, regimes = pharyngeal, 
   		     model_spec = modelspec, 
 		     control = list(maxit=3000)
 		    ) 
@@ -60,6 +66,9 @@ save(list=ls(), file=sprintf("%s.Rdat", id))
 ggsave(sprintf("%s_lik.png", id), p1)
 ggsave(sprintf("%s_params_p2.png", id),  p2)
 ggsave(sprintf("%s_params_p3.png", id),  p3)
+
+
+print(id)
 
 ## For uploading plots at end  
 #require(socialR); require(ggplot2); require(wrightscape)
