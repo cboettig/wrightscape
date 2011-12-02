@@ -8,15 +8,10 @@ require(ggplot2)
 require(socialR)
 gitaddr <- gitcommit("simulation.R")
 id <- gitlog()$shortID
-
-
 print(id)
 
-
 data(labrids)
-#
 #  Create a dataset by simulation, where the parrotfish all have lower alpha
-#
 a1_spec  <- list(alpha = "indep", sigma = "global", theta = "global")
 a1 <- multiTypeOU(data = dat["close"], tree = tree, regimes = pharyngeal, 
 	     model_spec = a1_spec,  control = list(maxit=5000))
@@ -41,10 +36,7 @@ dummy <- update(a1, dat[["simulated_a1"]])
 print(dummy$alpha) # let's see what kind of 
 
 
-
-
 ## We can repeat the whole thing with a model based on differnt sigmas, to make sure 
-
 s1_spec  <- list(alpha = "global", sigma = "indep", theta = "global")
 s1 <- multiTypeOU(data = dat["close"], tree = tree, regimes = pharyngeal, 
 	     model_spec = s1_spec,  control = list(maxit=5000))
@@ -104,6 +96,10 @@ p1 <- ggplot(subset(data,  param=="loglik")) +
 p2 <- ggplot(subset(data, param %in% c("sigma", "alpha"))) +
       geom_boxplot(aes(trait, value, fill=regimes)) + 
       facet_grid(param ~ model, scales = "free") + scale_y_log() 
+
+#cast(subset(data, param %in% c("sigma", "alpha")), trait ~ value, mean)
+
+
 
 p3 <- ggplot(subset(data, param %in% c("sigma"))) +
       geom_boxplot(aes(model, value, fill=regimes)) + 
