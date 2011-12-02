@@ -32,9 +32,9 @@ dat[["simulated_a1"]] <-simulate(a1)[[1]]
 regime <- pharyngeal
 testcase <- dat[["simulated_a1"]]
 testcase[regime =="other" & !is.na(testcase) & testcase != 0] -> lowvar
-testcase[regimei !="other" & !is.na(testcase) & testcase != 0] -> highvar
-var(lowvar)
-var(highvar)
+testcase[regime !="other" & !is.na(testcase) & testcase != 0] -> highvar
+print(var(lowvar))
+print(var(highvar))
 
 # estimate a model from this simulated data
 dummy <- update(a1, dat[["simulated_a1"]]) 
