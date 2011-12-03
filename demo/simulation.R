@@ -11,29 +11,29 @@ id <- gitlog()$shortID
 print(id)
 
 data(labrids)
+
+# rename the regimes less technically
+levels(pharyngeal) = c("wrasses", "parrotfish")
+regime <- pharyngeal
 #  Create a dataset by simulation, where the parrotfish all have lower alpha
 a1_spec  <- list(alpha = "indep", sigma = "global", theta = "global")
-a1 <- multiTypeOU(data = dat["close"], tree = tree, regimes = pharyngeal, 
+a1 <- multiTypeOU(data = dat["close"], tree = tree, regimes = regime, 
 	     model_spec = a1_spec,  control = list(maxit=5000))
-names(a1$alpha) <- levels(pharyngeal) 
-a1$alpha["other"] <- 10
-a1$alpha["pharyngeal"] <- 1e-10
-#a1$sigma <- c(15, 15)  # We can keep those parameters estimated from data or update them
-#a1$theta <- c(0,0)   
-dat[["simulated_a1"]] <-simulate(a1)[[1]]
+
+# expected "startree" standard deviations: wrasses 1.25, parrotfish 5
+a1$alpha[1] <- 10
+a1$alpha[2] <- 1e-10
+a1$sigma <- c(5, 5)  
+a1$theta <- c(0,0)   
+dat[["constraint release"]] <-simulate(a1)[[1]]
+
 
 # Check out the variance in the relative groups -- it should be larger in parrotfish
 # in an extreme example, but need not be... 
-regime <- pharyngeal
-testcase <- dat[["simulated_a1"]]
-testcase[regime =="other" & !is.na(testcase) & testcase != 0] -> lowvar
-testcase[regime !="other" & !is.na(testcase) & testcase != 0] -> highvar
-print(var(lowvar))
-print(var(highvar))
-
-# estimate a model from this simulated data
-dummy <- update(a1, dat[["simulated_a1"]]) 
-print(dummy$alpha) # let's see what kind of 
+testcase <- dat[["constraint release"]]
+testcase[regime =="wrasses" & !is.na(testcase) & testcase != 0] -> lowvar
+testcase[regime !="wrasses" & !is.na(testcase) & testcase != 0] -> highvar
+print(c(var(lowvar), var(highvar)))
 
 
 ## We can repeat the whole thing with a model based on differnt sigmas, to make sure 
@@ -41,31 +41,28 @@ s1_spec  <- list(alpha = "global", sigma = "indep", theta = "global")
 s1 <- multiTypeOU(data = dat["close"], tree = tree, regimes = pharyngeal, 
 	     model_spec = s1_spec,  control = list(maxit=5000))
 # Order of entries in sigma is the order regime names are given by levels (alphabetical)
-names(s1$sigma) <- levels(pharyngeal)
-s1$sigma["other"] <- .1
-s1$sigma["pharyngeal"] <- 10
-testcase <- simulate(s1)[[1]]
-testcase[pharyngeal=="other" & !is.na(testcase) & testcase != 0 ] -> lowvar
-testcase[pharyngeal!="other" & !is.na(testcase) & testcase != 0 ] -> highvar
-var(lowvar)
-var(highvar)
-# and the recovered estimates are pretty close to the underlying simulation parameters
-dummy <- update(s1, testcase)
-dummy$sigma
-dat[["simulated_s1"]] <-simulate(s1)[[1]]
-
+names(s1$sigma) <- levels(regime)
+s1$sigma[1] <- sqrt(2*5*1.25)
+s1$sigma[2] <- sqrt(2*5*5)
+s1$alpha <- c(5, 5)  # We can keep those parameters estimated from data or update them
+a1$theta <- c(0,0)   
+dat[["faster evolution"]] <-simulate(s1)[[1]]
+testcase <- dat[["faster evolution"]]
+testcase[regime == "wrasses" & !is.na(testcase) & testcase != 0 ] -> lowvar
+testcase[regime != "wrasses" & !is.na(testcase) & testcase != 0 ] -> highvar
+print(c(var(lowvar), var(highvar)))
 
 ## Now we have a trait where change in alpha is responsible, 
 ## and one in which sigma change is responsible. 
 ## Can we correctly identify each??
 
-traits <- c("simulated_a1", "simulated_s1")
+traits <- c("constraint release", "faster evolution")
 sfInit(par=T, 2)    # for debugging locally
 sfLibrary(wrightscape)
 sfExportAll()
 fits <- sfLapply(traits, function(trait){
   # declare function for shorthand
-  multi <- function(modelspec, reps = 20){
+  multi <- function(modelspec, reps = 40){
     m <- multiTypeOU(data = dat[[trait]], tree = tree, regimes = pharyngeal, 
   		     model_spec = modelspec, 
 #		     control = list(temp = 20, tmax = 50), method = "SANN"
@@ -87,35 +84,45 @@ fits <- sfLapply(traits, function(trait){
 names(fits) <- traits  # each fit is a different trait (so use it for a label)
 data <- melt(fits)
 names(data) <- c("regimes", "param", "rep", "value", "model", "trait")
+print(id)
+
+
+save(list=ls(), file=sprintf("%s.Rdat", id))
+
+
+
+
 #model likelihood
 p1 <- ggplot(subset(data,  param=="loglik")) + 
       geom_boxplot(aes(model, value)) +
       facet_wrap(~ trait, scales="free_y")
 
-# paramater estimates
-p2 <- ggplot(subset(data, param %in% c("sigma", "alpha"))) +
-      geom_boxplot(aes(trait, value, fill=regimes)) + 
-      facet_grid(param ~ model, scales = "free") + scale_y_log() 
+p2 <-  ggplot(subset(data, param %in% c("sigma", "alpha")), aes(model, value, fill=regimes)) + 
+#       stat_summary(fun.y=mean, geom="bar", position="dodge") + # add bars for some extra ink...
+       stat_summary(fun.data=mean_sdl, geom="pointrange", aes(color=regimes), 
+		    position = position_dodge(width=0.90)) +
+       scale_y_log() + 
+       facet_grid(param ~ trait, scales = "free_y")
 
-#cast(subset(data, param %in% c("sigma", "alpha")), trait ~ value, mean)
-
-
-
-p3 <- ggplot(subset(data, param %in% c("sigma"))) +
+p3 <- ggplot(subset(data, param %in% c("sigma") )) +
       geom_boxplot(aes(model, value, fill=regimes)) + 
       facet_wrap(trait ~ param, scales = "free_y") 
 
-p4 <- ggplot(subset(data, param %in% c("alpha"))) +
+p4 <- ggplot(subset(data, param %in% c("alpha")  )) +
       geom_boxplot(aes(model, value, fill=regimes)) + 
       facet_wrap(trait ~ param, scales = "free_y") 
 
-save(list=ls(), file=sprintf("%s_lik.Rdat", id))
+save(list=ls(), file=sprintf("%s.Rdat", id))
+
+
+
 ggsave(sprintf("%s_lik.png", id), p1)
-ggsave(sprintf("%s_params_p2.png", id),  p2)
+ggsave(sprintf("%s_params_p2.png", id),  p2, width=14)
 ggsave(sprintf("%s_params_p3.png", id),  p3)
 ggsave(sprintf("%s_params_p4.png", id),  p4)
 
-print(id)
+
+
 
 #upload(sprintf("%s_*.png", id), gitaddr=gitaddr, tag="phylogenetics", save=FALSE)
 
