@@ -1,11 +1,15 @@
 \name{getParameters}
 \alias{getParameters}
-\title{An internal generic function}
+\title{get parameters of a fitted object}
 \usage{
-  getParameters(x, y, ...)
+  getParameters(x, ...)
+}
+\arguments{
+  \item{x}{a model fit}
+
+  \item{...}{additional arguments}
 }
 \description{
   An internal generic function
 }
-\keyword{internal}
 

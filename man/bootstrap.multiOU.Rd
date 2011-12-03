@@ -2,11 +2,7 @@
 \alias{bootstrap.multiOU}
 \title{function to bootstrap a multiOU object}
 \usage{
-  \method{bootstrap}{multiOU} (modelfit)
-}
-\arguments{
-  \item{modelfit}{a multiOU object, (output of
-  multiTypeOU() fn)}
+  bootstrap.multiOU(modelfit)
 }
 \value{
   a matrix of bootstrap values. (replicates fixed values)

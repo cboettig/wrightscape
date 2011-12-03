@@ -4,6 +4,10 @@
 \usage{
   bootstrap(x, ...)
 }
+\arguments{
+  \item{modelfit}{a multiOU object, (output of
+  multiTypeOU() fn)}
+}
 \description{
   bootstrap: a function to compute bootstrap replicates
 }
