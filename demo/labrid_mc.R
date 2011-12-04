@@ -17,7 +17,7 @@ print(id)
 data(labrids)
 traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
 
-regimes <- pharyngeal
+regimes <- two_shifts
   # declare function for shorthand
 sfInit(par=T, 10)    # for debugging locally
 sfLibrary(wrightscape)
