@@ -16,7 +16,7 @@ data(parrotfish)
 
 regimes <- intramandibular
   # declare function for shorthand
-sfInit(par=F)    # for debugging locally
+sfInit(par=T, cpu=4)    # for debugging locally
 sfLibrary(wrightscape)
 sfExportAll()
 
@@ -25,8 +25,8 @@ sfExportAll()
 			    model_spec = modelspec, control = list(maxit=8000))
 
 	}
-	s1 <- multi(list(alpha = "global", sigma = "indep", theta = "global")) 
-	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
+	s2 <- multi(list(alpha = "global", sigma = "indep", theta = "global")) 
+	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
 
 sfExportAll()
 mc <- montecarlotest(s1,a1)
