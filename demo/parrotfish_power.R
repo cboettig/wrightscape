@@ -25,10 +25,12 @@ sfExportAll()
 			    model_spec = modelspec, control = list(maxit=8000))
 
 	}
-	s2 <- multi(list(alpha = "global", sigma = "indep", theta = "global")) 
-	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
+	s1 <- multi(list(alpha = "global", sigma = "indep", theta = "global")) 
+	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
+	s2 <- multi(list(alpha = "global", sigma = "indep", theta = "indep")) 
+	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
 
 sfExportAll()
-mc <- montecarlotest(s1,a1)
+mc <- montecarlotest(s2,a2)
 plot(mc)
 
