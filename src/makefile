@@ -1,21 +1,35 @@
 #-----------------------------------#
-#	Makefile for GNU C++ Compiler	#
+# Makefile for GNU C Compiler	    #
 #-----------------------------------#
 CC = gcc
-CFLAGS = -Wall -lgsl -lgslcblas -lm -O4 -fpic -funroll-loops 
+CFLAGS = -Wall -O4 -fpic -funroll-loops 
+LIB = -lgsl -lgslcblas -lm
 EXE = wrightscape.exe 
 LDLIB = /usr/common/usg/gsl/1.13/lib
 INC = /usr/common/usg/gsl/1.13/include
 FILES = piecewise_regimes.c likelihood.c multimin.c siman.c mvn.c 
 
 build: $(FILES)
-	$(CC) -I$(INC) -L$(LDLIB) $(CFLAGS) -o $(EXE) $(FILES)
+	$(CC) -I$(INC) -L$(LDLIB) $(LIB) $(CFLAGS) -o $(EXE) $(FILES)
+
+objects: $(FILES)
+	$(CC) $(CFLAGS2) -c piecewise_regimes.c -o piecewise_regimes.o
+	$(CC) $(CFLAGS2) -c likelihood.c -o likelihood.o
+	$(CC) $(CFLAGS2) -c siman.c -o siman.o
+	$(CC) $(CFLAGS2) -c multimin.c -o multimin.o
+	$(CC) $(CFLAGS2) -c mvn.c -o mvn.o
+
+shared: $(FILES)
+	$(CC) $(LIB) -shared -o wrightscape.so *.o  
+
+ibm: $(FILES)
+	$(CC) -I$(INC) -L$(LDLIB) $(LIB) $(CFLAGS) -o $(EXE) $(FILES)
 
 profile: $(FILES)
-	$(CC) $(CFLAGS) -g -pg -o $(EXE) $(FILES)
+	$(CC)  $(LIB) $(CFLAGS) -g -pg -o $(EXE) $(FILES)
 
 debug:  $(FILES)
-	$(CC) $(CFLAGS) -g -o $(EXE) $(FILES)
+	$(CC) $(LIB) $(CFLAGS) -g -o $(EXE) $(FILES)
 	
 clean:
 	rm -f *.o *.exe *.bak callgrind.* gmon.out
