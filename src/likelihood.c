@@ -96,20 +96,25 @@ node_age(int i, const int * ancestor, const double * branch_length)
 double log_normal_lik(int n, double * X_EX, double * V)
 {
   gsl_matrix * V_inverse = gsl_matrix_alloc(n,n);
-    gsl_permutation * p = gsl_permutation_alloc (n);
+  gsl_permutation * p = gsl_permutation_alloc (n);
   gsl_matrix * ANS = gsl_matrix_alloc(1,n);
   gsl_matrix * ANS2 = gsl_matrix_alloc(1,1);
   double V_det, Xt_Vi_X;
   int signum;
 
+  int is_singular; /* error checking */
+
   gsl_matrix_view V_view = gsl_matrix_view_array(V, n, n);
   gsl_matrix_view DIFF = gsl_matrix_view_array(X_EX, n, 1);
-  gsl_linalg_LU_decomp (&V_view.matrix, p, &signum);
+  is_singular = gsl_linalg_LU_decomp (&V_view.matrix, p, &signum);
+  if(is_singular) return GSL_NEGINF;
   gsl_linalg_LU_invert(&V_view.matrix, p, V_inverse);
   V_det = gsl_linalg_LU_det(&V_view.matrix,signum);
 
-  /** @f$ -2 \log L = (X - E(X) )^T V^{-1} (X-E(X) ) + N\log(2\pi) + \log(\det V) @f$ */
-  // Consider using appropriate blas optimized multiplication, not general matrix-matrix method!!
+  /**@f$ -2 log L = @f$  
+   * @f$ (X - E(X) )^T V^{-1} (X-E(X) ) + N\log(2\pi) + \log(\det V) @f$ */
+  /* Consider using appropriate blas optimized multiplication, 
+   * not the general matrix-matrix method (for greater speed) */
   gsl_blas_dgemm (CblasTrans, CblasNoTrans,
            1.0, &DIFF.matrix, V_inverse,
            0.0, ANS);
