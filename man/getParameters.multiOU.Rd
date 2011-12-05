@@ -1,16 +1,13 @@
 \name{getParameters.multiOU}
 \alias{getParameters.multiOU}
-\title{Internal, extends method to mulitOU class}
+\title{get parameters for the multiOU model}
 \usage{
-  \method{getParameters}{multiOU} (ws)
-}
-\arguments{
-  \item{a}{multiOU class object}
+  getParameters.multiOU(ws)
 }
 \value{
-  a vector of all the model parameter estimates
+  a vector of parameters
 }
 \description{
-  Internal, extends method to mulitOU class
+  get parameters for the multiOU model
 }
 

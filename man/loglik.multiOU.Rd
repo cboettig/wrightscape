@@ -1,18 +1,13 @@
 \name{loglik.multiOU}
 \alias{loglik.multiOU}
-\title{Internal use mostly extending the method to multiOU class
-exported for use by PMC}
+\title{get the log likelihood}
 \usage{
-  \method{loglik}{multiOU} (ws)
-}
-\arguments{
-  \item{a}{multiOU class object (model fit)}
+  loglik.multiOU(ws)
 }
 \value{
-  extracts the log likelihood value
+  log likelihood
 }
 \description{
-  Internal use mostly extending the method to multiOU class
-  exported for use by PMC
+  get the log likelihood
 }
 

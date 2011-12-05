@@ -1,15 +1,13 @@
 \name{update.multiOU}
 \alias{update.multiOU}
-\title{updates a multiOU model parameter estimation on new data}
+\title{update the model fit}
 \usage{
-  \method{update}{multiOU} (model, data)
+  update.multiOU(model, data)
 }
-\arguments{
-  \item{model}{a multiOU model}
-
-  \item{data}{trait data on which to base the update}
+\value{
+  updated model fit
 }
 \description{
-  updates a multiOU model parameter estimation on new data
+  update the model fit
 }
 

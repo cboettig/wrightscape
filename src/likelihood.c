@@ -367,7 +367,7 @@ printf("\n\n");
   }
 
   *llik = log_normal_lik(n_tips, X_EX, V);
-  free(gamma_matrix);
+  gsl_matrix_free(gamma_matrix);
   free(X_EX); 
   free(V);
   free(tips);
@@ -434,9 +434,97 @@ void simulate (const gsl_rng * rng, tree * mytree)
   gsl_vector_free(EX);
   gsl_matrix_free(V);
   gsl_vector_free(simdata);
-  free(gamma_matrix);
+  gsl_matrix_free(gamma_matrix);
   free(tips);
 }
 
+
+void unit_tests (const double *Xo, const double alpha[], const double theta[], 
+               const double sigma[], const int regimes[], const int ancestor[],
+                 const double branch_length[], const double traits[], 
+                 int *n_nodes, int lca_matrix[], double *llik)
+{
+  /* gsl_set_error_handler_off (); /* Comment out this line to assist debugging */
+
+  /* Declare variables */
+  int i, j, ki, kj;
+  int n_tips = (*n_nodes+1)/2;
+  double *X_EX = (double *) malloc(n_tips * sizeof(double));
+  double *V = (double *) malloc(n_tips * n_tips * sizeof(double));
+  gsl_matrix * gamma_matrix = gsl_matrix_calloc(*n_nodes,*n_nodes);
+  double mean;
+  int lca;
+  int * tips = alloc_tips(*n_nodes, ancestor);
+
+
+  /* Calculate the gamma matrix */
+  calc_gamma_matrix(tips, n_tips, alpha, regimes, ancestor,
+                    branch_length, gamma_matrix);
+
+
+  /* Unit test -- tips have the same age */
+  for(i = 0; i < n_tips; i++)
+    printf("%lf\n", node_age(tips[i], ancestor, branch_length));
+
+  /* Unit test -- gamma of root values */
+  for(i = 0; i < n_tips; i++)
+    printf("%lf\n", gsl_matrix_get(gamma_matrix, tips[i], 0));
+    printf("%lf\n", gsl_matrix_get(gamma_matrix, tips[i], ancestor[tips[i]]));
+
+/* Unit test -- variance on a single tip with a middle node (tree = *-*-*)  */
+double salpha[] = {.1}; 
+double ssigma[] = {2}; 
+int sregimes[] = {0, 0, 0, 0}; 
+int sancestor[] = {-1, 0, 1, 1}; 
+double sbranch_length[] = {0, 5, 5, 5}; 
+int s_tips[] = {2,3};
+gsl_matrix * sgamma_matrix = gsl_matrix_calloc(4,4);
+calc_gamma_matrix(s_tips, 2, salpha, sregimes, sancestor,
+                    sbranch_length, sgamma_matrix);
+printf("var: %lf\n",	calc_var(2, 3, 1, salpha, ssigma, sregimes, sancestor, sbranch_length, sgamma_matrix));
+printf("analytic %lf\n", gsl_pow_2(ssigma[0])/(2*salpha[0]) * (1 - exp(-2*salpha[0]*5)) *exp(-2*salpha[0]*5) );
+
+printf("var: %lf\n",	calc_var(2, 2, 2, salpha, ssigma, sregimes, sancestor, sbranch_length, sgamma_matrix));
+printf("analytic %lf\n", gsl_pow_2(ssigma[0])/(2*salpha[0]) * (1 - exp(-2*salpha[0]*10)));
+
+for(i=0;i<4;i++){
+	printf("\n");
+  for(j=0;j<4;j++){
+		printf("%g\t ", gsl_matrix_get(sgamma_matrix, i, j));
+	}
+}
+printf("\n\n");
+
+
+  /* Calculate the mean square differences */
+  for(i = 0; i < n_tips; i++){
+    ki = tips[i];
+    mean = calc_mean(ki, *Xo, alpha, theta, regimes, ancestor,
+                     branch_length, gamma_matrix);
+    X_EX[i] = traits[ki] - mean;
+    printf("%lf\n", mean);
+  }
+
+
+  /* Calculate the variances */
+  for(i=0; i < n_tips; i++){
+    ki = tips[i];
+    for(j=0; j < n_tips; j++){
+      kj = tips[j];
+      /* Identify which node is last common ancestor of the tips*/
+      lca = lca_matrix[ki * *n_nodes + kj];
+      /* get the covariance between all possible pairs of tips */
+      V[n_tips*i+j] = calc_var(ki, kj, lca, alpha, sigma, regimes,
+                               ancestor, branch_length, gamma_matrix);
+      if(ki==kj) printf("%g, %d, %d\n", V[n_tips*i+j], ki, lca);
+    }
+  }
+
+  *llik = log_normal_lik(n_tips, X_EX, V);
+  gsl_matrix_free(gamma_matrix);
+  free(X_EX); 
+  free(V);
+  free(tips);
+}
 
 

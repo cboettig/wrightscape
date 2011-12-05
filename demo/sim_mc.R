@@ -57,72 +57,28 @@ print(c(var(lowvar), var(highvar)))
 ## Can we correctly identify each??
 
 traits <- c("constraint release", "faster evolution")
-sfInit(par=T, 2)    # for debugging locally
+
+sfInit(par=T, 10)    # for debugging locally
 sfLibrary(wrightscape)
+sfLibrary(pmc)
+
+fits <- lapply(traits, function(trait){
+
+	multi <- function(modelspec)
+	    m <- multiTypeOU(data = dat[[trait]], tree = tree, regimes = pharyngeal, 
+			     model_spec = modelspec, 
+			     control = list(maxit=5000)
+			    ) 
+
+	  s1 <- multi(list(alpha = "global", sigma = "indep", theta = "global")) 
+	  a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
 sfExportAll()
-fits <- sfLapply(traits, function(trait){
-  # declare function for shorthand
-  multi <- function(modelspec, reps = 40){
-    m <- multiTypeOU(data = dat[[trait]], tree = tree, regimes = pharyngeal, 
-  		     model_spec = modelspec, 
-#		     control = list(temp = 20, tmax = 50), method = "SANN"
-		     control = list(maxit=5000)
-		    ) 
-    replicate(reps, bootstrap(m))
-  }
 
-  bm <- multi(list(alpha = "fixed", sigma = "indep", theta = "global"))
-  s1 <- multi(list(alpha = "global", sigma = "indep", theta = "global")) 
-  a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
-  s2 <- multi(list(alpha = "global", sigma = "indep", theta = "indep")) 
-  a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
-
-  list(bm=bm, s1=s1, a1=a1, s2=s2, a2=a2)
+	mc <- montecarlotest(s1, a1, nboot=100)
 })
 
-# Reformat and label data for plotting
-names(fits) <- traits  # each fit is a different trait (so use it for a label)
-data <- melt(fits)
-names(data) <- c("regimes", "param", "rep", "value", "model", "trait")
+save(list=ls(), file=sprintf("sim_modelchoice_%s.Rdat", id))
 print(id)
-
-
-save(list=ls(), file=sprintf("%s.Rdat", id))
-
-
-
-
-#model likelihood
-p1 <- ggplot(subset(data,  param=="loglik")) + 
-      geom_boxplot(aes(model, value)) +
-      facet_wrap(~ trait, scales="free_y")
-
-p2 <-  ggplot(subset(data, param %in% c("sigma", "alpha")), aes(model, value, fill=regimes)) + 
-#       stat_summary(fun.y=mean, geom="bar", position="dodge") + # add bars for some extra ink...
-       stat_summary(fun.data=mean_sdl, geom="pointrange", aes(color=regimes), 
-		    position = position_dodge(width=0.90)) +
-       scale_y_log() + 
-       facet_grid(param ~ trait, scales = "free_y")
-
-p3 <- ggplot(subset(data, param %in% c("sigma") )) +
-      geom_boxplot(aes(model, value, fill=regimes)) + 
-      facet_wrap(trait ~ param, scales = "free_y") 
-
-p4 <- ggplot(subset(data, param %in% c("alpha")  )) +
-      geom_boxplot(aes(model, value, fill=regimes)) + 
-      facet_wrap(trait ~ param, scales = "free_y") 
-
-save(list=ls(), file=sprintf("%s.Rdat", id))
-
-
-
-ggsave(sprintf("%s_lik.png", id), p1)
-ggsave(sprintf("%s_params_p2.png", id),  p2, width=14)
-ggsave(sprintf("%s_params_p3.png", id),  p3)
-ggsave(sprintf("%s_params_p4.png", id),  p4)
-
-
-
 
 #upload(sprintf("%s_*.png", id), gitaddr=gitaddr, tag="phylogenetics", save=FALSE)
 
