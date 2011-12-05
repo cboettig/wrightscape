@@ -16,7 +16,7 @@ data(parrotfish)
 
 regimes <- intramandibular
   # declare function for shorthand
-sfInit(par=T, 4)    # for debugging locally
+sfInit(par=F)    # for debugging locally
 sfLibrary(wrightscape)
 sfExportAll()
 
