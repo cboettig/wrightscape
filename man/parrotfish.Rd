@@ -6,5 +6,5 @@
   parrotfish data
 }
 \keyword{data}
-\keyword{datasets}
+\keyword{dataset}
 

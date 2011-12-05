@@ -27,3 +27,4 @@ Collate:
     'wrightscape.R'
     'format_data.R'
     'data.R'
+    'custom.R'
