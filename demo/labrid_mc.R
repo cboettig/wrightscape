@@ -18,7 +18,7 @@ data(labrids)
 #traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
 traits <- c("gape.x",  "prot.x", "AM.x", "SH.x", "LP.x")
 
-regimes <- intramandibular
+regimes <- two_shifts
   # declare function for shorthand
 sfInit(par=T, 4)    # for debugging locally
 sfLibrary(wrightscape)
