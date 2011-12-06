@@ -14,7 +14,7 @@ print(id)
 
 data(labrids)
 
-regimes <- pharyngeal
+regimes <- intramandibular
   # declare function for shorthand
 sfInit(par=T, 10)    # for debugging locally
 sfLibrary(wrightscape)
