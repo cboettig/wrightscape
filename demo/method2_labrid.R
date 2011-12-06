@@ -61,10 +61,26 @@ X <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "
 
 trait <- input$data[c("Genus_species", "Reg", "bodymass")]
 
-trait[,3] <- rnorm(length(trait[,3]), 0, 2)
-
-oumva <- OUwie(input$phy, trait, model = c("OUMVA"),
+require(geiger)
+phy <- lambdaTree(input$phy, .0001)
+trait[,3] <- rnorm(length(trait[,3]), 0, sd=2)
+ouma <- OUwie(input$phy, trait, model = c("OUMA"),
                root.station=TRUE, plot.resid=FALSE)
 
+# expected variance
+ouwie_var <- .5*ouma$Param.est["sigma.sq",]/ouma$Param.est["alpha",]*(1-exp(-2*ouma$Param.est["alpha",]))
+print(ouwie_var)
 
+require(wrightscape)
+data(labrids)
+test <- dat[["prot.y"]]
+test[!is.na(test)] <- trait[,3]  
+tree <- convert(lambdaTree(convert(tree), .0001))
+ws <- multiTypeOU(test, tree, two_shifts, control=list(maxit=10000), model=list(alpha="indep", sigma="global", theta="indep"))
 
+## expected variance 
+ws_var <- (1-exp(-2*ws$alpha))*.5*ws$sigma^2/ws$alpha
+
+print(ws_var)
+
+var(test, na.rm=T)
