@@ -16,12 +16,12 @@ data(parrotfish)
 
 regimes <- intramandibular
   # declare function for shorthand
-sfInit(par=T, cpu=4)    # for debugging locally
+sfInit(par=T, cpu=10)    # for debugging locally
 sfLibrary(wrightscape)
 sfExportAll()
 
 	multi <- function(modelspec){ 
-	 multiTypeOU(data = dat[["kt"]], tree = tree, regimes = regimes, 
+	 multiTypeOU(data = dat[["open"]], tree = tree, regimes = regimes, 
 			    model_spec = modelspec, control = list(maxit=8000))
 
 	}
