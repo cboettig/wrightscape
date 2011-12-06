@@ -16,12 +16,12 @@ data(parrotfish)
 
 regimes <- intramandibular
   # declare function for shorthand
-sfInit(par=T, cpu=4)    # for debugging locally
+sfInit(par=T, cpu=10)    # for debugging locally
 sfLibrary(wrightscape)
 sfExportAll()
 
 	multi <- function(modelspec){ 
-	 multiTypeOU(data = dat[["close"]], tree = tree, regimes = regimes, 
+	 multiTypeOU(data = dat[["open"]], tree = tree, regimes = regimes, 
 			    model_spec = modelspec, control = list(maxit=8000))
 
 	}
@@ -30,7 +30,11 @@ sfExportAll()
 	s2 <- multi(list(alpha = "global", sigma = "indep", theta = "indep")) 
 	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
 
+
 sfExportAll()
 mc <- montecarlotest(s2,a2)
-plot(mc)
+png("mc.png")
+  plot(mc,show_data=TRUE)
+dev.off()
 
+upload("mc.png", gitaddr=gitaddr, tag="phylogenetics")
