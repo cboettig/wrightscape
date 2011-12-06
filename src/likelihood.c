@@ -282,7 +282,7 @@ void calc_lik (const double *Xo, const double alpha[], const double theta[],
                  const double branch_length[], const double traits[], 
                  int *n_nodes, int lca_matrix[], double *llik)
 {
-  /* gsl_set_error_handler_off (); /* Comment out this line to assist debugging */
+  gsl_set_error_handler_off (); /* Comment out this line to assist debugging */
 
   /* Declare variables */
   int i, j, ki, kj;
@@ -449,7 +449,7 @@ void unit_tests (const double *Xo, const double alpha[], const double theta[],
                  const double branch_length[], const double traits[], 
                  int *n_nodes, int lca_matrix[], double *llik)
 {
-  /* gsl_set_error_handler_off (); /* Comment out this line to assist debugging */
+  gsl_set_error_handler_off (); /* Comment out this line to assist debugging */
 
   /* Declare variables */
   int i, j, ki, kj;
