@@ -32,8 +32,8 @@ sfExportAll()
 
 sfExportAll()
 mc <- montecarlotest(s2,a2)
-png("mc.png")
+png(sprintf("mc_%s.png", id))
   plot(mc,show_data=TRUE)
 dev.off()
-upload("mc.png", gitaddr=gitaddr, tag="phylogenetics", comment="labrid open, intramandibular, s2 vs a2")
+#upload("mc.png", gitaddr=gitaddr, tag="phylogenetics", comment="labrid open, intramandibular, s2 vs a2")
 
