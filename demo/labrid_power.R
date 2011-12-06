@@ -27,8 +27,13 @@ sfExportAll()
 	}
 	s1 <- multi(list(alpha = "global", sigma = "indep", theta = "global")) 
 	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
+	s2 <- multi(list(alpha = "global", sigma = "indep", theta = "indep")) 
+	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
 
 sfExportAll()
-mc <- montecarlotest(s1,a1)
-
+mc <- montecarlotest(s2,a2)
+png("mc.png")
+  plot(mc,show_data=TRUE)
+dev.off()
+upload("mc.png", gitaddr=gitaddr, tag="phylogenetics")
 
