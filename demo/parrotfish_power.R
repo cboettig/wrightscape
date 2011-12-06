@@ -32,7 +32,7 @@ sfExportAll()
 
 
 sfExportAll()
-mc <- montecarlotest(s2,a2)
+mc <- montecarlotest(s1,a1)
 png("mc.png")
   plot(mc,show_data=TRUE)
 dev.off()
