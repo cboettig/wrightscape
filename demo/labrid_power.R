@@ -21,7 +21,7 @@ sfLibrary(wrightscape)
 sfExportAll()
 
 	multi <- function(modelspec){ 
-	 multiTypeOU(data = dat[["open"]], tree = tree, regimes = regimes, 
+	 multiTypeOU(data = dat[["close"]], tree = tree, regimes = regimes, 
 			    model_spec = modelspec, control = list(maxit=8000))
 
 	}
