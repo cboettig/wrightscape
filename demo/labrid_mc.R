@@ -16,9 +16,10 @@ print(id)
 
 data(labrids)
 #traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
-traits <- c("gape.x",  "prot.x", "AM.x", "SH.x", "LP.x")
+#traits <- c("gape.x",  "prot.x", "AM.x", "SH.x", "LP.x")
+traits <- c("close", "open", "kt")
 
-regimes <- two_shifts
+regimes <- intramandibular
   # declare function for shorthand
 sfInit(par=T, 4)    # for debugging locally
 sfLibrary(wrightscape)
@@ -26,7 +27,7 @@ sfExportAll()
 
 fits <- sfLapply(traits, function(trait){
 	multi <- function(modelspec){ 
-		out <- multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, 
+		out <- multiTypeOU(data = log(dat[[trait]]), tree = tree, regimes = regimes, 
 			    model_spec = modelspec, control = list(maxit=8000))
 
 	      ## plots require this formatting.  should make as a seperate function
