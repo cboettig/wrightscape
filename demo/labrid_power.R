@@ -27,13 +27,16 @@ sfExportAll()
 	}
 	s1 <- multi(list(alpha = "global", sigma = "indep", theta = "global")) 
 	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
+print(a1$loglik - s1$loglik)
+
 	s2 <- multi(list(alpha = "global", sigma = "indep", theta = "indep")) 
 	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
+print(a2$loglik-s2$loglik)
 
-sfExportAll()
-mc <- montecarlotest(s2,a2)
-png(sprintf("mc_%s.png", id))
-  plot(mc,show_data=TRUE)
-dev.off()
+#sfExportAll()
+#mc <- montecarlotest(s2,a2)
+#png(sprintf("mc_%s.png", id))
+#  plot(mc,show_data=TRUE)
+#dev.off()
 #upload("mc.png", gitaddr=gitaddr, tag="phylogenetics", comment="labrid open, intramandibular, s2 vs a2")
 
