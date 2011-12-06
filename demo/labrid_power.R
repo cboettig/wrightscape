@@ -21,7 +21,7 @@ sfLibrary(wrightscape)
 sfExportAll()
 
 	multi <- function(modelspec){ 
-	 multiTypeOU(data = dat[["close"]], tree = tree, regimes = regimes, 
+	 multiTypeOU(data = dat[["open"]], tree = tree, regimes = regimes, 
 			    model_spec = modelspec, control = list(maxit=8000))
 
 	}
@@ -35,5 +35,5 @@ mc <- montecarlotest(s2,a2)
 png("mc.png")
   plot(mc,show_data=TRUE)
 dev.off()
-upload("mc.png", gitaddr=gitaddr, tag="phylogenetics")
+upload("mc.png", gitaddr=gitaddr, tag="phylogenetics", comment="labrid open, intramandibular, s2 vs a2")
 
