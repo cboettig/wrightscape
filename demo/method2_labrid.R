@@ -1,14 +1,11 @@
 # labrid example
 rm(list=ls()) # clean workspace
 
-# load previous run to keep all_oumva result.  
-load("method2_labrid.Rdat")
-
 require(phytools)
 require(geiger)
 require(OUwie)
 # This data has not been released
-path = "../data/labrids/"
+path = "../data/"
 labrid_tree <- read.nexus(paste(path, "labrid_tree.nex", sep=""))
 diet_data <- read.csv(paste(path,"labriddata_parrotfish.csv", sep=""))
 
@@ -62,24 +59,12 @@ input <- paint_phy(ape$phy, traits,
 # Get just the active trait # not sure if necessary
 X <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
 
-require(snowfall)
-sfInit(parallel=T, cpu=16)
-sfLibrary(OUwie)
-sfExportAll()
+trait <- input$data[c("Genus_species", "Reg", "bodymass")]
 
-all_oumv <- sfLapply(X, function(x){
-  trait <- input$data[c("Genus_species", "Reg", x)]
-  oumv <- OUwie(input$phy, trait, model = c("OUMV"),
+trait[,3] <- rnorm(length(trait[,3]), 0, 2)
+
+oumva <- OUwie(input$phy, trait, model = c("OUMVA"),
                root.station=TRUE, plot.resid=FALSE)
-})
 
-all_ouma <- sfLapply(X, function(x){
-  trait <- input$data[c("Genus_species", "Reg", x)]
-  ouma <- OUwie(input$phy, trait, model = c("OUMA"),
-               root.station=TRUE, plot.resid=FALSE)
-})
-
-
-save(list=ls(), file="method2_labrid.Rdat")
 
 
