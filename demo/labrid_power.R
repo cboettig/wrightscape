@@ -14,7 +14,7 @@ print(id)
 
 data(labrids)
 
-regimes <- intramandibular
+regimes <- two_shifts
   # declare function for shorthand
 sfInit(par=T, 10)    # for debugging locally
 sfLibrary(wrightscape)
@@ -33,10 +33,10 @@ print(a1$loglik - s1$loglik)
 	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
 print(a2$loglik-s2$loglik)
 
-#sfExportAll()
-#mc <- montecarlotest(s2,a2)
-#png(sprintf("mc_%s.png", id))
-#  plot(mc,show_data=TRUE)
-#dev.off()
-#upload("mc.png", gitaddr=gitaddr, tag="phylogenetics", comment="labrid open, intramandibular, s2 vs a2")
+sfExportAll()
+mc <- montecarlotest(s2,a2)
+png(sprintf("mc_%s.png", id))
+  plot(mc,show_data=TRUE)
+dev.off()
+#upload("mc.png", gitaddr=gitaddr, tag="phylogenetics")
 
