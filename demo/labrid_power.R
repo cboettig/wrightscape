@@ -14,26 +14,29 @@ print(id)
 
 data(labrids)
 
-regimes <- intramandibular
+regimes <- two_shifts
   # declare function for shorthand
 sfInit(par=T, 10)    # for debugging locally
 sfLibrary(wrightscape)
 sfExportAll()
 
 	multi <- function(modelspec){ 
-	 multiTypeOU(data = dat[["open"]], tree = tree, regimes = regimes, 
+	 multiTypeOU(data = dat[["close"]], tree = tree, regimes = regimes, 
 			    model_spec = modelspec, control = list(maxit=8000))
 
 	}
 	s1 <- multi(list(alpha = "global", sigma = "indep", theta = "global")) 
 	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
+print(a1$loglik - s1$loglik)
+
 	s2 <- multi(list(alpha = "global", sigma = "indep", theta = "indep")) 
 	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
+print(a2$loglik-s2$loglik)
 
 sfExportAll()
 mc <- montecarlotest(s2,a2)
-png("mc.png")
+png(sprintf("mc_%s.png", id))
   plot(mc,show_data=TRUE)
 dev.off()
-upload("mc.png", gitaddr=gitaddr, tag="phylogenetics", comment="labrid open, intramandibular, s2 vs a2")
+#upload("mc.png", gitaddr=gitaddr, tag="phylogenetics")
 
