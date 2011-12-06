@@ -62,6 +62,10 @@ p1 <- ggplot(subset(data,  param=="loglik")) + geom_boxplot(aes(model, value)) +
 p2 <-  ggplot(subset(data, param %in% c("alpha") & model %in% c("a1", "a2", "full") ),
               aes(model, value, fill=regimes)) + geom_bar(position="dodge") +  
        facet_wrap(~trait, scales="free_y")
+p3 <-  ggplot(subset(data, param %in% c("sigma") & model %in% c("s1", "s2", "full") ),
+              aes(model, value, fill=regimes)) + geom_bar(position="dodge") +  
+       facet_wrap(~trait, scales="free_y")
+ggsave(sprintf("%s_p3.png", id), p3)
 ggsave(sprintf("%s_p1.png", id), p1)
 ggsave(sprintf("%s_p2.png", id),  p2)
 require(socialR)
