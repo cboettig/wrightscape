@@ -66,9 +66,9 @@ custom.llik.closure <- function(data, tree, regimes, indices, make_bm){
 #' Regimes are numbered 1 to 7.  1-6 follow modelspec global alpha/sigma, 
 #' indep theta and regime 7 follows modelspec alpha=0, theta, shares a 
 #' global sigma.  Also imagine a parameter list,
-#' par = (alpha, sigma, theta1,2,3,4,5,6,7).  Then:
-#' indices = list(alpha_i = rep(1,7), sigma_i = rep(2,7), theta_i = 3:(7+2)) 
-#' make_bm <- c(7)  # makes the 7th alpha value set to zero always
+#' par <- (alpha, sigma, theta1,2,3,4,5,6,7).  Then:
+#' indices <- list(alpha_i = rep(1,7), sigma_i = rep(2,7), theta_i = 3:(7+2)) 
+#' make_bm <- c(1)  # makes the 7th alpha value set to zero always
 #' @useDynLib wrightscape
 #' @import ouch
 #' @import geiger
@@ -87,6 +87,7 @@ custom.llik.closure <- function(data, tree, regimes, indices, make_bm){
 #' @export
 custom_multiType <- function(data, tree, regimes, par, indices, make_bm=NA,   
                      ...){
+
   myCall <- match.call() # can be used to call the function as it was called
 
   # Create the submodel and do the optimization (all the action is here)

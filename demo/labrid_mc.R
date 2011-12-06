@@ -15,11 +15,12 @@ print(id)
 
 
 data(labrids)
-traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+#traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+traits <- c("gape.x",  "prot.x", "AM.x", "SH.x", "LP.x")
 
-regimes <- two_shifts
+regimes <- intramandibular
   # declare function for shorthand
-sfInit(par=T, 10)    # for debugging locally
+sfInit(par=T, 4)    # for debugging locally
 sfLibrary(wrightscape)
 sfExportAll()
 
@@ -61,6 +62,10 @@ p1 <- ggplot(subset(data,  param=="loglik")) + geom_boxplot(aes(model, value)) +
 p2 <-  ggplot(subset(data, param %in% c("alpha") & model %in% c("a1", "a2", "full") ),
               aes(model, value, fill=regimes)) + geom_bar(position="dodge") +  
        facet_wrap(~trait, scales="free_y")
+p3 <-  ggplot(subset(data, param %in% c("sigma") & model %in% c("s1", "s2", "full") ),
+              aes(model, value, fill=regimes)) + geom_bar(position="dodge") +  
+       facet_wrap(~trait, scales="free_y")
+ggsave(sprintf("%s_p3.png", id), p3)
 ggsave(sprintf("%s_p1.png", id), p1)
 ggsave(sprintf("%s_p2.png", id),  p2)
 require(socialR)

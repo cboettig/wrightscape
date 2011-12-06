@@ -33,8 +33,7 @@ getParameters <- function(x, ...) UseMethod("getParameters")
 # @S3method getParameters multiOU
 #' @export
 getParameters.multiOU <- function(ws){
-    c(alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma, Xo=ws$Xo)
-#, converge=ws$convergence) 
+    c(alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma, Xo=ws$Xo, converge=ws$convergence) 
 }
 
 #' get the log likelihood
@@ -91,8 +90,7 @@ loglik.wrighttree <- function(ws) ws$loglik
 
 #' An internal S3 method to get the parameters from the wrightscape object
 getParameters.wrighttree <- function(ws){
-    c(alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma, Xo=ws$Xo)
-#, converge=ws$convergence) 
+    c(alpha=ws$alpha, theta=ws$theta, sigma=ws$sigma, Xo=ws$Xo, converge=ws$convergence) 
 }
 
 

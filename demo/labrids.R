@@ -16,7 +16,8 @@ print(id)
 
 
 data(labrids)
-traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+traits <- c("bodymass", "close", "open", "kt", "gape.x",  "prot.x", "AM.x", "SH.x", "LP.x")
+#traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
 #traits <- c("close", "open", "gape.y",  "prot.y")
 
 

@@ -1,14 +1,11 @@
 # labrid example
 rm(list=ls()) # clean workspace
 
-# load previous run to keep all_oumva result.  
-load("method2_labrid.Rdat")
-
 require(phytools)
 require(geiger)
 require(OUwie)
 # This data has not been released
-path = "../data/labrids/"
+path = "../data/"
 labrid_tree <- read.nexus(paste(path, "labrid_tree.nex", sep=""))
 diet_data <- read.csv(paste(path,"labriddata_parrotfish.csv", sep=""))
 
@@ -62,24 +59,28 @@ input <- paint_phy(ape$phy, traits,
 # Get just the active trait # not sure if necessary
 X <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
 
-require(snowfall)
-sfInit(parallel=T, cpu=16)
-sfLibrary(OUwie)
-sfExportAll()
+trait <- input$data[c("Genus_species", "Reg", "bodymass")]
 
-all_oumv <- sfLapply(X, function(x){
-  trait <- input$data[c("Genus_species", "Reg", x)]
-  oumv <- OUwie(input$phy, trait, model = c("OUMV"),
+require(geiger)
+phy <- lambdaTree(input$phy, .0001)
+trait[,3] <- rnorm(length(trait[,3]), 0, sd=2)
+ouma <- OUwie(input$phy, trait, model = c("OUMA"),
                root.station=TRUE, plot.resid=FALSE)
-})
 
-all_ouma <- sfLapply(X, function(x){
-  trait <- input$data[c("Genus_species", "Reg", x)]
-  ouma <- OUwie(input$phy, trait, model = c("OUMA"),
-               root.station=TRUE, plot.resid=FALSE)
-})
+# expected variance
+ouwie_var <- .5*ouma$Param.est["sigma.sq",]/ouma$Param.est["alpha",]*(1-exp(-2*ouma$Param.est["alpha",]))
+print(ouwie_var)
 
+require(wrightscape)
+data(labrids)
+test <- dat[["prot.y"]]
+test[!is.na(test)] <- trait[,3]  
+tree <- convert(lambdaTree(convert(tree), .0001))
+ws <- multiTypeOU(test, tree, two_shifts, control=list(maxit=10000), model=list(alpha="indep", sigma="global", theta="indep"))
 
-save(list=ls(), file="method2_labrid.Rdat")
+## expected variance 
+ws_var <- (1-exp(-2*ws$alpha))*.5*ws$sigma^2/ws$alpha
 
+print(ws_var)
 
+var(test, na.rm=T)
