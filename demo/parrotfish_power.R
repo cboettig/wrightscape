@@ -19,6 +19,7 @@ regimes <- intramandibular
   # declare function for shorthand
 sfInit(par=T, cpu=4)    # for debugging locally
 sfLibrary(wrightscape)
+sfLibrary(socialR)
 sfExportAll()
 
 fits <- sfLapply(traits, function(trait){
@@ -33,7 +34,6 @@ fits <- sfLapply(traits, function(trait){
 #	full  <- multi(list(alpha = "indep", sigma = "indep", theta = "indep")) 
 
 
-  sfExportAll()
   mc <- montecarlotest(bm2,a2)
   png("mc.png")
     plot(mc,show_data=TRUE)
