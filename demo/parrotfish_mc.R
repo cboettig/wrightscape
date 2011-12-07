@@ -41,12 +41,11 @@ fits <- sfLapply(traits, function(trait){
 	      pars
 	}
 
-	s1 <- multi(list(alpha = "global", sigma = "indep", theta = "global")) 
-	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
-	s2 <- multi(list(alpha = "global", sigma = "indep", theta = "indep")) 
+	bm <- multi(list(alpha = "fixed", sigma = "indep", theta = "global")) #uncensored
+	bm2 <- multi(list(alpha = "fixed", sigma = "indep", theta = "indep")) #censored 
 	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
 	full  <- multi(list(alpha = "indep", sigma = "indep", theta = "indep")) 
-	list(s1=s1,a1=a1,s2=s2,a2=a2, full=full)
+	list(bm=bm,bm2=bm2,a2=a2,full=full)
 })
 
 # Reformat and label data for plotting
