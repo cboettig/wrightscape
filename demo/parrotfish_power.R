@@ -39,7 +39,7 @@ fits <- sfLapply(traits, function(trait){
     plot(mc,show_data=TRUE)
   dev.off()
 
-  upload("mc.png", gitaddr=gitaddr, tag="phylogenetics")
+  upload("mc.png", gitaddr=gitaddr, tag="phylogenetics", comment=trait)
   mc
 })
 
