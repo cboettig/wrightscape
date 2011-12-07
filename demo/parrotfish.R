@@ -12,8 +12,8 @@ id <- gitlog()$shortID
 
 
 data(parrotfish)
-#traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
-traits <- c("close", "open", "gape.y")
+traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+#traits <- c("close", "open", "gape.y")
 
 sfInit(par=T, 4)    # for debugging locally
 sfLibrary(wrightscape)
@@ -31,10 +31,8 @@ fits <- sfLapply(traits, function(trait){
     replicate(reps, bootstrap(m))
   }
 
-  bm <- multi(list(alpha = "fixed", sigma = "indep", theta = "global"))
-  s1 <- multi(list(alpha = "global", sigma = "indep", theta = "global")) 
+  bm <- multi(list(alpha = "fixed", sigma = "indep", theta = "global")) #uncensored
   a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
-  s2 <- multi(list(alpha = "global", sigma = "indep", theta = "indep")) 
   a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
   full <- multi(list(alpha = "indep", sigma = "indep", theta = "indep")) 
 

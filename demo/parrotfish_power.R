@@ -17,29 +17,26 @@ traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.
 
 regimes <- intramandibular
   # declare function for shorthand
-sfInit(par=T, cpu=4)    # for debugging locally
+sfInit(par=T, cpu=9)    # for debugging locally
 sfLibrary(wrightscape)
-sfLibrary(socialR)
+#sfLibrary(socialR)
 sfExportAll()
 
 fits <- sfLapply(traits, function(trait){
 	multi <- function(modelspec){ 
-	 multiTypeOU(data = dat[["open"]], tree = tree, regimes = regimes, 
+	 multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, 
 			    model_spec = modelspec, control = list(maxit=8000))
 
 	}
-#	bm <- multi(list(alpha = "fixed", sigma = "indep", theta = "global")) #uncensored
-	bm2 <- multi(list(alpha = "fixed", sigma = "indep", theta = "indep")) #censored 
-	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
+	bm <- multi(list(alpha = "fixed", sigma = "indep", theta = "global")) 
+	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
+#	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
 #	full  <- multi(list(alpha = "indep", sigma = "indep", theta = "indep")) 
-
-
-  mc <- montecarlotest(bm2,a2)
-  png("mc.png")
+  mc <- montecarlotest(bm,a1)
+  png(paste(trait, "_mc.png", sep=""))
     plot(mc,show_data=TRUE)
   dev.off()
-
-  upload("mc.png", gitaddr=gitaddr, tag="phylogenetics", comment=trait)
+#  upload("mc.png", gitaddr=gitaddr, tag="phylogenetics", comment=trait)
   mc
 })
 

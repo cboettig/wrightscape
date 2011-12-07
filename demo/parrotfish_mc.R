@@ -41,8 +41,8 @@ fits <- sfLapply(traits, function(trait){
 	      pars
 	}
 
-	bm <- multi(list(alpha = "fixed", sigma = "indep", theta = "global")) #uncensored
-	bm2 <- multi(list(alpha = "fixed", sigma = "indep", theta = "indep")) #censored 
+  # no point in bm with theta indep, since the only theta that matters is root value
+	bm <- multi(list(alpha = "fixed", sigma = "indep", theta = "global")) 
 	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
 	full  <- multi(list(alpha = "indep", sigma = "indep", theta = "indep")) 
 	list(bm=bm,bm2=bm2,a2=a2,full=full)

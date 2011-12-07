@@ -16,27 +16,28 @@ data(labrids)
 
 regimes <- two_shifts
   # declare function for shorthand
-sfInit(par=T, 10)    # for debugging locally
+sfInit(par=T, 9)    # for debugging locally
 sfLibrary(wrightscape)
 sfExportAll()
 
+fits <- sfLapply(traits, function(trait){
 	multi <- function(modelspec){ 
-	 multiTypeOU(data = dat[["close"]], tree = tree, regimes = regimes, 
+	 multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, 
 			    model_spec = modelspec, control = list(maxit=8000))
 
 	}
-	s1 <- multi(list(alpha = "global", sigma = "indep", theta = "global")) 
+	bm <- multi(list(alpha = "fixed", sigma = "indep", theta = "global")) 
 	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
-print(a1$loglik - s1$loglik)
+#	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
+#	full  <- multi(list(alpha = "indep", sigma = "indep", theta = "indep")) 
 
-	s2 <- multi(list(alpha = "global", sigma = "indep", theta = "indep")) 
-	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
-print(a2$loglik-s2$loglik)
+  mc <- montecarlotest(bm,a1)
+  png(paste(trait, "_mc_labrids.png", sep=""))
+    plot(mc,show_data=TRUE)
+  dev.off()
 
-sfExportAll()
-mc <- montecarlotest(s2,a2)
-png(sprintf("mc_%s.png", id))
-  plot(mc,show_data=TRUE)
-dev.off()
-#upload("mc.png", gitaddr=gitaddr, tag="phylogenetics")
+#  upload("mc.png", gitaddr=gitaddr, tag="phylogenetics", comment=trait)
+  mc
+})
 
+save(list=ls(), file="labrid_power.Rdat")
