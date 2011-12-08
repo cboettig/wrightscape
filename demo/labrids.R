@@ -16,10 +16,10 @@ print(id)
 
 
 data(labrids)
-traits <- c("bodymass", "close", "open", "kt", "gape.x",  "prot.x", "AM.x", "SH.x", "LP.x")
-#traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
-#traits <- c("close", "open", "gape.y",  "prot.y")
+#traits <- c("bodymass", "close", "open", "kt", "gape.x",  "prot.x", "AM.x", "SH.x", "LP.x")
+traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
 
+regimes <- intramandibular
 
 sfInit(par=T, 9)    # for debugging locally
 sfLibrary(wrightscape)
@@ -28,7 +28,7 @@ fits <- sfLapply(traits, function(trait){
 
   # declare function for shorthand
   multi <- function(modelspec, reps = 20){
-    m <- multiTypeOU(data = dat[trait], tree = tree, regimes = intramandibular, 
+    m <- multiTypeOU(data = dat[trait], tree = tree, regimes = regimes, 
   		     model_spec = modelspec, 
 		     control = list(maxit=3000)
 		    ) 
@@ -36,21 +36,16 @@ fits <- sfLapply(traits, function(trait){
   }
 
   bm <- multi(list(alpha = "fixed", sigma = "indep", theta = "global"))
-  s1 <- multi(list(alpha = "global", sigma = "indep", theta = "global")) 
   a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
-  s2 <- multi(list(alpha = "global", sigma = "indep", theta = "indep")) 
   a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
 
-  list(bm=bm, s1=s1, a1=a1, s2=s2, a2=a2)
+  list(bm=bm, a1=a1, a2=a2)
 })
 
 # Reformat and label data for plotting
 names(fits) <- traits  # each fit is a different trait (so use it for a label)
 data <- melt(fits)
 names(data) <- c("regimes", "param", "rep", "value", "model", "trait")
-
-
-
 
 #model likelihood
 p1 <- ggplot(subset(data,  param=="loglik")) + 
