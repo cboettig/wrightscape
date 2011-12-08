@@ -35,7 +35,7 @@ fits <- sfLapply(traits, function(trait){
 
   mc <- montecarlotest(bm,a1)
   png(paste(trait, "_mc_labrid_", id, ".png", sep=""))
-    plot(mc,show_data=TRUE)
+    plot(mc,show_data=TRUE, main=trait)
   dev.off()
 
 #  upload("mc.png", gitaddr=gitaddr, tag="phylogenetics", comment=trait)
