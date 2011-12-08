@@ -17,12 +17,12 @@ traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.
 
 regimes <- intramandibular
   # declare function for shorthand
-sfInit(par=T, cpu=9)    # for debugging locally
-sfLibrary(wrightscape)
+#sfInit(par=T, cpu=9)    # for debugging locally
+#sfLibrary(wrightscape)
 #sfLibrary(socialR)
-sfExportAll()
+#sfExportAll()
 
-fits <- sfLapply(traits, function(trait){
+fits <- lapply(traits, function(trait){
 	multi <- function(modelspec){ 
 	 multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, 
 			    model_spec = modelspec, control = list(maxit=8000))
