@@ -33,13 +33,16 @@ fits <- lapply(traits, function(trait){
 	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
 #	full  <- multi(list(alpha = "indep", sigma = "indep", theta = "indep")) 
 
-  mc <- montecarlotest(bm,a1)
+  mc <- montecarlotest(bm,a2)
+
+
   png(paste(trait, "_mc_labrid_", id, ".png", sep=""))
     plot(mc,show_data=TRUE, main=trait)
   dev.off()
+  upload("mc.png", gitaddr=gitaddr, tag="phylogenetics", comment=trait)
 
-#  upload("mc.png", gitaddr=gitaddr, tag="phylogenetics", comment=trait)
-  mc
+
+  list(mc$null_dist, mc$test_dist, -2*(mc$null$loglik-mc$test$loglik))
 })
 
 save(list=ls(), file=paste("labrid_power_", id, ".Rdat", sep=""))
