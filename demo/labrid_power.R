@@ -18,19 +18,19 @@ traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.
 regimes <- intramandibular
 
   # declare function for shorthand
-sfInit(par=T, 9)    # for debugging locally
-sfLibrary(wrightscape)
-sfExportAll()
+#sfInit(par=T, 9)    # for debugging locally
+#sfLibrary(wrightscape)
+#sfExportAll()
 
-fits <- sfLapply(traits, function(trait){
+fits <- lapply(traits, function(trait){
 	multi <- function(modelspec){ 
 	 multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, 
 			    model_spec = modelspec, control = list(maxit=8000))
 
 	}
 	bm <- multi(list(alpha = "fixed", sigma = "indep", theta = "global")) 
-	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
-#	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
+#	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
+	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
 #	full  <- multi(list(alpha = "indep", sigma = "indep", theta = "indep")) 
 
   mc <- montecarlotest(bm,a1)
@@ -42,4 +42,4 @@ fits <- sfLapply(traits, function(trait){
   mc
 })
 
-save(list=ls(), file="labrid_power.Rdat")
+save(list=ls(), file=paste("labrid_power_", id, ".Rdat", sep=""))
