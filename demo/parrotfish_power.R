@@ -33,7 +33,7 @@ fits <- sfLapply(traits, function(trait){
 #	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
 #	full  <- multi(list(alpha = "indep", sigma = "indep", theta = "indep")) 
   mc <- montecarlotest(bm,a1)
-  png(paste(trait, "_mc.png", sep=""))
+  png(paste(trait, "_mc_parrotfish_", id, ".png", sep=""))
     plot(mc,show_data=TRUE)
   dev.off()
 #  upload("mc.png", gitaddr=gitaddr, tag="phylogenetics", comment=trait)
