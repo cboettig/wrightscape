@@ -29,15 +29,15 @@ fits <- lapply(traits, function(trait){
 
 	}
 	bm <- multi(list(alpha = "fixed", sigma = "indep", theta = "global")) 
-	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
-#	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
+#	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
+	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
 #	full  <- multi(list(alpha = "indep", sigma = "indep", theta = "indep")) 
-  mc <- montecarlotest(bm,a1)
+  mc <- montecarlotest(bm,a2)
   png(paste(trait, "_mc_parrotfish_", id, ".png", sep=""))
-    plot(mc,show_data=TRUE)
+    plot(mc,show_data=TRUE, main=trait)
   dev.off()
 #  upload("mc.png", gitaddr=gitaddr, tag="phylogenetics", comment=trait)
   mc
 })
 
-save(list=ls(), file="parrotfish_power.Rdat")
+save(list=ls(), file=paste("parrotfish_power_", id, ".Rdat", sep=""))
