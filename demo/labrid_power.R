@@ -18,10 +18,7 @@ traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.
 regimes <- intramandibular
 
   # declare function for shorthand
-#sfInit(par=T, 9)    # for debugging locally
-#sfLibrary(wrightscape)
-#sfExportAll()
-
+sfInit(par=F)    # for debugging locally
 fits <- lapply(traits, function(trait){
 	multi <- function(modelspec){ 
 	 multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, 
@@ -34,14 +31,9 @@ fits <- lapply(traits, function(trait){
 #	full  <- multi(list(alpha = "indep", sigma = "indep", theta = "indep")) 
 
   mc <- montecarlotest(bm,a2)
-
-
   png(paste(trait, "_mc_labrid_", id, ".png", sep=""))
     plot(mc,show_data=TRUE, main=trait)
   dev.off()
-  upload("mc.png", gitaddr=gitaddr, tag="phylogenetics", comment=trait)
-
-
   list(mc$null_dist, mc$test_dist, -2*(mc$null$loglik-mc$test$loglik))
 })
 
