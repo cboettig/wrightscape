@@ -17,27 +17,27 @@ traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.
 
 regimes <- intramandibular
   # declare function for shorthand
-sfInit(par=T, cpu=9)    # for debugging locally
-sfLibrary(wrightscape)
+#sfInit(par=T, cpu=9)    # for debugging locally
+#sfLibrary(wrightscape)
 #sfLibrary(socialR)
-sfExportAll()
+#sfExportAll()
 
-fits <- sfLapply(traits, function(trait){
+fits <- lapply(traits, function(trait){
 	multi <- function(modelspec){ 
 	 multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, 
 			    model_spec = modelspec, control = list(maxit=8000))
 
 	}
 	bm <- multi(list(alpha = "fixed", sigma = "indep", theta = "global")) 
-	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
-#	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
+#	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
+	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
 #	full  <- multi(list(alpha = "indep", sigma = "indep", theta = "indep")) 
-  mc <- montecarlotest(bm,a1)
-  png(paste(trait, "_mc.png", sep=""))
-    plot(mc,show_data=TRUE)
+  mc <- montecarlotest(bm,a2)
+  png(paste(trait, "_mc_parrotfish_", id, ".png", sep=""))
+    plot(mc,show_data=TRUE, main=trait)
   dev.off()
 #  upload("mc.png", gitaddr=gitaddr, tag="phylogenetics", comment=trait)
   mc
 })
 
-save(list=ls(), file="parrotfish_power.Rdat")
+save(list=ls(), file=paste("parrotfish_power_", id, ".Rdat", sep=""))

@@ -14,7 +14,9 @@ print(id)
 
 data(labrids)
 
-regimes <- two_shifts
+traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+regimes <- intramandibular
+
   # declare function for shorthand
 sfInit(par=T, 9)    # for debugging locally
 sfLibrary(wrightscape)
@@ -32,8 +34,8 @@ fits <- sfLapply(traits, function(trait){
 #	full  <- multi(list(alpha = "indep", sigma = "indep", theta = "indep")) 
 
   mc <- montecarlotest(bm,a1)
-  png(paste(trait, "_mc_labrids.png", sep=""))
-    plot(mc,show_data=TRUE)
+  png(paste(trait, "_mc_labrid_", id, ".png", sep=""))
+    plot(mc,show_data=TRUE, main=trait)
   dev.off()
 
 #  upload("mc.png", gitaddr=gitaddr, tag="phylogenetics", comment=trait)
