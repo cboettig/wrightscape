@@ -19,7 +19,7 @@ traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.
 #traits <- c("gape.x",  "prot.x", "AM.x", "SH.x", "LP.x")
 #traits <- c("close", "open", "kt")
 
-regimes <- intramandibular
+regimes <- two_shifts
   # declare function for shorthand
 sfInit(par=T, 4)    # for debugging locally
 sfLibrary(wrightscape)
@@ -43,12 +43,13 @@ fits <- sfLapply(traits, function(trait){
 	      pars
 	}
 
-	s1 <- multi(list(alpha = "global", sigma = "indep", theta = "global")) 
+  bm <-  multi(list(alpha = "fixed", sigma = "indep", theta = "global")) 
+#	s1 <- multi(list(alpha = "global", sigma = "indep", theta = "global")) 
 	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
-	s2 <- multi(list(alpha = "global", sigma = "indep", theta = "indep")) 
+#	s2 <- multi(list(alpha = "global", sigma = "indep", theta = "indep")) 
 	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
 	full  <- multi(list(alpha = "indep", sigma = "indep", theta = "indep")) 
-	list(s1=s1,a1=a1,s2=s2,a2=a2, full=full)
+	list(bm=bm,a1=a1,a2=a2, full=full)
 })
 
 # Reformat and label data for plotting
