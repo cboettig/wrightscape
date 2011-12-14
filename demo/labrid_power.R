@@ -31,7 +31,7 @@ fits <- lapply(traits, function(trait){
 #	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
 #	full  <- multi(list(alpha = "indep", sigma = "indep", theta = "indep")) 
 
-  mc <- montecarlotest(bm,a2)
+  mc <- montecarlotest(bm,a1)
   png(paste(trait, "_mc_labrid_", id, ".png", sep=""))
     plot(mc,show_data=TRUE, main=paste(trait, "pharyngeal"))
   dev.off()
