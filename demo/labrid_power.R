@@ -34,7 +34,7 @@ fits <- lapply(traits, function(trait){
   png(paste(trait, "_mc_labrid_", id, ".png", sep=""))
     plot(mc,show_data=TRUE, main=paste(trait, levels(regimes)))
   dev.off()
-  list(mc$null_dist, mc$test_dist, -2*(mc$null$loglik-mc$test$loglik))
+  list(null=mc$null_dist, test=mc$test_dist, lr=-2*(mc$null$loglik-mc$test$loglik))
 })
 
 save(list=ls(), file=paste("labrid_power_", id, ".Rdat", sep=""))

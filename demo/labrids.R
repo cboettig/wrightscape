@@ -49,6 +49,16 @@ names(fits) <- traits  # each fit is a different trait (so use it for a label)
 data <- melt(fits)
 names(data) <- c("regimes", "param", "rep", "value", "model", "trait")
 
+# Calculate the range for intellegent zooming in on summary stat values
+range <- cast(data, regimes ~ model ~ trait ~ param, smedian.hilow, conf.int=.5, na.rm=T)
+upper <- sapply(c("sigma", "alpha"), function(t) max(range[, , , t]))
+
+
+#ave <- cast(data, regimes ~ model ~ trait ~ param, mean, na.rm=T)
+#errs <- cast(data, regimes ~ model ~ trait ~ param, sd, na.rm=T)
+#upper <- sapply(c("sigma", "alpha"), function(t) max(ave[, , , t]+errs[, , , t]))
+
+
 #model likelihood
 p1 <- ggplot(subset(data,  param=="loglik")) + 
       geom_boxplot(aes(model, value)) +
@@ -61,7 +71,8 @@ p2 <-  ggplot(subset(data, param %in% c("sigma", "alpha") & model != "bm"),
                     position = position_dodge(width=0.90), conf.int=.5) +
        scale_y_log() + 
        facet_grid(param ~ trait, scales = "free_y")  
-#       coord_cartesian(ylim=c(0,10), wise=TRUE)
+       coord_cartesian(ylim=c(0,max(upper)), wise=TRUE)
+
 
 
 ## Just plot the parameters seperately
@@ -70,9 +81,8 @@ p3 <-  ggplot(subset(data, param %in% c("sigma") ),
        stat_summary(fun.y=mean, geom="bar", position="dodge", alpha=.5) + # add bars for some extra ink...
        stat_summary(fun.data=median_hilow, geom="pointrange", aes(color=regimes), 
                     position = position_dodge(width=0.90), conf.int=.5) +
-#       scale_y_log() + 
        facet_grid(param ~ trait, scales = "free_y") + 
-#       coord_cartesian(ylim=c(0,4), wise=TRUE) +  # easiest to just adjust the zoom limits manually still...
+       coord_cartesian(ylim=c(0,upper["sigma"]), wise=TRUE) +  # easiest to just adjust the zoom limits manually still...
        opts(title="sigma")
 
 p4 <-  ggplot(subset(data, param %in% c("alpha") ), 
@@ -80,9 +90,8 @@ p4 <-  ggplot(subset(data, param %in% c("alpha") ),
        stat_summary(fun.y=mean, geom="bar", position="dodge", alpha=.5) + # add bars for some extra ink...
        stat_summary(fun.data=median_hilow, geom="pointrange", aes(color=regimes), 
                     position = position_dodge(width=0.90), conf.int=.5) +
-#       scale_y_log() + 
        facet_grid(param ~ trait, scales = "free_y") + 
-#       coord_cartesian(ylim=c(0,10), wise=TRUE) +
+       coord_cartesian(ylim=c(0,upper["alpha"]), wise=TRUE) +
         opts(title = "alpha")
 
 
