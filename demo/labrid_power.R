@@ -15,7 +15,7 @@ print(id)
 data(labrids)
 
 #traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
-traits <- c("close", "open", "kt", "gape.y""AM.y")
+traits <- c("close", "open", "kt", "gape.y", "AM.y")
 regimes <- two_shifts 
 
   # declare function for shorthand
