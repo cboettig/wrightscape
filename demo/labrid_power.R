@@ -19,7 +19,7 @@ traits <- c("close", "open", "kt", "gape.y", "AM.y")
 regimes <- two_shifts 
 
   # declare function for shorthand
-sfInit(par=T, cpu=5)    # for debugging locally
+sfInit(par=F)    # for debugging locally
 fits <- lapply(traits, function(trait){
 	multi <- function(modelspec){ 
 	 multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, 
