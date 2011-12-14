@@ -17,11 +17,13 @@ print(id)
 
 data(labrids)
 #traits <- c("bodymass", "close", "open", "kt", "gape.x",  "prot.x", "AM.x", "SH.x", "LP.x")
-traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+#traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+traits <- c("open", "kt", "gape.y",  "AM.y")
 
-regimes <- intramandibular
 
-sfInit(par=T, 9)    # for debugging locally
+regimes <- two_shifts
+
+sfInit(par=T, 4)    # for debugging locally
 sfLibrary(wrightscape)
 sfExportAll()
 fits <- sfLapply(traits, function(trait){
