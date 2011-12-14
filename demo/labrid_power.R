@@ -14,8 +14,9 @@ print(id)
 
 data(labrids)
 
-traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
-regimes <- pharyngeal 
+#traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+traits <- c("close", "open", "kt", "gape.y""AM.y")
+regimes <- two_shifts 
 
   # declare function for shorthand
 sfInit(par=F)    # for debugging locally
@@ -26,8 +27,8 @@ fits <- lapply(traits, function(trait){
 
 	}
 	bm <- multi(list(alpha = "fixed", sigma = "indep", theta = "global")) 
-#	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
-	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
+	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
+#	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
 #	full  <- multi(list(alpha = "indep", sigma = "indep", theta = "indep")) 
 
   mc <- montecarlotest(bm,a2)
