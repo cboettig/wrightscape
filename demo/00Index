@@ -1,0 +1,20 @@
+anoles.R  a unit test comparing wrightscape and ouch
+auteur_labrids.R  an relatively simple example of auteur run on the labrid dataset
+brownie_parrotfish.R an incomplete example of brownie.lite on parrotfish data.  Painting the tree wants simmap formats
+labrid_data.R prepare the labrid trait data under transforms and phylogenetic size correction
+labrid_mcmc.R example of mcmc on the labrid data, needs refining
+
+labrid_mc.R Preliminary model choice over a suite of traits in the labrid data.  Plot the best-fit parameter values and likelihoods of a variety of model fits without estimating uncertainty (for speed).  
+
+labrid_power.R Phylogenetic monte carlo (bootstrapped likelihood ratio test) pairwise comparisons of several models
+labrids.R analysis of the labrid model parameters and likelihoods under bootstrap
+
+mietchen.R analysis of the brain measurements of Prof. Daniel Mietchen on a primate phylogeny from the auteur package
+power_plot.R plotting script for the power comparisons between models across traits.  move into *_power.R scripts, and consider adding to package function list. 
+
+primates.R a wrightscape analysis on primate body size data included in auteur package.  (Shows that differences in OU means is best?  Check the notebook..)
+
+sim_mc.R show the basic model choice works clearly on simulated data (essentially a unit-test)
+simulation.R bootstrapped comparisons of model choice on simulated data sets
+
+

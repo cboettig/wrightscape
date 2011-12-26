@@ -1,5 +1,7 @@
 
-# labrid example
+# labrid example of the auteur program in MPI mode for large cluster
+# Probably needs finer adjustment of the rjmcmc parameters & mcmc analysis to ensure proper mixing.  
+
 rm(list=ls()) # clean workspace
 
 require(auteur)
