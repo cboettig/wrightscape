@@ -1,4 +1,4 @@
-PKG_CPPFLAGS=-O4
+PKG_CPPFLAGS=-O3
 PKG_LIBS=-lm -lgsl -lgslcblas
 
 #PKG_CPPFLAGS=-I/usr/common/usg/gsl/1.13/include -Wall -O3
