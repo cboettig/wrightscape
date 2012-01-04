@@ -45,8 +45,8 @@ fits <- lapply(traits, function(trait){
   bm_t2 <- list(null=mc$null_dist, test=mc$test_dist, lr=-2*(mc$null$loglik-mc$test$loglik))
 
   list(sigmas_vs_alphas=bm_a2, sigmas_vs_thetas=bm_t2, thetas_vs_alphas=t2_a2,
-       sigmas_vs_alphas-thetas=bm_a2t2,  alphas_vs_alphas-thetas=a2_a2t2,  
-       thetas_vs_alphas-thetas=t2_a2t2)
+       sigmas_vs_alphasthetas=bm_a2t2,  alphas_vs_alphasthetas=a2_a2t2,  
+       thetas_vs_alphasthetas=t2_a2t2)
 })
 
 names(fits) <- traits
