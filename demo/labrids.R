@@ -70,7 +70,7 @@ p2 <-  ggplot(subset(data, param %in% c("sigma", "alpha") & model != "bm"),
        stat_summary(fun.data=median_hilow, geom="pointrange", aes(color=regimes), 
                     position = position_dodge(width=0.90), conf.int=.5) +
        scale_y_log() + 
-       facet_grid(param ~ trait, scales = "free_y")  
+       facet_grid(param ~ trait, scales = "free_y") + 
        coord_cartesian(ylim=c(0,max(upper)), wise=TRUE)
 
 
