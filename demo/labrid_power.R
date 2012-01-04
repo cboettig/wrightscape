@@ -41,7 +41,7 @@ fits <- lapply(traits, function(trait){
   t2_a2 <- list(null=mc$null_dist, test=mc$test_dist, lr=-2*(mc$null$loglik-mc$test$loglik))
   mc <- montecarlotest(t2,a2t2)
   t2_a2t2 <- list(null=mc$null_dist, test=mc$test_dist, lr=-2*(mc$null$loglik-mc$test$loglik))
-  mc <- montecarlotest(bm,t2)
+  mc <- montecarlotest(bm2,t2)
   bm_t2 <- list(null=mc$null_dist, test=mc$test_dist, lr=-2*(mc$null$loglik-mc$test$loglik))
 
   list(sigmas_vs_alphas=bm_a2, sigmas_vs_thetas=bm_t2, thetas_vs_alphas=t2_a2,
