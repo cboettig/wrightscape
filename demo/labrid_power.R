@@ -55,7 +55,9 @@ require(ggplot2)
 p1 <- ggplot(subset(dat, abs(value) < 1e3)) + 
       geom_boxplot(aes(type, value)) +
       facet_grid(comparison ~ trait, scales="free")
-ggsave("modelchoice.png", p1)
+ggsave(paste(id, "_modelchoice.png", sep=""), p1)
+
+## Tough to see everything on such a grid
 
 
 save(list=ls(), file=paste("labrid_power_", id, ".Rdat", sep=""))
