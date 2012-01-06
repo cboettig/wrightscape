@@ -3,7 +3,6 @@
 
 rm(list=ls())
 require(wrightscape)
-require(snowfall)
 require(ggplot2)
 
 # store the unique id of this script version
@@ -16,10 +15,9 @@ data(labrids)
 
 traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
 #traits <- c("close", "open", "kt", "gape.y", "AM.y")
-regimes <- intramandibular 
+regimes <- two_shifts 
 
   # declare function for shorthand
-sfInit(par=F)    # for debugging locally
 fits <- lapply(traits, function(trait){
 	multi <- function(modelspec){ 
 	 multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, 
