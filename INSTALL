@@ -1,0 +1,27 @@
+ INSTALL 
+########### 
+ Install from github using devtools:
+ Install and load the "devtools" package first
+```R
+ install.packages("devtools")
+ library(devtools)
+```
+ 
+Then install the package from github
+```R
+install_github("wrightscape", "cboettig")
+```
+
+For installing on NERSC Systems
+###############################
+Run the following commands from the wrightscape directory
+
+```bash
+module swap pgi intel
+module swap openmpi openmpi-intel
+module load gsl
+module load R/2.12.1
+rm config*
+cp src/nersc_makevars src/Makevars
+R CMD INSTALL .
+```

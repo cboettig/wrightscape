@@ -1,0 +1,9 @@
+## Standard calls:
+#PKG_CPPFLAGS=-O3
+#PKG_LIBS=-lm -lgsl -lgslcblas
+
+## For NERSC supercomputer, we need to explicitly give the gsl 
+## paths, since config file doesn't work
+## Copy this file to Makevars to install on NERSC
+PKG_CPPFLAGS=-I/usr/common/usg/gsl/1.13/include -Wall -O3
+PKG_LIBS=-L/usr/common/usg/gsl/1.13/lib -lm -lgsl -lgslcblas
