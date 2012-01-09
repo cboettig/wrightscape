@@ -2,22 +2,32 @@
 # License: BSD 
 
 rm(list=ls())
-require(wrightscape)
-require(ggplot2)
 
+### THIS MUST MATCH THE FILENAME !!!!!!!!!!! ### 
+### Consider reading in as an argument?? ## 
 # store the unique id of this script version
 require(socialR)
-gitaddr <- gitcommit("labrid_power.R")
+gitaddr <- gitcommit("parrotfish_power.R")
 id <- gitlog()$shortID
 print(id)
 
-data(labrids)
+
+
+
+require(wrightscape)
+#require(snowfall)
+require(ggplot2)
+
+data(parrotfish)
 
 traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
 #traits <- c("close", "open", "kt", "gape.y", "AM.y")
-regimes <- two_shifts 
+regimes <- intramandibular 
 
   # declare function for shorthand
+#sfInit(par=T, cpu=9)    # for debugging locally
+#sfLibrary(wrightscape)
+#sfExportAll() 
 fits <- lapply(traits, function(trait){
 	multi <- function(modelspec){ 
 	 multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, 
@@ -51,7 +61,7 @@ names(fits) <- traits
 dat <- melt(fits)
 names(dat) <- c("value", "type", "comparison", "trait")
 
-save(list=ls(), file=paste("labrid_power_", id, ".Rdat", sep=""))
+save(list=ls(), file=paste("parrotfish_power_", id, ".Rdat", sep=""))
 
 
 require(ggplot2)
