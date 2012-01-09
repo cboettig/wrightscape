@@ -9,6 +9,7 @@ path = "/home/cboettig/Documents/data/phylogenetics/carnivora/"
 # uses aquatic vs terrestrial
 tree <- read.nexus(paste(path, "carnivora.nex", sep=""))
 data <- read.csv(paste(path, "carnivora.txt", sep=""), sep="\t")
+rownames(data) <- data[,1]
 out <- format_data(tree, data, species_names = data[,1], regimes = data[,3])
 
 size <- log(out$data[,2])
