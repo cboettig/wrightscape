@@ -18,14 +18,15 @@ path = "/home/cboettig/Documents/data/phylogenetics/carnivora/"
 tree <- read.nexus(paste(path, "carnivora.nex", sep=""))
 data <- read.csv(paste(path, "carnivora.txt", sep=""), sep="\t")
 rownames(data) <- data[,1]
-# uses aquatic vs terrestrial as regime definitions
-out <- format_data(tree, data, species_names = data[,1], regimes = data[,3])
+# regimes = data[,3] uses aquatic vs terrestrial as regime definitions
+#  regimes = data[,4] uses "marine, freshwater, terrestrial" 
+out <- format_data(tree, data, species_names = data[,1], regimes = data[,4])
 size <- log(out$data[,2])
 names(size) <- rownames(out$data)
 regimes <- out$regimes
 
 
-sfInit(par=T, cpu=4)    
+sfInit(par=T, cpu=16)    
 
 	multi <- function(modelspec){ 
 	 multiTypeOU(data = size, tree = out$tree, regimes = regimes, 
