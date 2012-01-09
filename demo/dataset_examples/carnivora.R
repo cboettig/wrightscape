@@ -4,8 +4,7 @@ cpu = 8
 
 require(wrightscape)
 #path = "~/data/carnivora/"
-path = "/home/cboettig/Documents/ucdavis/research/phylotrees/data/carnivora/"
-
+path = "/home/cboettig/Documents/data/phylogenetics/carnivora/"
 
 # uses aquatic vs terrestrial
 tree <- read.nexus(paste(path, "carnivora.nex", sep=""))
