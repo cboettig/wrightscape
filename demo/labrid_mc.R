@@ -15,9 +15,9 @@ print(id)
 
 
 data(labrids)
-#traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
 #traits <- c("gape.x",  "prot.x", "AM.x", "SH.x", "LP.x")
-traits <- c("open", "kt", "AM.y", "gape.y")
+#traits <- c("open", "kt", "close", "AM.y", "gape.y")
 
 regimes <- two_shifts
   # declare function for shorthand
@@ -39,14 +39,12 @@ fits <- sfLapply(traits, function(trait){
 	      rownames(pars) <- levels(out$regimes)
 	      colnames(pars) <- c("alpha", "sigma", "theta", "Xo", "loglik")
 	      if(out$convergence != 0) # only return values if successful
-		pars[,] <- NA
+      		pars[,] <- NA
 	      pars
 	}
 
   bm <-  multi(list(alpha = "fixed", sigma = "indep", theta = "global")) 
-#	s1 <- multi(list(alpha = "global", sigma = "indep", theta = "global")) 
 	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
-#	s2 <- multi(list(alpha = "global", sigma = "indep", theta = "indep")) 
 	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
 	full  <- multi(list(alpha = "indep", sigma = "indep", theta = "indep")) 
 	list(bm=bm,a1=a1,a2=a2, full=full)
@@ -71,7 +69,7 @@ ggsave(sprintf("%s_p3.png", id), p3)
 ggsave(sprintf("%s_p1.png", id), p1)
 ggsave(sprintf("%s_p2.png", id),  p2)
 require(socialR)
-upload(sprintf("%s_p*.png", id), gitaddr=gitaddr, tag="phylogenetics")
+#upload(sprintf("%s_p*.png", id), gitaddr=gitaddr, tag="phylogenetics")
 
 save(list=ls(), file=sprintf("%s.Rdat", id))
 print(id)
