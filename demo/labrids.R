@@ -17,8 +17,8 @@ print(id)
 
 data(labrids)
 #traits <- c("bodymass", "close", "open", "kt", "gape.x",  "prot.x", "AM.x", "SH.x", "LP.x")
-#traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
-traits <- c("open", "kt", "gape.y",  "AM.y")
+traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+#traits <- c("open", "kt", "gape.y",  "AM.y")
 
 
 regimes <- two_shifts
@@ -37,11 +37,13 @@ fits <- sfLapply(traits, function(trait){
     replicate(reps, bootstrap(m))
   }
 
-  bm <- multi(list(alpha = "fixed", sigma = "indep", theta = "global"))
-  a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
-  a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
+  bm <- multi(list(alpha = "fixed", sigma = "global", theta = "global")) 
+  ou <- multi(list(alpha = "global", sigma = "global", theta = "global")) 
+  bm2 <- multi(list(alpha = "fixed", sigma = "indep", theta = "global")) 
+  a2  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
+  t2  <- multi(list(alpha = "global", sigma = "global", theta = "indep")) 
 
-  list(bm=bm, a1=a1, a2=a2)
+	list(bm=bm,brownie=bm2, ou=ou, ouch=t2, alphas=a2)
 })
 
 # Reformat and label data for plotting
