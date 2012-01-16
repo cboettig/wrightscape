@@ -6,6 +6,8 @@ rm(list=ls())
 require(wrightscape)
 require(snowfall)
 require(ggplot2)
+require(Hmisc)
+
 
 # store the unique id of this script version
 require(socialR)
@@ -23,7 +25,7 @@ traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.
 
 regimes <- two_shifts
 
-sfInit(par=T, 4)    # for debugging locally
+sfInit(par=T, 9)    # for debugging locally
 sfLibrary(wrightscape)
 sfExportAll()
 fits <- sfLapply(traits, function(trait){
