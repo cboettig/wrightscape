@@ -29,10 +29,10 @@ sfExportAll()
 fits <- sfLapply(traits, function(trait){
 
   # declare function for shorthand
-  multi <- function(modelspec, reps = 20){
+  multi <- function(modelspec, reps = 100){
     m <- multiTypeOU(data = dat[trait], tree = tree, regimes = regimes, 
   		     model_spec = modelspec, 
-		     control = list(maxit=3000)
+		     control = list(maxit=8000)
 		    ) 
     replicate(reps, bootstrap(m))
   }
