@@ -43,11 +43,13 @@ fits <- sfLapply(traits, function(trait){
 	      pars
 	}
 
-  bm <-  multi(list(alpha = "fixed", sigma = "indep", theta = "global")) 
-	a1  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
-	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "indep")) 
-	full  <- multi(list(alpha = "indep", sigma = "indep", theta = "indep")) 
-	list(bm=bm,a1=a1,a2=a2, full=full)
+  bm <- multi(list(alpha = "fixed", sigma = "global", theta = "global")) 
+  ou <- multi(list(alpha = "global", sigma = "global", theta = "global")) 
+  bm2 <- multi(list(alpha = "fixed", sigma = "indep", theta = "global")) 
+  a2  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
+  t2  <- multi(list(alpha = "global", sigma = "global", theta = "indep")) 
+
+	list(bm=bm,brownie=bm2, ou=ou, ouch=t2, alphas=a2)
 })
 
 # Reformat and label data for plotting
@@ -57,19 +59,22 @@ names(data) <- c("regimes", "param", "value", "model", "trait")
 
 
 #model likelihood
-p1 <- ggplot(subset(data,  param=="loglik")) + geom_boxplot(aes(model, value)) +
+p1 <- ggplot(subset(data,  param=="loglik")) +
+      geom_boxplot(aes(model, value)) +
       facet_wrap(~ trait, scales="free_y")
-p2 <-  ggplot(subset(data, param %in% c("alpha") & model %in% c("a1", "a2", "full") ),
-              aes(model, value, fill=regimes)) + geom_bar(position="dodge") +  
-       facet_wrap(~trait, scales="free_y")
-p3 <-  ggplot(subset(data, param %in% c("sigma") & model %in% c("s1", "s2", "full") ),
+p2 <- ggplot(subset(data, param %in% c("alpha")),
+             aes(model, value, fill=regimes)) +
+      geom_bar(position="dodge") +  
+      facet_wrap(~trait, scales="free_y")
+
+p3 <-  ggplot(subset(data, param %in% c("sigma")),
               aes(model, value, fill=regimes)) + geom_bar(position="dodge") +  
        facet_wrap(~trait, scales="free_y")
 ggsave(sprintf("%s_p3.png", id), p3)
 ggsave(sprintf("%s_p1.png", id), p1)
 ggsave(sprintf("%s_p2.png", id),  p2)
 require(socialR)
-#upload(sprintf("%s_p*.png", id), gitaddr=gitaddr, tag="phylogenetics")
+upload(sprintf("%s_p*.png", id), gitaddr=gitaddr, tag="phylogenetics")
 
 save(list=ls(), file=sprintf("%s.Rdat", id))
 print(id)
