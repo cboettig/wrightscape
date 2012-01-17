@@ -39,19 +39,20 @@ ggsave("parameters.png", p2)
 ## hmm 
 
 
-load("f6cc2b1.Rdat")
+load("6b5fb57.Rdat")
 require(Hmisc)
 # Calculate the range for intellegent zooming in on summary stat values
 
 subdat <- subset(data, param %in% c("alpha") 
-                 & trait %in% c("kt", "close") 
-                 & model %in% c("alphas"))
+                 & trait %in% c("kt", "open") 
+                 & model %in% c("alphas") 
+                 & value < 20)
 r <- cast(subdat, regimes ~ model ~ trait ~ param, smedian.hilow, conf.int=.5, na.rm=T)
 upper <- sapply(c("alpha"), function(t) max(r[, , , t]))
 
 
 p4 <-  ggplot(subdat, aes(model, value, fill=regimes)) + 
-  stat_summary(fun.y=mean, geom="bar", position="dodge", alpha=.5) + # add bars for some extra ink...
+#  stat_summary(fun.y=mean, geom="bar", position="dodge", alpha=.5) + # add bars for some extra ink...
   stat_summary(fun.data=median_hilow, geom="pointrange", aes(color=regimes), 
   position = position_dodge(width=0.90), conf.int=.5) +
   facet_grid(param ~ trait, scales = "free_y") + 
