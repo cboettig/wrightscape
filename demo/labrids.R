@@ -23,7 +23,7 @@ traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.
 #traits <- c("open", "kt", "gape.y",  "AM.y")
 
 
-regimes <- two_shifts
+regimes <- intramandibular
 
 sfInit(par=T, 9)    # for debugging locally
 sfLibrary(wrightscape)
@@ -53,6 +53,34 @@ names(fits) <- traits  # each fit is a different trait (so use it for a label)
 data <- melt(fits)
 names(data) <- c("regimes", "param", "rep", "value", "model", "trait")
 
+
+
+
+
+
+subdat <- subset(data, param %in% c("alpha") 
+#                 & trait %in% c("kt", "open") 
+                 & model %in% c("alphas") 
+                 & value < 20)
+r <- cast(subdat, regimes ~ model ~ trait ~ param, smedian.hilow, conf.int=.5, na.rm=T)
+upper <- sapply(c("alpha"), function(t) max(r[, , , t]))
+
+
+p4 <-  ggplot(subdat, aes(model, value, fill=regimes)) + 
+#  stat_summary(fun.y=mean, geom="bar", position="dodge", alpha=.5) + # add bars for some extra ink...
+  stat_summary(fun.data=median_hilow, geom="pointrange", aes(color=regimes), 
+  position = position_dodge(width=0.90), conf.int=.5) +
+  facet_grid(param ~ trait, scales = "free_y") + 
+  coord_cartesian(ylim=c(0,upper["alpha"]), wise=TRUE) +
+  opts(title = "alpha")
+
+save(list=ls(), file=sprintf("%s.Rdat", id))
+ggsave(sprintf("%s_params_p4.png", id),  p4)
+print(id)
+
+norun <- function{
+
+
 # Calculate the range for intellegent zooming in on summary stat values
 range <- cast(data, regimes ~ model ~ trait ~ param, smedian.hilow, conf.int=.5, na.rm=T)
 upper <- sapply(c("sigma", "alpha"), function(t) max(range[, , , t]))
@@ -61,7 +89,6 @@ upper <- sapply(c("sigma", "alpha"), function(t) max(range[, , , t]))
 #ave <- cast(data, regimes ~ model ~ trait ~ param, mean, na.rm=T)
 #errs <- cast(data, regimes ~ model ~ trait ~ param, sd, na.rm=T)
 #upper <- sapply(c("sigma", "alpha"), function(t) max(ave[, , , t]+errs[, , , t]))
-
 
 #model likelihood
 p1 <- ggplot(subset(data,  param=="loglik")) + 
@@ -98,16 +125,16 @@ p4 <-  ggplot(subset(data, param %in% c("alpha") ),
        coord_cartesian(ylim=c(0,upper["alpha"]), wise=TRUE) +
         opts(title = "alpha")
 
-
-
 save(list=ls(), file=sprintf("%s.Rdat", id))
 ggsave(sprintf("%s_lik.png", id), p1)
 ggsave(sprintf("%s_params_p2.png", id),  p2)
 ggsave(sprintf("%s_params_p3.png", id),  p3)
 ggsave(sprintf("%s_params_p4.png", id),  p4)
-
-
 print(id)
+}
+
+
+
 
 ## For uploading plots at end  
 #require(socialR); require(ggplot2); require(wrightscape)
