@@ -44,7 +44,7 @@ require(Hmisc)
 # Calculate the range for intellegent zooming in on summary stat values
 
 subdat <- subset(data, param %in% c("alpha") 
-                 & trait %in% c("kt", "open") 
+#                 & trait %in% c("kt", "open") 
                  & model %in% c("alphas") 
                  & value < 20)
 r <- cast(subdat, regimes ~ model ~ trait ~ param, smedian.hilow, conf.int=.5, na.rm=T)
