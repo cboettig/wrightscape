@@ -62,13 +62,16 @@ plot.path_sim <- function(x, ...)
 
 
 example_path <- function(){
-  X <- bm_path_sim()
-  Y <- ou_path_sim()
-  Z <- release_path_sim()
+  require(ggplot2)
+  reps <- 100
+  X <- bm_path_sim(reps = reps)
+  Y <- ou_path_sim(reps = reps, alpha = 4)
+  Z <- release_path_sim(reps = reps, alpha = 4)
 
-  px <- plot.path_sim(X) + opts(title = "Brownian Motion")
-  py <- plot.path_sim(Y) + opts(title = "Ornstein-Uhlenbeck")
-  pz <- plot.path_sim(Z) + opts(title = "Release of Constraint")
+  px <- plot.path_sim(X) + opts(title = "Brownian Motion") + coord_cartesian(ylim = c(-2,2))
+  py <- plot.path_sim(Y) + opts(title = "Ornstein-Uhlenbeck") + coord_cartesian(ylim = c(-2,2))
+  pz <- plot.path_sim(Z) + opts(title = "Release of Constraint") + coord_cartesian(ylim = c(-2,2))
+
 
   grid.newpage()
   pushViewport(viewport(layout = grid.layout(1,3)))
