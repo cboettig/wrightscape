@@ -1,6 +1,12 @@
 #' brownian motion path simulator
 #'
-#'
+#' @param x0 starting position
+#' @param T total time
+#' @param sigma noise parameter 
+#' @param pts number of points per rep
+#' @param reps number of replicates
+#' @return a melted data object ready for ggploting 
+#' @export
 bm_path_sim <- function(x0 = 0, T = 1, sigma = 1, pts = 100, reps = 40){
   deltaT <- T/pts
   X <- replicate(reps,  x0 + cumsum(rnorm(pts, 0, sigma*sqrt(deltaT))))
@@ -11,7 +17,17 @@ bm_path_sim <- function(x0 = 0, T = 1, sigma = 1, pts = 100, reps = 40){
 
 
 #' OU path simulator
-ou_path_sim <- function(x0 = 0, T = 1, alpha = 2, sigma = 1, theta = 0,
+#'
+#' @param x0 starting position
+#' @param T total time
+#' @param alpha selection/constraint strength 
+#' @param sigma noise parameter 
+#' @param theta optimum value
+#' @param pts number of points per rep
+#' @param reps number of replicates
+#' @return a melted data object ready for ggploting 
+#' @export
+ou_path_sim <- function(x0 = 0, T = 1, alpha = 4, sigma = 1, theta = 0,
                         pts = 100, reps = 40){
   deltaT <- T/pts
   ou <- function(){
@@ -32,7 +48,18 @@ ou_path_sim <- function(x0 = 0, T = 1, alpha = 2, sigma = 1, theta = 0,
 
 
 #' Release of constraint path simulator
-release_path_sim <- function(x0 = 0, T = 1, alpha = 2, sigma = 1, theta = 0,
+#'
+#' @param x0 starting position
+#' @param T total time
+#' @param alpha selection/constraint strength 
+#' @param sigma noise parameter 
+#' @param theta optimum value
+#' @param pts number of points per rep
+#' @param reps number of replicates
+#' @param release_frac fraction of time after which shift occurs
+#' @return a melted data object ready for ggploting 
+#' @export
+release_path_sim <- function(x0 = 0, T = 1, alpha = 4, sigma = 1, theta = 0,
                         pts = 100, reps = 40, release_frac=.5){
   deltaT <- T/pts
   shiftT <- ceiling(release_frac * pts)
@@ -56,29 +83,36 @@ release_path_sim <- function(x0 = 0, T = 1, alpha = 2, sigma = 1, theta = 0,
 }
 
 
-
-plot.path_sim <- function(x, ...)
-  ggplot(x) + geom_line(aes(time, value, group = rep), alpha = .3)
-
-
-example_path <- function(){
-  require(ggplot2)
-  reps <- 100
-  X <- bm_path_sim(reps = reps)
-  Y <- ou_path_sim(reps = reps, alpha = 4)
-  Z <- release_path_sim(reps = reps, alpha = 4)
-
-  px <- plot.path_sim(X) + opts(title = "Brownian Motion") + coord_cartesian(ylim = c(-2,2))
-  py <- plot.path_sim(Y) + opts(title = "Ornstein-Uhlenbeck") + coord_cartesian(ylim = c(-2,2))
-  pz <- plot.path_sim(Z) + opts(title = "Release of Constraint") + coord_cartesian(ylim = c(-2,2))
-
-
-  grid.newpage()
-  pushViewport(viewport(layout = grid.layout(1,3)))
-  vplayout <- function(x, y) viewport(layout.pos.row = x,
-  layout.pos.col = y)
-  print(px, vp = vplayout(1, 1))
-  print(pz, vp = vplayout(1, 2))
-  print(py, vp = vplayout(1, 3))
+#' Release of constraint path simulator
+#'
+#' @param x0 starting position
+#' @param T total time
+#' @param sigma BM rate at start
+#' @param sigma2 BM rate after shift
+#' @param pts number of points per rep
+#' @param reps number of replicates
+#' @param release_frac fraction of time after which shift occurs
+#' @return a melted data object ready for ggploting
+#' @export
+brownie_path_sim <- function(x0 = 0, T = 1, sigma = 1/sqrt(8), sigma2 = 1, 
+                        pts = 100, reps = 40, release_frac=.5){
+  deltaT <- T/pts
+  shiftT <- ceiling(release_frac * pts)
+  snap <- function(){
+    x <- numeric(pts)
+    x[1] <- x0
+    for(i in 1:shiftT){
+      x[i + 1] <- rnorm(1, x[i], sigma*sqrt(deltaT))
+    }
+    for(i in shiftT:pts){
+      x[i + 1] <- rnorm(1, x[i], sigma2*sqrt(deltaT))
+    }
+    x
+  }
+  X <- replicate(reps, snap())
+  out <- melt(X)
+  names(out) <- c("time", "rep", "value")
+  out
 }
+
 
