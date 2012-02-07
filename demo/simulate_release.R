@@ -29,14 +29,4 @@ plot.path_sim <- function(x, ...)
 
 
 
-png("release.png")
-  pushViewport(viewport(layout = grid.layout(2,2)))
-  vplayout <- function(x, y) viewport(layout.pos.row = x,
-  layout.pos.col = y)
-  print(px, vp = vplayout(1, 1))
-  print(py, vp = vplayout(1, 2))
-  print(pw, vp = vplayout(2, 1))
-  print(pz, vp = vplayout(2, 2))
-  dev.off()
-require(socialR)
-upload("release.png", script="simulate_release.R")
+
