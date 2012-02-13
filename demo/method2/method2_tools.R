@@ -58,7 +58,7 @@ paint_phy <- function(phy, data, clades, show_plot=TRUE){
     tiplabels(pch=21, bg=colors[tips])
   }
 
-  list(phy=phy, data=data)
+  list(phy=phy, data=data, colors=colors)
 }
 
 
