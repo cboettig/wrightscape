@@ -10,7 +10,7 @@ INC = /usr/common/usg/gsl/1.13/include
 FILES = piecewise_regimes.c likelihood.c multimin.c siman.c mvn.c 
 
 build: $(FILES)
-	$(CC) -I$(INC) -L$(LDLIB) $(LIB) $(CFLAGS) -o $(EXE) $(FILES)
+	$(CC) $(LIB) $(CFLAGS) -o $(EXE) $(FILES)
 
 objects: $(FILES)
 	$(CC) $(CFLAGS2) -c piecewise_regimes.c -o piecewise_regimes.o
