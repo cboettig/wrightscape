@@ -14,8 +14,9 @@ require(Hmisc)
 
 
 ``` {r }
+data(labrids)
 traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
-regimes <- intramandibular
+regimes <- two_shifts
 ````
 
 Setup parallel environment
