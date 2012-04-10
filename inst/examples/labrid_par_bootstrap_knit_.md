@@ -2,6 +2,7 @@
 * Author: Carl Boettiger <cboettig@gmail.com>
 * License: BSD 
 
+`ro dev='png', fig.width=8, fig.path='figures/' or`
 
 ``` {r }
 require(wrightscape)

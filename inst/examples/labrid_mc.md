@@ -37,6 +37,18 @@ Just a few processors, for debugging locally.
 
 ```r
 sfInit(par=T, 4)    # for debugging locally
+```
+
+
+
+```
+R Version:  R version 2.14.1 (2011-12-22) 
+
+```
+
+
+
+```r
 sfLibrary(wrightscape)
 ```
 
@@ -109,7 +121,7 @@ ggplot(subset(data,  param=="loglik")) +
   facet_wrap(~ trait, scales="free_y")
 ```
 
-![plot of chunk unnamed-chunk-7](http://farm8.staticflickr.com/7188/7065004911_7c48a59d54_o.png) 
+![plot of chunk unnamed-chunk-7](http://farm8.staticflickr.com/7114/6919293482_a5a6e34736_o.png) 
 
 
 Parameter distributions of alpha parameter in model `alpha` (alphas vary) and `ou` (global).  
@@ -124,7 +136,7 @@ ggplot(subset(data, param %in% c("alpha")
   facet_wrap(~trait, scales="free_y")
 ```
 
-![plot of chunk unnamed-chunk-8](http://farm8.staticflickr.com/7263/7065005419_8e389a4629_o.png) 
+![plot of chunk unnamed-chunk-8](http://farm6.staticflickr.com/5312/7065373031_0d9dec7c12_o.png) 
 
 
 Parameter distribution of the sigma parameter in the brownie and bm models
@@ -139,7 +151,7 @@ ggplot(subset(data, param %in% c("sigma")
   facet_wrap(~trait, scales="free_y")
 ```
 
-![plot of chunk unnamed-chunk-9](http://farm8.staticflickr.com/7211/7065005919_548eb4e0ce_o.png) 
+![plot of chunk unnamed-chunk-9](http://farm8.staticflickr.com/7277/6919294288_2686173e09_o.png) 
 
 
 

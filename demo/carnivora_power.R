@@ -70,17 +70,17 @@ save(list=ls(), file=paste("power_", id, ".Rdat", sep=""))
 
 
 require(ggplot2)
-r <- cast(dat, comparison ~ trait, function(x) quantile(x, c(.10,.90)))
-subdat <- subset(dat, abs(value) < max(abs(as.matrix(r))))
+#r <- cast(dat, comparison ~ trait, function(x) quantile(x, c(.10,.90)))
+#subdat <- subset(dat, abs(value) < max(abs(as.matrix(r))))
 
-p1 <- ggplot(subdat) + 
+p1 <- ggplot(dat) + 
       geom_boxplot(aes(type, value)) +
       facet_grid(trait ~ comparison, scales="free_y") 
 ggsave(paste(id, "_modelchoice.png", sep=""), p1)
 
 ## Tough to see everything on such a grid
 for(tr in traits){
-  p <- ggplot(subset(subdat, trait==tr)) +  geom_boxplot(aes(type, value)) +   facet_wrap(~ comparison, scales="free_y")
+  p <- ggplot(subset(dat, trait==tr)) +  geom_boxplot(aes(type, value)) +   facet_wrap(~ comparison, scales="free_y")
   ggsave(paste(id, "_", tr, ".png", sep=""), p)
 }
 
