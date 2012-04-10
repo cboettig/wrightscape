@@ -1,37 +1,35 @@
-# Author: Carl Boettiger <cboettig@gmail.com>
-# License: BSD 
+* Author: Carl Boettiger <cboettig@gmail.com>
+* License: BSD 
 
-rm(list=ls())
+``` {r }
 require(wrightscape)
 require(snowfall)
 require(ggplot2)
-
-# store the unique id of this script version
-require(socialR)
-gitaddr <- gitcommit("labrid_mc.R")
-id <- gitlog()$shortID
-
-print(id)
+````
 
 
+``` {r }
 data(labrids)
 traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
-#traits <- c("gape.x",  "prot.x", "AM.x", "SH.x", "LP.x")
-#traits <- c("open", "kt", "close", "AM.y", "gape.y")
+````
 
+``` {r }
 regimes <- two_shifts
-  # declare function for shorthand
+````
+
+Just a few processors, for debugging locally.
+``` {r }
 sfInit(par=T, 4)    # for debugging locally
 sfLibrary(wrightscape)
 sfExportAll()
+````
 
+The main parallel loop fitting each model
+``` {r }
 fits <- sfLapply(traits, function(trait){
 	multi <- function(modelspec){ 
 		out <- multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, 
 			    model_spec = modelspec, control = list(maxit=8000))
-
-	      ## plots require this formatting.  should make as a seperate function
-	      ## so can return full model fits.   
 	      n <- length(levels(out$regimes))
 	      Xo <- rep(out$Xo,n) 
 	      loglik <- rep(out$loglik, n)
@@ -42,43 +40,50 @@ fits <- sfLapply(traits, function(trait){
       		pars[,] <- NA
 	      pars
 	}
-
   bm <- multi(list(alpha = "fixed", sigma = "global", theta = "global")) 
   ou <- multi(list(alpha = "global", sigma = "global", theta = "global")) 
   bm2 <- multi(list(alpha = "fixed", sigma = "indep", theta = "global")) 
   a2  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
   t2  <- multi(list(alpha = "global", sigma = "global", theta = "indep")) 
-
 	list(bm=bm,brownie=bm2, ou=ou, ouch=t2, alphas=a2)
 })
+````
 
-# Reformat and label data for plotting
+
+Reformat and label data for plotting
+
+``` {r }
 names(fits) <- traits  # each fit is a different trait (so use it for a label)
 data <- melt(fits)
 names(data) <- c("regimes", "param", "value", "model", "trait")
+````
 
+model likelihood
 
-#model likelihood
-p1 <- ggplot(subset(data,  param=="loglik")) +
-      geom_boxplot(aes(model, value)) +
-      facet_wrap(~ trait, scales="free_y")
-p2 <- ggplot(subset(data, param %in% c("alpha") 
-             & model %in% c("alphas", "ou")),
-             aes(model, value, fill=regimes)) +
-      geom_bar(position="dodge") +  
-      facet_wrap(~trait, scales="free_y")
+``` {r fig.width=8}
+ggplot(subset(data,  param=="loglik")) +
+  geom_boxplot(aes(model, value)) +
+  facet_wrap(~ trait, scales="free_y")
+````
 
-p3 <-  ggplot(subset(data, param %in% c("sigma") 
-             & model %in% c("bm", "brownie")),
-              aes(model, value, fill=regimes)) +
-              geom_bar(position="dodge") +  
-       facet_wrap(~trait, scales="free_y")
-ggsave(sprintf("%s_p3.png", id), p3)
-ggsave(sprintf("%s_p1.png", id), p1)
-ggsave(sprintf("%s_p2.png", id),  p2)
-require(socialR)
-upload(sprintf("%s_p*.png", id), gitaddr=gitaddr, tag="phylogenetics")
+Parameter distributions of alpha parameter in model `alpha` (alphas vary) and `ou` (global).  
 
-save(list=ls(), file=sprintf("%s.Rdat", id))
-print(id)
+``` {r fig.width=8 }
+ggplot(subset(data, param %in% c("alpha") 
+       & model %in% c("alphas", "ou")),
+       aes(model, value, fill=regimes)) +
+  geom_bar(position="dodge") +  
+  facet_wrap(~trait, scales="free_y")
+````
+
+Parameter distribution of the sigma parameter in the brownie and bm models
+
+``` {r fig.width=8 }
+ggplot(subset(data, param %in% c("sigma") 
+       & model %in% c("bm", "brownie")),
+       aes(model, value, fill=regimes)) +
+  geom_bar(position="dodge") +  
+  facet_wrap(~trait, scales="free_y")
+````
+
 

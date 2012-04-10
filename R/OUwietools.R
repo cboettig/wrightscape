@@ -7,11 +7,19 @@
 #' the descendents of the MRCA of sp1 and sp2 define the regime
 #' later clades are painted over earlier ones, so should be in 
 #' order of nesting or otherwise non-overlapping. 
-#' @data the data.frame of characters (see data in ?treedata)
-#' @show_plot logical, should I plot the resulting tree
+#' @param data the data.frame of characters (see data in ?treedata)
+#' @param show_plot logical, should I plot the resulting tree
 #' @return a list with the phy, updated to have regimes at node labels
 #' (for OUwie) and the data matrix formatted with regimes, for OUwie,
 #' and a list of colors corresponding to edges, that can be used for plotting.  
+#' @examples
+#' data(labrids)
+#' myphy <- paint_phy(ape.phy, ape.dat, 
+#'                    list(c("Bolbometopon_muricatum", "Sparisoma_radians"), 
+#'                    c("Chlorurus_sordidus", "Hipposcarus_longiceps")))
+#' plot(myphy$phy, edge.color=myphy$colors, type="fan", 
+#' show.tip.label=FALSE, edge.width=2)
+#' 
 #' @import ape
 #' @import geiger
 #' @export 

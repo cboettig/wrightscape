@@ -28,3 +28,5 @@ Collate:
     'format_data.R'
     'data.R'
     'custom.R'
+    'simulate_release.R'
+    'OUwietools.R'

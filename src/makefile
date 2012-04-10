@@ -9,15 +9,14 @@ LDLIB = /usr/common/usg/gsl/1.13/lib
 INC = /usr/common/usg/gsl/1.13/include
 FILES = piecewise_regimes.c likelihood.c multimin.c siman.c mvn.c 
 
-build: $(FILES)
-	$(CC) -I$(INC) -L$(LDLIB) $(LIB) $(CFLAGS) -o $(EXE) $(FILES)
+build: objects shared
 
 objects: $(FILES)
-	$(CC) $(CFLAGS2) -c piecewise_regimes.c -o piecewise_regimes.o
-	$(CC) $(CFLAGS2) -c likelihood.c -o likelihood.o
-	$(CC) $(CFLAGS2) -c siman.c -o siman.o
-	$(CC) $(CFLAGS2) -c multimin.c -o multimin.o
-	$(CC) $(CFLAGS2) -c mvn.c -o mvn.o
+	$(CC) $(CFLAGS) -c piecewise_regimes.c -o piecewise_regimes.o
+	$(CC) $(CFLAGS) -c likelihood.c -o likelihood.o
+	$(CC) $(CFLAGS) -c siman.c -o siman.o
+	$(CC) $(CFLAGS) -c multimin.c -o multimin.o
+	$(CC) $(CFLAGS) -c mvn.c -o mvn.o
 
 shared: $(FILES)
 	$(CC) $(LIB) -shared -o wrightscape.so *.o  
