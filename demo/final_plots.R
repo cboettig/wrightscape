@@ -2,7 +2,7 @@ rm(list=ls())
 ## Model Choice ##
 load("labrid_power_d8bfe90.Rdat")
 require(ggplot2)
-require(reshape2)
+require(reshape)
 
 dist_plot <- function(x, dat, compare, mode=c("density", "boxplot")){
   subdat <- subset(dat, comparison==compare & trait %in% x)

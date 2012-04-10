@@ -2,21 +2,33 @@
 * License: BSD 
 
 
-``` {r }
+
+
+```r
 require(wrightscape)
 require(ggplot2)
 require(reshape)
 data(labrids)
-````
+```
 
-``` {r }
+
+
+
+
+
+```r
 traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
 regimes <- two_shifts 
-````
+```
+
+
+
 
 Fit all models, then actually perform the model choice analysis for the chosen model pairs
 
-``` {r }
+
+
+```r
 fits <- lapply(traits, function(trait){
 	multi <- function(modelspec){ 
 	 multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, 
@@ -45,31 +57,230 @@ fits <- lapply(traits, function(trait){
   list(brownie_vs_alphas=bm2_a2, brownie_vs_thetas=bm2_t2, thetas_vs_alphas=t2_a2,
        bm_vs_brownie=bm_bm2,  bm_vs_ou=bm_ou, ou_vs_brownie=ou_bm2)
 })
-````
+```
+
+
+
+```
+R Version:  R version 2.15.0 (2012-03-30) 
+
+```
+
+
+
+```
+Library reshape loaded.
+```
+
+
+
+```
+Library plyr loaded.
+```
+
+
+
+```
+Library reshape2 loaded.
+```
+
+
+
+```
+Library ggplot2 loaded.
+```
+
+
+
+```
+Library wrightscape loaded.
+```
+
+
+
+```
+Library mcmcTools loaded.
+```
+
+
+
+```
+Library cairoDevice loaded.
+```
+
+
+
+```
+Library Rflickr loaded.
+```
+
+
+
+```
+Library digest loaded.
+```
+
+
+
+```
+Library XML loaded.
+```
+
+
+
+```
+Library RCurl loaded.
+```
+
+
+
+```
+Library bitops loaded.
+```
+
+
+
+```
+Library snowfall loaded.
+```
+
+
+
+```
+Library snow loaded.
+```
+
+
+
+```
+Library phytools loaded.
+```
+
+
+
+```
+Library phangorn loaded.
+```
+
+
+
+```
+Library Matrix loaded.
+```
+
+
+
+```
+Library lattice loaded.
+```
+
+
+
+```
+Library igraph loaded.
+```
+
+
+
+```
+Library mnormt loaded.
+```
+
+
+
+```
+Library geiger loaded.
+```
+
+
+
+```
+Library ouch loaded.
+```
+
+
+
+```
+Library subplex loaded.
+```
+
+
+
+```
+Library msm loaded.
+```
+
+
+
+```
+Library mvtnorm loaded.
+```
+
+
+
+```
+Library MASS loaded.
+```
+
+
+
+```
+Library ape loaded.
+```
+
+
+
+```
+Library devtools loaded.
+```
+
+
+
+```
+Library knitr loaded.
+```
+
+
+
 
 Clean up the data
-``` {r }
+
+
+```r
 names(fits) <- traits
 dat <- melt(fits)
 names(dat) <- c("value", "type", "comparison", "trait")
-````
+```
 
 
-``` {r }
+
+
+
+
+
+```r
 r <- cast(dat, comparison ~ trait, function(x) quantile(x, c(.10,.90)))
 subdat <- subset(dat, abs(value) < max(abs(as.matrix(r))))
-````
+```
+
+
+
 
 ``` { r} 
 ggplot(subdat) + 
   geom_boxplot(aes(type, value)) +
   facet_grid(trait ~ comparison, scales="free_y") 
-````
+
 
 Since it's tough to see everything on such a grid, plot individually:
-``` {r }
+
+
+```r
 for(tr in traits){
   ggplot(subset(subdat, trait==tr)) +  geom_boxplot(aes(type, value)) +   facet_wrap(~ comparison, scales="free_y")
 }
-````
+```
+
+
+
 

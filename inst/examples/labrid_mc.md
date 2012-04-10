@@ -37,13 +37,25 @@ Just a few processors, for debugging locally.
 
 ```r
 sfInit(par=T, 4)    # for debugging locally
+```
+
+
+
+```
+R Version:  R version 2.15.0 (2012-03-30) 
+
+```
+
+
+
+```r
 sfLibrary(wrightscape)
 ```
 
 
 
 ```
-FALSE Library wrightscape loaded.
+Library wrightscape loaded.
 ```
 
 
