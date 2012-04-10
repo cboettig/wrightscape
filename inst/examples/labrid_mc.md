@@ -37,18 +37,6 @@ Just a few processors, for debugging locally.
 
 ```r
 sfInit(par=T, 4)    # for debugging locally
-```
-
-
-
-```
-R Version:  R version 2.15.0 (2012-03-30) 
-
-```
-
-
-
-```r
 sfLibrary(wrightscape)
 ```
 
@@ -116,12 +104,12 @@ model likelihood
 
 
 ```r
-p1 <- ggplot(subset(data,  param=="loglik")) +
-      geom_boxplot(aes(model, value)) +
-      facet_wrap(~ trait, scales="free_y")
+ggplot(subset(data,  param=="loglik")) +
+  geom_boxplot(aes(model, value)) +
+  facet_wrap(~ trait, scales="free_y")
 ```
 
-
+![plot of chunk unnamed-chunk-7](http://farm8.staticflickr.com/7188/7065004911_7c48a59d54_o.png) 
 
 
 Parameter distributions of alpha parameter in model `alpha` (alphas vary) and `ou` (global).  
@@ -129,14 +117,14 @@ Parameter distributions of alpha parameter in model `alpha` (alphas vary) and `o
 
 
 ```r
-p2 <- ggplot(subset(data, param %in% c("alpha") 
-             & model %in% c("alphas", "ou")),
-             aes(model, value, fill=regimes)) +
-      geom_bar(position="dodge") +  
-      facet_wrap(~trait, scales="free_y")
+ggplot(subset(data, param %in% c("alpha") 
+       & model %in% c("alphas", "ou")),
+       aes(model, value, fill=regimes)) +
+  geom_bar(position="dodge") +  
+  facet_wrap(~trait, scales="free_y")
 ```
 
-
+![plot of chunk unnamed-chunk-8](http://farm8.staticflickr.com/7263/7065005419_8e389a4629_o.png) 
 
 
 Parameter distribution of the sigma parameter in the brownie and bm models
@@ -144,14 +132,14 @@ Parameter distribution of the sigma parameter in the brownie and bm models
 
 
 ```r
-p3 <-  ggplot(subset(data, param %in% c("sigma") 
-             & model %in% c("bm", "brownie")),
-              aes(model, value, fill=regimes)) +
-              geom_bar(position="dodge") +  
-       facet_wrap(~trait, scales="free_y")
+ggplot(subset(data, param %in% c("sigma") 
+       & model %in% c("bm", "brownie")),
+       aes(model, value, fill=regimes)) +
+  geom_bar(position="dodge") +  
+  facet_wrap(~trait, scales="free_y")
 ```
 
-
+![plot of chunk unnamed-chunk-9](http://farm8.staticflickr.com/7211/7065005919_548eb4e0ce_o.png) 
 
 
 
