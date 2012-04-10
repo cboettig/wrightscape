@@ -60,7 +60,7 @@ names(data) <- c("regimes", "param", "value", "model", "trait")
 
 model likelihood
 
-``` {r }
+``` {r fig.width=8}
 ggplot(subset(data,  param=="loglik")) +
   geom_boxplot(aes(model, value)) +
   facet_wrap(~ trait, scales="free_y")
@@ -68,7 +68,7 @@ ggplot(subset(data,  param=="loglik")) +
 
 Parameter distributions of alpha parameter in model `alpha` (alphas vary) and `ou` (global).  
 
-``` {r }
+``` {r fig.width=8 }
 ggplot(subset(data, param %in% c("alpha") 
        & model %in% c("alphas", "ou")),
        aes(model, value, fill=regimes)) +
@@ -78,7 +78,7 @@ ggplot(subset(data, param %in% c("alpha")
 
 Parameter distribution of the sigma parameter in the brownie and bm models
 
-``` {r }
+``` {r fig.width=8 }
 ggplot(subset(data, param %in% c("sigma") 
        & model %in% c("bm", "brownie")),
        aes(model, value, fill=regimes)) +
