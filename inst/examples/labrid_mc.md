@@ -155,3 +155,10 @@ ggplot(subset(data, param %in% c("sigma")
 
 
 
+
+```r
+save(list=ls(), file="~/public_html/data/labrid_mc.rda")
+```
+
+
+

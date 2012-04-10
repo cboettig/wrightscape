@@ -1,5 +1,6 @@
 # labrid data processing 
 
+`ro fig.width=7.5 or`
 
 ``` {r }
 require(phytools)

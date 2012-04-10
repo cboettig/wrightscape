@@ -86,4 +86,6 @@ ggplot(subset(data, param %in% c("sigma")
   facet_wrap(~trait, scales="free_y")
 ````
 
-
+``` {r }
+save(list=ls(), file="~/public_html/data/labrid_mc.rda")
+````

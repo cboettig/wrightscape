@@ -3,6 +3,7 @@
 
 
 
+
 ```r
 require(phytools)
 require(geiger)
@@ -242,6 +243,6 @@ and tree in `labrid$tree`
 plot(labrid$tree, regimes=two_shifts)
 ```
 
-![plot of chunk unnamed-chunk-18](http://farm8.staticflickr.com/7138/7062711743_05c553fd43_o.png) 
+![plot of chunk unnamed-chunk-18](http://farm8.staticflickr.com/7259/7066024825_d08e8c4a42_o.png) 
 
 
