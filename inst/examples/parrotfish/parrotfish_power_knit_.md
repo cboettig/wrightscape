@@ -47,7 +47,8 @@ dat <- melt(fits)
 names(dat) <- c("value", "type", "comparison", "trait")
 ````
 
-``` {r }
+
+``` {r fig.height=26 }
 require(ggplot2)
 r <- cast(dat, comparison ~ trait, function(x) quantile(x, c(.10,.90)))
 subdat <- subset(dat, abs(value) < max(abs(as.matrix(r))))
@@ -57,9 +58,5 @@ ggplot(subdat) +
 ````
 
 ``` {r }
-for(tr in traits){
-  ggplot(subset(subdat, trait==tr)) +  geom_boxplot(aes(type, value)) +   facet_wrap(~ comparison, scales="free_y")
-}
+save(list=ls(), file="~/public_html/data/parrotfish_power.rda")
 ````
-
-
