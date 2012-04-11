@@ -24,50 +24,12 @@ regimes <- two_shifts
 
 
 
-Parallel over the 9 traits
-
-
-
-```r
-require(snowfall)
-sfInit(par=T, 9)    
-```
-
-
-
-```
-R Version:  R version 2.15.0 (2012-03-30) 
-
-```
-
-
-
-```r
-sfLibrary(wrightscape)
-```
-
-
-
-```
-Library wrightscape loaded.
-```
-
-
-
-```r
-sfExportAll()
-```
-
-
-
-
-
 Fit all models, then actually perform the model choice analysis for the chosen model pairs
 
 
 
 ```r
-fits <- sfLapply(traits, function(trait){
+fits <- lapply(traits, function(trait){
 	multi <- function(modelspec){ 
 	 multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, 
 			    model_spec = modelspec, control = list(maxit=8000))
@@ -97,7 +59,116 @@ fits <- sfLapply(traits, function(trait){
 
 
 ```
-Error: could not find function "sfLapply"
+R Version:  R version 2.14.1 (2011-12-22) 
+
+```
+
+
+
+```
+Library Rflickr loaded.
+```
+
+
+
+```
+Library digest loaded.
+```
+
+
+
+```
+Library XML loaded.
+```
+
+
+
+```
+Library RCurl loaded.
+```
+
+
+
+```
+Library bitops loaded.
+```
+
+
+
+```
+Library wrightscape loaded.
+```
+
+
+
+```
+Library ape loaded.
+```
+
+
+
+```
+Library mcmcTools loaded.
+```
+
+
+
+```
+Library snowfall loaded.
+```
+
+
+
+```
+Library snow loaded.
+```
+
+
+
+```
+Library ggplot2 loaded.
+```
+
+
+
+```
+Library proto loaded.
+```
+
+
+
+```
+Library reshape loaded.
+```
+
+
+
+```
+Library plyr loaded.
+```
+
+
+
+```
+Library reshape2 loaded.
+```
+
+
+
+```
+Library Hmisc loaded.
+```
+
+
+
+```
+Library survival loaded.
+```
+
+
+
+```
+Library knitr loaded.
 ```
 
 
@@ -106,32 +177,9 @@ Error: could not find function "sfLapply"
 Clean up the data
 
 
-
 ```r
 names(fits) <- traits
-```
-
-
-
-```
-Error: object 'fits' not found
-```
-
-
-
-```r
 dat <- melt(fits)
-```
-
-
-
-```
-Error: object 'fits' not found
-```
-
-
-
-```r
 names(dat) <- c("value", "type", "comparison", "trait")
 ```
 
@@ -143,39 +191,8 @@ names(dat) <- c("value", "type", "comparison", "trait")
 
 ```r
 r <- cast(dat, comparison ~ trait, function(x) quantile(x, c(.10,.90)))
-```
-
-
-
-```
-Error: missing values and NaN's not allowed if 'na.rm' is FALSE
-```
-
-
-
-```r
 subdat <- subset(dat, abs(value) < max(abs(as.matrix(r))))
 ```
-
-
-
-```
-Error: object 'r' not found
-```
-
-
-
-
-Save the data explicitly for future reference 
-
-
-
-```r
-save(list=ls(), file="~/public_html/data/labrid_power.rda")
-```
-
-
-
 
 
 
@@ -188,17 +205,10 @@ ggplot(subdat) +
   facet_grid(trait ~ comparison, scales="free_y") 
 ```
 
+![plot of chunk unnamed-chunk-6](http://farm8.staticflickr.com/7263/6920831530_eccb20d9f4_o.png) 
 
 
-```
-Error: could not find function "ggplot"
-```
-
-
-
-
-Since it is tough to see everything on such a grid, plot individually:
-
+Since it's tough to see everything on such a grid, plot individually:
 
 
 ```r
@@ -206,14 +216,6 @@ for(tr in traits){
   ggplot(subset(subdat, trait==tr)) +  geom_boxplot(aes(type, value)) +   facet_wrap(~ comparison, scales="free_y")
 }
 ```
-
-
-
-```
-Error: could not find function "ggplot"
-```
-
-
 
 
 
