@@ -14,10 +14,20 @@ traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.
 regimes <- two_shifts 
 ````
 
+Parallel over the 9 traits
+
+``` {r }
+require(snowfall)
+sfInit(par=T, 9)    
+sfLibrary(wrightscape)
+sfExportAll()
+````
+
+
 Fit all models, then actually perform the model choice analysis for the chosen model pairs
 
 ``` {r }
-fits <- lapply(traits, function(trait){
+fits <- sfLapply(traits, function(trait){
 	multi <- function(modelspec){ 
 	 multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, 
 			    model_spec = modelspec, control = list(maxit=8000))
@@ -45,6 +55,7 @@ fits <- lapply(traits, function(trait){
 ````
 
 Clean up the data
+
 ``` {r }
 names(fits) <- traits
 dat <- melt(fits)
@@ -57,16 +68,28 @@ r <- cast(dat, comparison ~ trait, function(x) quantile(x, c(.10,.90)))
 subdat <- subset(dat, abs(value) < max(abs(as.matrix(r))))
 ````
 
-``` {r } 
+Save the data explicitly for future reference 
+
+``` {r }
+save(list=ls(), file="~/public_html/data/labrid_power.rda")
+````
+
+
+
+
+``` {r }
 ggplot(subdat) + 
   geom_boxplot(aes(type, value)) +
   facet_grid(trait ~ comparison, scales="free_y") 
 ````
 
-Since it's tough to see everything on such a grid, plot individually:
+Since it is tough to see everything on such a grid, plot individually:
+
 ``` {r }
 for(tr in traits){
   ggplot(subset(subdat, trait==tr)) +  geom_boxplot(aes(type, value)) +   facet_wrap(~ comparison, scales="free_y")
 }
 ````
+
+
 

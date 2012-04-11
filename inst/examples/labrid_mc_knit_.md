@@ -18,13 +18,15 @@ regimes <- two_shifts
 ````
 
 Just a few processors, for debugging locally.
+
 ``` {r }
-sfInit(par=T, 4)    # for debugging locally
+sfInit(par=T, 4)    
 sfLibrary(wrightscape)
 sfExportAll()
 ````
 
 The main parallel loop fitting each model
+
 ``` {r }
 fits <- sfLapply(traits, function(trait){
 	multi <- function(modelspec){ 
