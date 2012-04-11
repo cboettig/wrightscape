@@ -7,6 +7,7 @@
 require(wrightscape)
 require(snowfall)
 require(ggplot2)
+require(reshape)
 ```
 
 
@@ -35,20 +36,9 @@ regimes <- two_shifts
 Just a few processors, for debugging locally.
 
 
-```r
-sfInit(par=T, 4)    # for debugging locally
-```
-
-
-
-```
-R Version:  R version 2.14.1 (2011-12-22) 
-
-```
-
-
 
 ```r
+sfInit(par=T, 4)    
 sfLibrary(wrightscape)
 ```
 
@@ -68,6 +58,7 @@ sfExportAll()
 
 
 The main parallel loop fitting each model
+
 
 
 ```r
@@ -121,7 +112,7 @@ ggplot(subset(data,  param=="loglik")) +
   facet_wrap(~ trait, scales="free_y")
 ```
 
-![plot of chunk unnamed-chunk-7](http://farm8.staticflickr.com/7114/6919293482_a5a6e34736_o.png) 
+![plot of chunk unnamed-chunk-7](http://farm6.staticflickr.com/5239/7068022465_4d5034d009_o.png) 
 
 
 Parameter distributions of alpha parameter in model `alpha` (alphas vary) and `ou` (global).  
@@ -136,7 +127,7 @@ ggplot(subset(data, param %in% c("alpha")
   facet_wrap(~trait, scales="free_y")
 ```
 
-![plot of chunk unnamed-chunk-8](http://farm6.staticflickr.com/5312/7065373031_0d9dec7c12_o.png) 
+![plot of chunk unnamed-chunk-8](http://farm8.staticflickr.com/7062/7068022759_7401d0e626_o.png) 
 
 
 Parameter distribution of the sigma parameter in the brownie and bm models
@@ -151,7 +142,7 @@ ggplot(subset(data, param %in% c("sigma")
   facet_wrap(~trait, scales="free_y")
 ```
 
-![plot of chunk unnamed-chunk-9](http://farm8.staticflickr.com/7277/6919294288_2686173e09_o.png) 
+![plot of chunk unnamed-chunk-9](http://farm8.staticflickr.com/7223/7068023083_7489c5e73c_o.png) 
 
 
 
