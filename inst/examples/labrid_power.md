@@ -97,7 +97,11 @@ fits <- sfLapply(traits, function(trait){
 
 
 ```
-Error: could not find function "sfLapply"
+Error: one node produced an error: Starting of snow cluster failed! Error in socketConnection(port = port, server = TRUE, blocking = TRUE,  : 
+  cannot open the connection
+ Error in socketConnection(port = port, server = TRUE, blocking = TRUE,  : 
+  cannot open the connection
+
 ```
 
 
