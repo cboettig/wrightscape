@@ -5,6 +5,7 @@
 require(wrightscape)
 require(snowfall)
 require(ggplot2)
+require(reshape)
 ````
 
 
