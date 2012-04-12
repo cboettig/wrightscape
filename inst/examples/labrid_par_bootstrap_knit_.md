@@ -83,7 +83,7 @@ p0
 
 
 ``` {r }
-save(list=ls, file = "~/public_html/data/labrids_par_bootstrap.rda")
+save(list=ls(), file = "~/public_html/data/labrids_par_bootstrap.rda")
 ````
 
 
