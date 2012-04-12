@@ -17,7 +17,7 @@ data(labrids)
 
 
 ```r
-traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+traits <- c("open", "kt")
 regimes <- two_shifts 
 ```
 
@@ -40,8 +40,31 @@ cpu <- 16
 
 ```r
 require(snowfall)
-sfInit(parallel=TRUE, cpu=cpu, type="MPI")
+sfInit(parallel=TRUE, cpu=cpu)
+```
+
+
+
+```
+R Version:  R version 2.14.1 (2011-12-22) 
+
+```
+
+
+
+```r
 sfLibrary(wrightscape)
+```
+
+
+
+```
+Library wrightscape loaded.
+```
+
+
+
+```r
 sfExportAll()
 ```
 
@@ -93,6 +116,15 @@ fits <- lapply(traits, function(trait){
 
 
 
+
+
+```r
+save(list=ls(), file="focal_examples.rda")
+```
+
+
+
+
 Clean up the data
 
 
@@ -125,19 +157,13 @@ ggplot(subdat) +
   facet_grid(trait ~ comparison, scales="free_y") 
 ```
 
-
-
-```
-Error: could not find function "ggplot"
-```
-
-
+![plot of chunk unnamed-chunk-9](http://farm8.staticflickr.com/7095/7066176003_574f96cacd_o.png) 
 
 
 
 
 ```r
-save(list=ls(), file="~/public_html/data/labrid_power.rda")
+save(list=ls(), file="~/public_html/data/focal_examples.rda")
 ```
 
 

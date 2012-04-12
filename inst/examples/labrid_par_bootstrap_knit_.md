@@ -29,6 +29,8 @@ sfExportAll()
 ````
 
 Bootstrap the fits by replication (bootstraps parameter values without bootstrapping the likelihood ratios)
+
+
 ``` {r }
 fits <- sfLapply(traits, function(trait){
   multi <- function(modelspec, reps = 100){
@@ -54,67 +56,82 @@ names(fits) <- traits  # each fit is a different trait (so use it for a label)
 data <- melt(fits)
 names(data) <- c("regimes", "param", "rep", "value", "model", "trait")
 ````
+
+
 ``` {r }
 subdat <- subset(data, param %in% c("alpha") 
-#                 & trait %in% c("kt", "open") 
                  & model %in% c("alphas") 
                  & value < 20)
 r <- cast(subdat, regimes ~ model ~ trait ~ param, smedian.hilow, conf.int=.5, na.rm=T)
 upper <- sapply(c("alpha"), function(t) max(r[, , , t]))
 ````
 
+
+Generate a plot of the relevant parameters
+
 ``` {r }
-p4 <-  ggplot(subdat, aes(model, value, fill=regimes)) + 
-#  stat_summary(fun.y=mean, geom="bar", position="dodge", alpha=.5) + # add bars for some extra ink...
+p0 <- 
+ggplot(subdat, aes(model, value, fill=regimes)) + 
   stat_summary(fun.data=median_hilow, geom="pointrange", aes(color=regimes), 
   position = position_dodge(width=0.90), conf.int=.5) +
   facet_grid(param ~ trait, scales = "free_y") + 
   coord_cartesian(ylim=c(0,upper["alpha"]), wise=TRUE) +
   opts(title = "alpha")
+p0
 ````
 
 
 
-``` {r eval=FALSE, include=FALSE, echo=FALSE}
-# Calculate the range for intellegent zooming in on summary stat values
-range <- cast(data, regimes ~ model ~ trait ~ param, smedian.hilow, conf.int=.5, na.rm=T)
+``` {r }
+save(list=ls, file = "~/public_html/data/labrids_par_bootstrap.rda")
+````
+
+
+
+Additional plots, just for variety
+
+``` {r }
+range <- cast(data, regimes ~ model ~ trait ~ param, smedian.hilow,
+              conf.int=.5, na.rm=T)
 upper <- sapply(c("sigma", "alpha"), function(t) max(range[, , , t]))
-
-#ave <- cast(data, regimes ~ model ~ trait ~ param, mean, na.rm=T)
-#errs <- cast(data, regimes ~ model ~ trait ~ param, sd, na.rm=T)
-#upper <- sapply(c("sigma", "alpha"), function(t) max(ave[, , , t]+errs[, , , t]))
-
-#model likelihood
 p1 <- ggplot(subset(data,  param=="loglik")) + 
       geom_boxplot(aes(model, value)) +
       facet_wrap(~ trait, scales="free_y")
-
-p2 <-  ggplot(subset(data, param %in% c("sigma", "alpha") & model != "bm"),
+p1
+p2 <- ggplot(subset(data, param %in% c("sigma", "alpha") & model != "bm"),
               aes(model, value, fill=regimes)) + 
-#       stat_summary(fun.y=mean, geom="bar", position="dodge") + # add bars for some extra ink...
-       stat_summary(fun.data=median_hilow, geom="pointrange", aes(color=regimes), 
-                    position = position_dodge(width=0.90), conf.int=.5) +
+       stat_summary(fun.y=mean, geom="bar", position="dodge") + 
+       stat_summary(fun.data=median_hilow, geom="pointrange",
+       aes(color=regimes), 
+       position = position_dodge(width=0.90), conf.int=.5) +
        scale_y_log() + 
        facet_grid(param ~ trait, scales = "free_y") + 
        coord_cartesian(ylim=c(0,max(upper)), wise=TRUE)
-## Just plot the parameters seperately
-p3 <-  ggplot(subset(data, param %in% c("sigma") ), 
+p2
+p3 <- ggplot(subset(data, param %in% c("sigma") ), 
               aes(model, value, fill=regimes)) + 
-       stat_summary(fun.y=mean, geom="bar", position="dodge", alpha=.5) + # add bars for some extra ink...
-       stat_summary(fun.data=median_hilow, geom="pointrange", aes(color=regimes), 
-                    position = position_dodge(width=0.90), conf.int=.5) +
+       stat_summary(fun.y=mean, geom="bar", position="dodge", alpha=.5) + 
+       stat_summary(fun.data=median_hilow, geom="pointrange",
+       aes(color=regimes), 
+       position = position_dodge(width=0.90), conf.int=.5) +
        facet_grid(param ~ trait, scales = "free_y") + 
-       coord_cartesian(ylim=c(0,upper["sigma"]), wise=TRUE) +  # easiest to just adjust the zoom limits manually still...
+       coord_cartesian(ylim=c(0,upper["sigma"]), wise=TRUE) +  
        opts(title="sigma")
-
-p4 <-  ggplot(subset(data, param %in% c("alpha") ), 
+p3
+p4 <- ggplot(subset(data, param %in% c("alpha") ), 
               aes(model, value, fill=regimes)) + 
-       stat_summary(fun.y=mean, geom="bar", position="dodge", alpha=.5) + # add bars for some extra ink...
-       stat_summary(fun.data=median_hilow, geom="pointrange", aes(color=regimes), 
-                    position = position_dodge(width=0.90), conf.int=.5) +
+       stat_summary(fun.y=mean, geom="bar", position="dodge", alpha=.5) +
+       stat_summary(fun.data=median_hilow, geom="pointrange",
+       aes(color=regimes), 
+       position = position_dodge(width=0.90), conf.int=.5) +
        facet_grid(param ~ trait, scales = "free_y") + 
        coord_cartesian(ylim=c(0,upper["alpha"]), wise=TRUE) +
         opts(title = "alpha")
+p4
+````
+
+``` {r }
+save(list=ls, file = "~/public_html/data/labrids_par_bootstrap.rda")
 ````
 
 

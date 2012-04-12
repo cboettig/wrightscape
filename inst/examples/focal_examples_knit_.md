@@ -2,58 +2,36 @@
 * License: BSD 
 
 
-
-
-```r
+``` {r }
 require(wrightscape)
 require(ggplot2)
 require(reshape)
 data(labrids)
-```
+````
 
-
-
-
-
-
-```r
-traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
+``` {r }
+traits <- c("open", "kt")
 regimes <- two_shifts 
-```
+````
 
 
-
-
-
-
-
-```r
+``` {r }
 nboot <- 50
 cpu <- 16
-```
+````
 
 
-
-
-
-
-
-```r
+``` {r } 
 require(snowfall)
-sfInit(parallel=TRUE, cpu=cpu, type="MPI")
+sfInit(parallel=TRUE, cpu=cpu)
 sfLibrary(wrightscape)
 sfExportAll()
-```
-
-
-
+````
 
 
 Fit all models, then actually perform the model choice analysis for the chosen model pairs
 
-
-
-```r
+``` {r }
 fits <- lapply(traits, function(trait){
 	multi <- function(modelspec){ 
 	 multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, 
@@ -87,59 +65,34 @@ fits <- lapply(traits, function(trait){
        thetas_vs_alphas=t2_a2, bm_vs_brownie=bm_bm2,  
        bm_vs_ou=bm_ou, ou_vs_brownie=ou_bm2)
 })
-```
+````
 
 
-
-
+``` {r }
+save(list=ls(), file="focal_examples.rda")
+````
 
 Clean up the data
 
-
-
-```r
+``` {r }
 names(fits) <- traits
 dat <- melt(fits)
 names(dat) <- c("value", "type", "comparison", "trait")
-```
+````
 
 
-
-
-
-
-
-```r
+``` {r }
 r <- cast(dat, comparison ~ trait, function(x) quantile(x, c(.10,.90)))
 subdat <- subset(dat, abs(value) < max(abs(as.matrix(r))))
-```
+````
 
-
-
-
-
-
-```r
+``` {r } 
 ggplot(subdat) + 
   geom_boxplot(aes(type, value)) +
   facet_grid(trait ~ comparison, scales="free_y") 
-```
+````
 
-
-
-```
-Error: could not find function "ggplot"
-```
-
-
-
-
-
-
-```r
-save(list=ls(), file="~/public_html/data/labrid_power.rda")
-```
-
-
-
+``` {r }
+save(list=ls(), file="~/public_html/data/focal_examples.rda")
+````
 

@@ -5,6 +5,7 @@
 
 
 
+
 ```r
 require(wrightscape)
 require(snowfall)
@@ -24,12 +25,6 @@ require(Hmisc)
 data(labrids)
 traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y", "SH.y", "LP.y")
 regimes <- two_shifts
-```
-
-
-
-```
-Error: object 'two_shifts' not found
 ```
 
 
@@ -59,7 +54,7 @@ sfLibrary(wrightscape)
 
 
 ```
-Error: Stop: error loading library on slave(s): wrightscape
+Library wrightscape loaded.
 ```
 
 
@@ -94,12 +89,6 @@ fits <- sfLapply(traits, function(trait){
 
 
 
-```
-Error: 4 nodes produced errors; first error: could not find function "multiTypeOU"
-```
-
-
-
 
 Reformat and label data for plotting
 
@@ -107,36 +96,8 @@ Reformat and label data for plotting
 
 ```r
 names(fits) <- traits  # each fit is a different trait (so use it for a label)
-```
-
-
-
-```
-Error: object 'fits' not found
-```
-
-
-
-```r
 data <- melt(fits)
-```
-
-
-
-```
-Error: object 'fits' not found
-```
-
-
-
-```r
 names(data) <- c("regimes", "param", "rep", "value", "model", "trait")
-```
-
-
-
-```
-Error: names() applied to a non-vector
 ```
 
 
@@ -148,36 +109,8 @@ subdat <- subset(data, param %in% c("alpha")
 #                 & trait %in% c("kt", "open") 
                  & model %in% c("alphas") 
                  & value < 20)
-```
-
-
-
-```
-Error: object 'param' not found
-```
-
-
-
-```r
 r <- cast(subdat, regimes ~ model ~ trait ~ param, smedian.hilow, conf.int=.5, na.rm=T)
-```
-
-
-
-```
-Error: object 'subdat' not found
-```
-
-
-
-```r
 upper <- sapply(c("alpha"), function(t) max(r[, , , t]))
-```
-
-
-
-```
-Error: object 'r' not found
 ```
 
 
@@ -193,12 +126,6 @@ p4 <-  ggplot(subdat, aes(model, value, fill=regimes)) +
   facet_grid(param ~ trait, scales = "free_y") + 
   coord_cartesian(ylim=c(0,upper["alpha"]), wise=TRUE) +
   opts(title = "alpha")
-```
-
-
-
-```
-Error: object 'subdat' not found
 ```
 
 
