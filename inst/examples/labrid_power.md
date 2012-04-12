@@ -24,6 +24,31 @@ regimes <- two_shifts
 
 
 
+
+
+
+```r
+nboot <- 50
+cpu <- 16
+```
+
+
+
+
+
+
+
+```r
+require(snowfall)
+sfInit(parallel=TRUE, cpu=cpu, type="MPI")
+sfLibrary(wrightscape)
+sfExportAll()
+```
+
+
+
+
+
 Fit all models, then actually perform the model choice analysis for the chosen model pairs
 
 
@@ -38,143 +63,38 @@ fits <- lapply(traits, function(trait){
 	ou <- multi(list(alpha = "global", sigma = "global", theta = "global")) 
 	bm2 <- multi(list(alpha = "fixed", sigma = "indep", theta = "global")) 
 	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
-	t2  <- multi(list(alpha = "global", sigma = "global", theta = "indep")) 
-  mc <- montecarlotest(bm2,a2)
-  bm2_a2 <- list(null=mc$null_dist, test=mc$test_dist, lr=-2*(mc$null$loglik-mc$test$loglik))
-  mc <- montecarlotest(bm,ou)
-  bm_ou <- list(null=mc$null_dist, test=mc$test_dist, lr=-2*(mc$null$loglik-mc$test$loglik))
-  mc <- montecarlotest(bm,bm2)
-  bm_bm2 <- list(null=mc$null_dist, test=mc$test_dist, lr=-2*(mc$null$loglik-mc$test$loglik))
-  mc <- montecarlotest(ou,bm2)
-  ou_bm2 <- list(null=mc$null_dist, test=mc$test_dist, lr=-2*(mc$null$loglik-mc$test$loglik))
-  mc <- montecarlotest(t2,a2)
-  t2_a2 <- list(null=mc$null_dist, test=mc$test_dist, lr=-2*(mc$null$loglik-mc$test$loglik))
-  mc <- montecarlotest(bm2,t2)
-  bm2_t2 <- list(null=mc$null_dist, test=mc$test_dist, lr=-2*(mc$null$loglik-mc$test$loglik))
-  list(brownie_vs_alphas=bm2_a2, brownie_vs_thetas=bm2_t2, thetas_vs_alphas=t2_a2,
-       bm_vs_brownie=bm_bm2,  bm_vs_ou=bm_ou, ou_vs_brownie=ou_bm2)
+	t2  <- multi(list(alpha = "global", sigma = "global", theta = "indep"))
+
+  mc <- montecarlotest(bm2,a2, cpu=cpu, nboot=nboot)
+  bm2_a2 <- list(null=mc$null_dist, test=mc$test_dist, 
+    lr=-2*(mc$null$loglik-mc$test$loglik))
+  mc <- montecarlotest(bm,ou, cpu=cpu, nboot=nboot)
+  bm_ou <- list(null=mc$null_dist, test=mc$test_dist, 
+    lr=-2*(mc$null$loglik-mc$test$loglik))
+  mc <- montecarlotest(bm,bm2, cpu=cpu, nboot=nboot)
+  bm_bm2 <- list(null=mc$null_dist, test=mc$test_dist, 
+    lr=-2*(mc$null$loglik-mc$test$loglik))
+  mc <- montecarlotest(ou,bm2, cpu=cpu, nboot=nboot)
+  ou_bm2 <- list(null=mc$null_dist, test=mc$test_dist,
+    lr=-2*(mc$null$loglik-mc$test$loglik))
+  mc <- montecarlotest(t2,a2, cpu=cpu, nboot=nboot)
+  t2_a2 <- list(null=mc$null_dist, test=mc$test_dist, 
+    lr=-2*(mc$null$loglik-mc$test$loglik))
+  mc <- montecarlotest(bm2,t2, cpu=cpu, nboot=nboot)
+  bm2_t2 <- list(null=mc$null_dist, test=mc$test_dist,
+    lr=-2*(mc$null$loglik-mc$test$loglik))
+  list(brownie_vs_alphas=bm2_a2, brownie_vs_thetas=bm2_t2,
+       thetas_vs_alphas=t2_a2, bm_vs_brownie=bm_bm2,  
+       bm_vs_ou=bm_ou, ou_vs_brownie=ou_bm2)
 })
 ```
 
 
 
-```
-R Version:  R version 2.14.1 (2011-12-22) 
-
-```
-
-
-
-```
-Library Rflickr loaded.
-```
-
-
-
-```
-Library digest loaded.
-```
-
-
-
-```
-Library XML loaded.
-```
-
-
-
-```
-Library RCurl loaded.
-```
-
-
-
-```
-Library bitops loaded.
-```
-
-
-
-```
-Library wrightscape loaded.
-```
-
-
-
-```
-Library ape loaded.
-```
-
-
-
-```
-Library mcmcTools loaded.
-```
-
-
-
-```
-Library snowfall loaded.
-```
-
-
-
-```
-Library snow loaded.
-```
-
-
-
-```
-Library ggplot2 loaded.
-```
-
-
-
-```
-Library proto loaded.
-```
-
-
-
-```
-Library reshape loaded.
-```
-
-
-
-```
-Library plyr loaded.
-```
-
-
-
-```
-Library reshape2 loaded.
-```
-
-
-
-```
-Library Hmisc loaded.
-```
-
-
-
-```
-Library survival loaded.
-```
-
-
-
-```
-Library knitr loaded.
-```
-
-
 
 
 Clean up the data
+
 
 
 ```r
@@ -205,16 +125,19 @@ ggplot(subdat) +
   facet_grid(trait ~ comparison, scales="free_y") 
 ```
 
-![plot of chunk unnamed-chunk-6](http://farm8.staticflickr.com/7263/6920831530_eccb20d9f4_o.png) 
 
 
-Since it's tough to see everything on such a grid, plot individually:
+```
+Error: could not find function "ggplot"
+```
+
+
+
+
 
 
 ```r
-for(tr in traits){
-  ggplot(subset(subdat, trait==tr)) +  geom_boxplot(aes(type, value)) +   facet_wrap(~ comparison, scales="free_y")
-}
+save(list=ls(), file="~/public_html/data/labrid_power.rda")
 ```
 
 
