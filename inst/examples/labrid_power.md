@@ -125,13 +125,7 @@ ggplot(subdat) +
   facet_grid(trait ~ comparison, scales="free_y") 
 ```
 
-
-
-```
-Error: could not find function "ggplot"
-```
-
-
+![plot of chunk unnamed-chunk-8](http://farm8.staticflickr.com/7134/7074425683_d4704fd0b3_o.png) 
 
 
 
