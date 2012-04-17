@@ -51,8 +51,20 @@ fits <- lapply(traits, function(trait){
 
 
 ```
-R Version:  R version 2.15.0 (2012-03-30) 
+R Version:  R version 2.14.1 (2011-12-22) 
 
+```
+
+
+
+```
+Library ggplot2 loaded.
+```
+
+
+
+```
+Library proto loaded.
 ```
 
 
@@ -65,12 +77,6 @@ Library reshape loaded.
 
 ```
 Library plyr loaded.
-```
-
-
-
-```
-Library ggplot2 loaded.
 ```
 
 
@@ -106,12 +112,6 @@ Library mcmcTools loaded.
 
 
 ```
-Library devtools loaded.
-```
-
-
-
-```
 Library knitr loaded.
 ```
 
@@ -131,6 +131,7 @@ names(dat) <- c("value", "type", "comparison", "trait")
 
 
 
+
 ```r
 require(ggplot2)
 r <- cast(dat, comparison ~ trait, function(x) quantile(x, c(.10,.90)))
@@ -140,18 +141,14 @@ ggplot(subdat) +
       facet_grid(trait ~ comparison, scales="free_y") 
 ```
 
-![plot of chunk unnamed-chunk-4](http://farm6.staticflickr.com/5323/6916947108_bff82f3f5e_o.png) 
+![plot of chunk unnamed-chunk-4](http://farm8.staticflickr.com/7240/7068789255_f194ca9642_o.png) 
 
 
 
 
 ```r
-for(tr in traits){
-  ggplot(subset(subdat, trait==tr)) +  geom_boxplot(aes(type, value)) +   facet_wrap(~ comparison, scales="free_y")
-}
+save(list=ls(), file="~/public_html/data/parrotfish_power.rda")
 ```
-
-
 
 
 
