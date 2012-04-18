@@ -197,7 +197,7 @@ fits <- lapply(traits, function(trait){
   bm2_t2 <- list(null=mc$null_dist, test=mc$test_dist,
     lr=-2*(mc$null$loglik-mc$test$loglik))
   list(brownie_vs_alphas=bm2_a2, brownie_vs_thetas=bm2_t2,
-       thetas_vs_alphas=t2_a2, bm_vs_brownie=bm_bm2,  
+       thetas_vs_alphas=t2_a2, bm_vs_brownie=bm_bm2, 
        bm_vs_ou=bm_ou, ou_vs_brownie=ou_bm2)
 })
 ````
