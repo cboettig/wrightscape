@@ -1,6 +1,6 @@
 # A wrightscape tutorial using simulated traits
 
-`ro refresh=1 or`
+`ro refresh=0, dev='png', fig.path='figure/', cache=TRUE, cache.path='cache/' or`
 
 Load package, along with parallelization, plotting, and data manipulation packages. Then load the data.  
 
@@ -158,18 +158,18 @@ cpu <- 16
 ````
 
 
-``` {r } 
+``` {r  refresh=1 } 
 require(snowfall)
-sfInit(parallel=TRUE, cpu=cpu, type="MPI")
+sfInit(parallel=TRUE, cpu=cpu)
 sfLibrary(wrightscape)
 sfExportAll()
 ````
 
 
-``` {r }
+``` {r  refresh=1 }
 fits <- lapply(traits, function(trait){
     multi <- function(modelspec){ 
-     multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, 
+     multiTypeOU(data = dat[[trait]], tree = tree, regimes = pharyngeal, 
                 model_spec = modelspec, control = list(maxit=8000))
     }
     bm <- multi(list(alpha = "fixed", sigma = "global", theta = "global")) 
@@ -205,19 +205,19 @@ fits <- lapply(traits, function(trait){
 
 Clean up the data
 
-``` {r }
+``` {r  refresh=1 }
 names(fits) <- traits
 dat <- melt(fits)
 names(dat) <- c("value", "type", "comparison", "trait")
 ````
 
 
-``` {r }
+``` {r refresh=1 }
 r <- cast(dat, comparison ~ trait, function(x) quantile(x, c(.10,.90)))
 subdat <- subset(dat, abs(value) < max(abs(as.matrix(r))))
 ````
 
-``` {r fig.height=24 } 
+``` {r fig.height=24 refresh=1} 
 ggplot(subdat) + 
   geom_boxplot(aes(type, value)) +
   facet_grid(trait ~ comparison, scales="free_y") 
