@@ -198,7 +198,7 @@ p1 <- ggplot(subset(data, param == "loglik")) + geom_boxplot(aes(model,
 p1
 ```
 
-![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11.png) 
+![plot of chunk unnamed-chunk-11](http://farm8.staticflickr.com/7123/6970735158_78d922c8a3_o.png) 
 
 
 
@@ -211,7 +211,7 @@ p2 <- ggplot(subset(data, param %in% c("sigma", "alpha")), aes(model,
 p2
 ```
 
-![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12.png) 
+![plot of chunk unnamed-chunk-12](http://farm8.staticflickr.com/7131/6970733804_448c60c6a4_o.png) 
 
 The visualization is easier if we seperate out the plots. Consider focusing on the sigma parameter for both simulations:
 
@@ -224,7 +224,7 @@ p3 <- ggplot(subset(data, param %in% c("sigma"))) + geom_boxplot(aes(model,
 p3
 ```
 
-![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13.png) 
+![plot of chunk unnamed-chunk-13](http://farm8.staticflickr.com/7199/7116808129_df31920316_o.png) 
 
 
 Compare this to the alpha parameter for both simulations:
@@ -237,7 +237,7 @@ p4 <- ggplot(subset(data, param %in% c("alpha"))) + geom_boxplot(aes(model,
 p4
 ```
 
-![plot of chunk unnamed-chunk-14](figure/unnamed-chunk-14.png) 
+![plot of chunk unnamed-chunk-14](http://farm8.staticflickr.com/7196/7116813345_4d7fb4b379_o.png) 
 
 
 
@@ -396,7 +396,7 @@ ggplot(subdat) + geom_boxplot(aes(type, value)) + facet_grid(trait ~
     comparison, scales = "free_y")
 ```
 
-![plot of chunk unnamed-chunk-21](figure/unnamed-chunk-21.png) 
+![plot of chunk unnamed-chunk-21](http://farm8.staticflickr.com/7195/7116806133_03ac043bd2_o.png) 
 
 
 
