@@ -9,123 +9,9 @@ Load package, along with parallelization, plotting, and data manipulation packag
 
 ```r
 require(wrightscape)
-```
-
-
-
-```
-## Loading required package: wrightscape
-```
-
-
-
-```
-## Loading required package: mcmcTools
-```
-
-
-
-```
-## Loading required package: ape
-```
-
-
-
-```
-## Warning message: No function found corresponding to methods exports from 'ouch' for: 'coerce', 'show'
-```
-
-
-
-```
-## 
-## Attaching package: 'wrightscape'
-## 
-```
-
-
-
-```
-## The following object(s) are masked from 'package:mcmcTools':
-## 
-##     getParameters
-## 
-```
-
-
-
-```r
 require(snowfall)
-```
-
-
-
-```
-## Loading required package: snowfall
-```
-
-
-
-```
-## Loading required package: snow
-```
-
-
-
-```r
 require(ggplot2)
-```
-
-
-
-```
-## Loading required package: ggplot2
-```
-
-
-
-```
-## Loading required package: methods
-```
-
-
-
-```r
 require(reshape)
-```
-
-
-
-```
-## Loading required package: reshape
-```
-
-
-
-```
-## Loading required package: plyr
-```
-
-
-
-```
-## 
-## Attaching package: 'reshape'
-## 
-```
-
-
-
-```
-## The following object(s) are masked from 'package:plyr':
-## 
-##     rename, round_any
-## 
-```
-
-
-
-```r
 data(labrids)
 ```
 
@@ -197,7 +83,7 @@ print(c(var(lowvar), var(highvar)))
 
 
 ```
-## [1]  1.329 19.258
+## [1] 0.9578 5.5166
 ```
 
 
@@ -239,7 +125,7 @@ print(c(var(lowvar), var(highvar)))
 
 
 ```
-## [1] 1.408 3.275
+## [1] 1.122 4.417
 ```
 
 
@@ -312,7 +198,7 @@ p1 <- ggplot(subset(data, param == "loglik")) + geom_boxplot(aes(model,
 p1
 ```
 
-![plot of chunk unnamed-chunk-11](http://farm8.staticflickr.com/7096/7092102931_8b59f20e0c_o.png) 
+![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11.png) 
 
 
 
@@ -325,7 +211,7 @@ p2 <- ggplot(subset(data, param %in% c("sigma", "alpha")), aes(model,
 p2
 ```
 
-![plot of chunk unnamed-chunk-12](http://farm6.staticflickr.com/5458/6946037568_ebc9cc476a_o.png) 
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12.png) 
 
 The visualization is easier if we seperate out the plots. Consider focusing on the sigma parameter for both simulations:
 
@@ -338,7 +224,7 @@ p3 <- ggplot(subset(data, param %in% c("sigma"))) + geom_boxplot(aes(model,
 p3
 ```
 
-![plot of chunk unnamed-chunk-13](http://farm8.staticflickr.com/7111/6946037778_49f6130724_o.png) 
+![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13.png) 
 
 
 Compare this to the alpha parameter for both simulations:
@@ -351,7 +237,7 @@ p4 <- ggplot(subset(data, param %in% c("alpha"))) + geom_boxplot(aes(model,
 p4
 ```
 
-![plot of chunk unnamed-chunk-14](http://farm6.staticflickr.com/5467/6946038162_04294f6ee4_o.png) 
+![plot of chunk unnamed-chunk-14](figure/unnamed-chunk-14.png) 
 
 
 
@@ -442,8 +328,8 @@ sfExportAll()
 ```r
 fits <- lapply(traits, function(trait) {
     multi <- function(modelspec) {
-        multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, model_spec = modelspec, 
-            control = list(maxit = 8000))
+        multiTypeOU(data = dat[[trait]], tree = tree, regimes = pharyngeal, 
+            model_spec = modelspec, control = list(maxit = 8000))
     }
     bm <- multi(list(alpha = "fixed", sigma = "global", theta = "global"))
     ou <- multi(list(alpha = "global", sigma = "global", theta = "global"))
@@ -476,12 +362,6 @@ fits <- lapply(traits, function(trait) {
 
 
 
-```
-## Error: object 'regimes' not found
-```
-
-
-
 
 
 Clean up the data
@@ -503,24 +383,7 @@ names(dat) <- c("value", "type", "comparison", "trait")
 ```r
 r <- cast(dat, comparison ~ trait, function(x) quantile(x, c(0.1, 
     0.9)))
-```
-
-
-
-```
-## Error: factors are not allowed
-```
-
-
-
-```r
 subdat <- subset(dat, abs(value) < max(abs(as.matrix(r))))
-```
-
-
-
-```
-## Error: abs not meaningful for factors
 ```
 
 
@@ -533,13 +396,7 @@ ggplot(subdat) + geom_boxplot(aes(type, value)) + facet_grid(trait ~
     comparison, scales = "free_y")
 ```
 
-
-
-```
-## Error: object 'subdat' not found
-```
-
-
+![plot of chunk unnamed-chunk-21](figure/unnamed-chunk-21.png) 
 
 
 
