@@ -1,0 +1,62 @@
+* Author: Carl Boettiger <cboettig@gmail.com>
+* License: BSD 
+
+
+``` {r }
+require(wrightscape)
+require(ggplot2)
+require(reshape)
+data(labrids)
+````
+
+``` {r }
+traits <- c("open", "kt")
+regimes <- two_shifts 
+````
+
+
+``` {r }
+nboot <- 100
+cpu <- 16
+````
+
+
+``` {r } 
+require(snowfall)
+sfInit(parallel=TRUE, cpu=cpu)
+sfLibrary(wrightscape)
+sfExportAll()
+````
+
+
+Fit all models, then actually perform the model choice analysis for the chosen model pairs
+
+``` {r }
+fits <- lapply(traits, function(trait){
+	multi <- function(modelspec){ 
+	 multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, 
+			    model_spec = modelspec, control = list(maxit=8000))
+	}
+	bm2 <- multi(list(alpha = "fixed", sigma = "indep", theta = "global")) 
+	a2  <- multi(list(alpha = "indep", sigma = "global", theta = "global")) 
+
+  mc <- montecarlotest(bm2,a2, cpu=cpu, nboot=nboot)
+  bm2_a2 <- list(null=mc$null_dist, test=mc$test_dist, 
+    lr=-2*(mc$null$loglik-mc$test$loglik))
+ })
+````
+
+
+Clean up the data
+
+``` {r }
+names(fits) <- traits
+dat <- melt(fits)
+names(dat) <- c("value", "type", "trait")
+````
+
+
+``` {r }
+save(list="dat", file="manuscript.rda")
+````
+
