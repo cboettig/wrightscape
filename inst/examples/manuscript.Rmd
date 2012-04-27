@@ -77,7 +77,7 @@ names(dat) <- c("regime", "value", "parameter", "model", "trait")
 
 
 ``` {r }
-ggplot(subset(dat, model=="release" & parameter == "alpha" & value < 2)) + 
+ggplot(subset(dat, model=="release" & parameter == "alpha")) + 
   geom_boxplot(aes(model, value, fill=regime)) + facet_wrap(~trait, scale="free_y")
 ggplot(subset(dat, model=="brownie" & parameter == "sigma" & value < 2)) + 
   geom_boxplot(aes(model, value, fill=regime)) + facet_wrap(~trait, scale="free_y")
@@ -92,12 +92,15 @@ lr_dat <- melt(list(
 open_LR <- 2* (fits[[1]]$test$loglik - fits[[1]]$null$loglik)
 kt_LR <- 2* (fits[[2]]$test$loglik - fits[[2]]$null$loglik)
 LR <- data.frame(value=c(open_LR, kt_LR), model="ratio", trait=c("open","kt"))
-
+names(lr_dat) <- c("value", "model", "trait")
 ````
 
 
 ``` {r }
-ggplot(subset(lr_dat, value>-1e4 & value < 1e4)) + geom_density(aes(value, fill=model), alpha=.5) + facet_wrap(~trait, scale="free_x") + geom_vline(data=LR, aes(xintercept=value))
+ggplot(subset(lr_dat, value>-1e4 & value < 1e4)) + 
+  geom_density(aes(value, fill=model), alpha=.5) + 
+  facet_wrap(~trait, scale="free_x") + 
+  geom_vline(data=LR, aes(xintercept=value))
 ````
 
 ``` {r }
