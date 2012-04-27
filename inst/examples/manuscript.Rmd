@@ -47,12 +47,64 @@ fits <- lapply(traits, function(trait){
 ````
 
 
+
+
+
+
+
 Clean up the data
 
 ``` {r }
-names(fits) <- traits
-dat <- melt(fits)
-names(dat) <- c("value", "type", "trait")
+require(reshape2)
+require(ggplot2)
+````
+
+### Parameter distributions
+
+``` {r }
+regroup <- function(df){
+  df <- as.data.frame(t(df))
+  alpha <- df[c("alpha1", "alpha2", "alpha3")]
+  sigma <- df[c("sigma1", "sigma2", "sigma3")]
+  theta <- df[c("theta1", "theta2", "theta3")]
+  names(alpha) <- levels(fits[[1]]$null$regimes)
+  names(sigma) <- levels(fits[[1]]$null$regimes)
+  names(theta) <- levels(fits[[1]]$null$regimes)
+#, Xo = df$Xo, converge=df$converge
+  list(alpha=alpha, theta=theta, sigma=sigma)
+}
+dat <- melt(list(
+  open = list(brownie = regroup(fits[[1]]$null_par_dist), 
+              release = regroup(fits[[1]]$test_par_dist)),
+  kt = list(brownie = regroup(fits[[2]]$null_par_dist),
+            release = regroup(fits[[2]]$test_par_dist))))
+names(dat) <- c("regime", "value", "parameter", "model", "trait")
+````
+
+
+
+``` {r }
+ggplot(subset(dat, model=="release" & parameter == "alpha" & value < 2)) + 
+  geom_boxplot(aes(model, value, fill=regime)) + facet_wrap(~trait, scale="free_y")
+ggplot(subset(dat, model=="brownie" & parameter == "sigma" & value < 2)) + 
+  geom_boxplot(aes(model, value, fill=regime)) + facet_wrap(~trait, scale="free_y")
+````
+
+### Likelihood ratio distributions:
+
+``` {r }
+lr_dat <- melt(list(
+  open=list(release=fits[[1]]$test_dist, brownie=fits[[1]]$null_dist), 
+  kt=list(release=fits[[2]]$test_dist, brownie=fits[[2]]$null_dist)))
+open_LR <- 2* (fits[[1]]$test$loglik - fits[[1]]$null$loglik)
+kt_LR <- 2* (fits[[2]]$test$loglik - fits[[2]]$null$loglik)
+LR <- data.frame(value=c(open_LR, kt_LR), model="ratio", trait=c("open","kt"))
+
+````
+
+
+``` {r }
+ggplot(subset(lr_dat, value>-1e4 & value < 1e4)) + geom_density(aes(value, fill=model), alpha=.5) + facet_wrap(~trait, scale="free_x") + geom_vline(data=LR, aes(xintercept=value))
 ````
 
 
