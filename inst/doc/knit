@@ -60,7 +60,7 @@ local({
     # try splitting the tables out with special options?
     options(knitr.include=TRUE)
     options(knitr.split=TRUE)
-    # We'll want plots to be external only in the case of doc generation:
+    # We'll want plots to be external only in the case of doc generation: 
     knit_hooks$set(plot = function(x, options) "") 
   } else if (fmt %in% c('tex','pdf')) {
    # xtable shouldn't print comments 
@@ -81,10 +81,8 @@ local({
   }
   
   # knit all _knit_.md files 
-  files <- list.files('./',  full.names = TRUE)
-  files <- files[grep(".*\\_knit_.md", files)]
-  for (f in files) {
-    knit(f, output = basename(f))
-  }
+  knit("wrightscape.Rmd")
+  
+ 
 })
 

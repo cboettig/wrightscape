@@ -1,0 +1,96 @@
+% Detecting a release of constraint in Labrid fish
+% Carl Boettiger, Jeremy Beaulieu and Peter C. Wainwright
+
+`ro echo=FALSE, fig.width=7, fig.height=4 or`
+
+# Introduction
+
+## The release of constraint hypothesis
+
+## Key innovations in parrotfish
+
+## Models for a release of constraint 
+
+The Ornstein-Uhlenbeck (OU) process is commonly used in the comparative phylogenetics 
+context to model the evolution of a trait under constraints [@Hansen1996]. 
+[@Boettiger2012].
+[@Price2010a]
+
+The most frequently used model to represent a change in the evolutionary rate
+of a trait models the process not as a release of constraint, but as an accelerating
+
+
+
+``` {r include=FALSE, echo=FALSE}
+require(wrightscape)
+require(ggplot2)
+require(reshape2)
+require(grid)
+theme_set(theme_bw())
+
+
+plot.path_sim <- function(x, ...) ggplot(x) + geom_line(aes(time, 
+    value, group = rep), alpha = 0.05)
+reps <- 500
+X <- bm_path_sim(reps = reps)
+Y <- ou_path_sim(reps = reps, alpha = 6)
+Z <- release_path_sim(reps = reps, alpha = 6, release_frac = 0.7)
+W <- brownie_path_sim(reps = reps, sigma = sqrt(1/0.7)/sqrt(2 * 6), 
+    sigma2 = 1, release_frac = 0.7)  # has 1/release_frac time = 2
+px <- plot.path_sim(X) + opts(title = "Brownian Motion") +
+    coord_cartesian(ylim = c(-2, 2)) + ylab("trait value")
+py <- plot.path_sim(Y) + opts(title = "Ornstein-Uhlenbeck") + 
+    coord_cartesian(ylim = c(-2, 2)) + ylab("trait value")
+pz <- plot.path_sim(Z) + opts(title = "Release of Constraint") + 
+    coord_cartesian(ylim = c(-2, 2)) + ylab("trait value")
+pw <- plot.path_sim(W) + opts(title = "Accelerated Evolution") + 
+    coord_cartesian(ylim = c(-2, 2)) + ylab("trait value")
+````
+
+``` {r figure1, fig.width=7, fig.height=7}
+pushViewport(viewport(layout = grid.layout(2, 2)))
+vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
+print(px, vp = vplayout(1, 1))
+print(py, vp = vplayout(1, 2))
+print(pw, vp = vplayout(2, 1))
+print(pz, vp = vplayout(2, 2))
+```` 
+
+
+
+![The phylogenetic tree of Labrid fish used in this study.  We divide the tree into three clades: Wrasses, Parrotfish with an intramandibular joint and pharyngeal joint, and parrotfish that lack the intramandibular joint. Diagrams of the jaw structure for representitive species from each group are shown adjacent.](figure/labrid_phylo.pdf)
+
+# Methods
+
+
+# Results
+
+``` {r }
+load("wrightscape.rda")
+````
+
+
+## Estimating the release of constraint model
+
+``` {r figure3, fig.cap="Parameter estimates for the release of constraint model. The estimated value of the alpha parameter, representing the strenth of the constraint, is smallest in the clade containing the intramandibular joint innovation in both traits. Parrotfish without this innovation show the strongest constraint in the kt ratio among the three clades.  Wrasses show a more strongly constrained opening lever ratio than both groups of parrotfish."}
+ggplot(subset(dat, model=="release" & parameter == "alpha")) + 
+  geom_boxplot(aes(model, value, fill=regime)) +
+  facet_wrap(~trait, scale="free_y") + ylab("alpha")
+````
+
+## Comparing models
+
+``` {r figure4, fig.cap="Distribution of likelihood ratios when simulating under each hypothesis (the Brownie model and the release model). The horizontal line indicates the likelihood ratio of the release model relative to the Brownie model in the observed data.  For both the kt ratio and opening lever ratio, this line falls clearly in the distribution corresponding to the release of constraint model"}  
+ggplot(subset(lr_dat, value > -10000 & value < 10000)) +
+  geom_boxplot(aes(model, value)) + 
+  facet_wrap(~trait, scale="free_y") + 
+  geom_hline(data=LR, aes(yintercept=value)) + ylab("likelihood ratio")
+````
+
+# Discussion
+
+
+# Acknowledgements
+
+
+

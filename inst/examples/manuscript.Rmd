@@ -45,8 +45,6 @@ fits <- lapply(traits, function(trait){
 ````
 
 
-Clean up the data
-
 ``` {r }
 require(reshape2)
 require(ggplot2)
@@ -95,6 +93,7 @@ LR <- data.frame(value=c(open_LR, kt_LR), model="ratio", trait=c("open","kt"))
 names(lr_dat) <- c("value", "model", "trait")
 ````
 
+Distribution plot
 
 ``` {r }
 ggplot(subset(lr_dat, value>-1e4 & value < 1e4)) + 
@@ -102,6 +101,17 @@ ggplot(subset(lr_dat, value>-1e4 & value < 1e4)) +
   facet_wrap(~trait, scale="free_x") + 
   geom_vline(data=LR, aes(xintercept=value))
 ````
+
+
+A boxplot may look cleaner
+
+``` {r }
+ggplot(subset(lr_dat, value > -10000 & value < 10000)) +
+  geom_boxplot(aes(model, value)) + 
+  facet_wrap(~trait, scale="free_y") + 
+  geom_hline(data=LR, aes(yintercept=value))
+````
+
 
 ``` {r }
 save(list=c("lr_dat", "dat", "fits"), file="manuscript.rda")
