@@ -11,7 +11,7 @@
 [@Price2010a]
 
 
-![The phylogenetic tree of Labrid fish used in this study.  We divide the tree into three clades: Wrasses, Parrotfish with an intramandibular joint and pharyngeal joint, and parrotfish that lack the intramandibular joint. Diagrams of the jaw structure for representitive species from each group are shown adjacent.](figure/labrid_phylo.pdf)
+![The phylogenetic tree of Labrid fish used in this study.  We divide the tree into three clades: Wrasses, Parrotfish with an intramandibular joint and pharyngeal joint, and parrotfish that lack the intramandibular joint. Diagrams of the jaw structure for representative species from each group are shown adjacent.](figure/labrid_phylo.pdf)
 
 
 ## Models for a release of constraint 
@@ -22,15 +22,15 @@ of a trait under constraint [@Hansen1996].  The model has been generalized to
 the case of multiple optima in [@Butler2004] and recently to the case of 
 differing strengths of selection [@Beaulieu2012].  This latest extension 
 is perhaps most interesting when used to detect a change in selection strength
-in a subclade following a potential innovation. This would predict and increase
-in the rate disparity increases in some focal traits in the subclade relative
+in a sub-clade following a potential innovation. This would predict and increase
+in the rate disparity increases in some focal traits in the sub-clade relative
 to the base rate observed.  We will refer to this model in which the strength
-of stablizing selection decreases as the release of constraint model.
+of stabilizing selection decreases as the release of constraint model.
 
 Unfortunately, this basic pattern corresponds to a similar scenario that does
 not involve a release of constraint.  It is commonly postulated that a trait's
 evolutionary pattern may correspond best to a Brownian motion (BM) process
-without no central tendancy imposed by the constraint in the OU model.  If the
+without no central tendency imposed by the constraint in the OU model.  If the
 basic Brownian rate parameter increases at the time of the innovation, a pattern
 of increased growth in disparity can still be observed without the corresponding
 mechanism of a release of constraint.  Modeling a change in a Brownian rate 
@@ -59,8 +59,6 @@ require(ggplot2)
 require(reshape2)
 require(grid)
 theme_set(theme_bw())
-
-
 plot.path_sim <- function(x, ...) ggplot(x) + geom_line(aes(time, 
     value, group = rep), alpha = 0.05)
 reps <- 500
@@ -97,7 +95,7 @@ steps in both directions. It is these subtle differences in the patterns of the
 evolutionary processes implied by the different models that we seek to tease apart.
 To obtain the most powerful statistical comparison between the two models that
 accounts for the uncertainty in the model estimate, we use the method described
-in @Boettiger2012 which uses a bootstrap simulation approach to compare likehood
+in @Boettiger2012 which uses a bootstrap simulation approach to compare likelihood
 ratios of the models.  
 
 
