@@ -46,8 +46,8 @@ fits <- lapply(traits, function(trait){
   mc <- montecarlotest(bm2,a2, cpu=cpu, nboot=nboot)
   bm2_a2 <- list(null=mc$null_dist, test=mc$test_dist, 
     lr=-2*(mc$null$loglik-mc$test$loglik))
-  mc <- montecarlotest(bm,ou, cpu=cpu, nboot=nboot)
-  bm_ou <- list(null=mc$null_dist, test=mc$test_dist, 
+  mc <- montecarlotest(ou,a2, cpu=cpu, nboot=nboot)
+  ou_a2 <- list(null=mc$null_dist, test=mc$test_dist, 
     lr=-2*(mc$null$loglik-mc$test$loglik))
   mc <- montecarlotest(bm,bm2, cpu=cpu, nboot=nboot)
   bm_bm2 <- list(null=mc$null_dist, test=mc$test_dist, 
@@ -67,6 +67,9 @@ fits <- lapply(traits, function(trait){
 })
 ````
 
+``` {r }
+save(list=list("fits"), file="~/public_html/data/labrid_fits.rda")
+`````
 
 Clean up the data
 
@@ -82,13 +85,13 @@ r <- cast(dat, comparison ~ trait, function(x) quantile(x, c(.10,.90)))
 subdat <- subset(dat, abs(value) < max(abs(as.matrix(r))))
 ````
 
-``` {r fig.height=24 } 
+``` {r fig.height=24, fig.width=10 } 
 ggplot(subdat) + 
   geom_boxplot(aes(type, value)) +
   facet_grid(trait ~ comparison, scales="free_y") 
 ````
 
 ``` {r }
-save(list=ls(), file="~/public_html/data/labrid_power.rda")
+save(list=list("fits", "dat", "subdat"), file="~/public_html/data/labrid_power.rda")
 ````
 

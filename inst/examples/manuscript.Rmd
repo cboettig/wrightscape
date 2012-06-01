@@ -2,6 +2,8 @@
 * License: BSD 
 
 
+`ro warning=FALSE, comment=NA, message=FALSE, fig.width = 20, fig.height=10 or`
+
 ``` {r }
 require(wrightscape)
 require(ggplot2)
@@ -9,19 +11,19 @@ require(reshape)
 data(labrids)
 ````
 
-``` {r }
-traits <- c("open", "kt")
+``` {r traits}
+traits <- c("bodymass", "close", "open", "kt", "gape.y",  "prot.y", "AM.y")
 regimes <- two_shifts 
 ````
 
 
-``` {r }
+``` {r pars}
 nboot <- 100
 cpu <- 16
 ````
 
 
-``` {r } 
+``` {r inparallel} 
 require(snowfall)
 sfInit(parallel=TRUE, cpu=cpu)
 sfLibrary(wrightscape)
@@ -31,7 +33,7 @@ sfExportAll()
 
 Fit all models, then actually perform the model choice analysis for the chosen model pairs
 
-``` {r }
+``` {r fitmodels}
 fits <- lapply(traits, function(trait){
 	multi <- function(modelspec){ 
 	 multiTypeOU(data = dat[[trait]], tree = tree, regimes = regimes, 
@@ -45,14 +47,14 @@ fits <- lapply(traits, function(trait){
 ````
 
 
-``` {r }
+``` {r morelibs}
 require(reshape2)
 require(ggplot2)
 ````
 
 ### Parameter distributions
 
-``` {r }
+``` {r cleandata}
 regroup <- function(df){
   df <- as.data.frame(t(df))
   alpha <- df[c("alpha1", "alpha2", "alpha3")]
@@ -74,7 +76,7 @@ names(dat) <- c("regime", "value", "parameter", "model", "trait")
 
 
 
-``` {r }
+``` {r parameterplots}
 ggplot(subset(dat, model=="release" & parameter == "alpha")) + 
   geom_boxplot(aes(model, value, fill=regime)) + facet_wrap(~trait, scale="free_y")
 ggplot(subset(dat, model=="brownie" & parameter == "sigma" & value < 2)) + 
@@ -83,7 +85,7 @@ ggplot(subset(dat, model=="brownie" & parameter == "sigma" & value < 2)) +
 
 ### Likelihood ratio distributions:
 
-``` {r }
+``` {r summarize_lr}
 lr_dat <- melt(list(
   open=list(release=fits[[1]]$test_dist, brownie=fits[[1]]$null_dist), 
   kt=list(release=fits[[2]]$test_dist, brownie=fits[[2]]$null_dist)))
@@ -93,19 +95,8 @@ LR <- data.frame(value=c(open_LR, kt_LR), model="ratio", trait=c("open","kt"))
 names(lr_dat) <- c("value", "model", "trait")
 ````
 
-Distribution plot
 
-``` {r }
-ggplot(subset(lr_dat, value>-1e4 & value < 1e4)) + 
-  geom_density(aes(value, fill=model), alpha=.5) + 
-  facet_wrap(~trait, scale="free_x") + 
-  geom_vline(data=LR, aes(xintercept=value))
-````
-
-
-A boxplot may look cleaner
-
-``` {r }
+``` {r modelcomparisons}
 ggplot(subset(lr_dat, value > -10000 & value < 10000)) +
   geom_boxplot(aes(model, value)) + 
   facet_wrap(~trait, scale="free_y") + 
@@ -113,6 +104,6 @@ ggplot(subset(lr_dat, value > -10000 & value < 10000)) +
 ````
 
 
-``` {r }
+``` {r labridsave}
 save(list=c("lr_dat", "dat", "fits"), file="manuscript.rda")
 ````
