@@ -1,0 +1,51 @@
+
+``` {r include=FALSE, echo=FALSE}
+require(wrightscape)
+require(ggplot2)
+require(reshape2)
+require(grid)
+theme_publish <- theme_set(theme_bw(8))
+theme_publish <- theme_update(
+  panel_background = theme_blank(), 
+  panel.grid.major = theme_blank(),
+  panel.grid.minor = theme_blank())
+plot.path_sim <- function(x, ...) ggplot(x) + geom_line(aes(time, 
+    value, group = rep), alpha = 0.05)
+reps <- 500
+X <- bm_path_sim(reps = reps)
+Y <- ou_path_sim(reps = reps, alpha = 6)
+Z <- release_path_sim(reps = reps, alpha = 6, release_frac = 0.7)
+W <- brownie_path_sim(reps = reps, sigma = sqrt(1/0.7)/sqrt(2 * 6), 
+    sigma2 = 1, release_frac = 0.7)  # has 1/release_frac time = 2
+px <- plot.path_sim(X) + opts(title = "Brownian Motion") +
+    coord_cartesian(ylim = c(-2, 2)) + ylab("trait value")
+py <- plot.path_sim(Y) + opts(title = "Ornstein-Uhlenbeck") + 
+    coord_cartesian(ylim = c(-2, 2)) + ylab("trait value")
+pz <- plot.path_sim(Z) + opts(title = "Release of Constraint") + 
+    coord_cartesian(ylim = c(-2, 2)) + ylab("trait value")
+pw <- plot.path_sim(W) + opts(title = "Accelerated Evolution") + 
+    coord_cartesian(ylim = c(-2, 2)) + ylab("trait value")
+````
+
+``` {r alpha_v_sigma, fig.width=7, fig.height=7, dev='Cairo_pdf'}
+px
+py
+pw
+pz
+```` 
+
+
+``` {r }
+load("wrightscape.rda")
+````
+
+
+
+``` {r figure4}  
+ggplot(subset(lr_dat, value > -10000 & value < 10000), aes(x=value)) +
+  geom_density(aes(fill=model), alpha=.8, adjust=2) + 
+  facet_wrap(~trait, scale="free") + 
+  geom_vline(data=LR, aes(xintercept=value)) + xlab("likelihood ratio")
+````
+
+
