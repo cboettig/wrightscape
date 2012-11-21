@@ -1,23 +1,15 @@
 #!/usr/bin/Rscript
 
 ## ./knit [epub|github|html|pdf|docx] to generate different types of output
-
 library(knitr)
-
-## use a custom pattern list: begin by ``` {r code begin} and end by ````; `ri
-## [inline code] ir`; `ro [global options] or`
-pat_gfm()
-
-## use GFM as the output format: R code in ```r and ``` (both GitHub and pandoc
-## recognize it)
-render_gfm()
+library(xtable) 
+library(ggplot2)
 
 ## Formatting for printed numbers
 knit_hooks$set(inline = function(x) {
   if(is.numeric(x))
    I(prettyNum(round(x,2), big.mark=","))
 })
-
 
 ## global chunk options: default uses high quality Cairo PNG device
 pdf.options(pointsize = 10)  # smaller pointsize for recording plots
@@ -32,8 +24,6 @@ knit_hooks$set(par=function(before, options, envir){
   if (before && options$fig.show!='none') 
     par(mar=c(4,4,.1,.1), cex.lab=.95, cex.axis=.9, mgp=c(2,.7,0), tcl=-.3)
 })
-
-
 
 ## verbose compile
 opts_knit$set(progress = TRUE, verbose = TRUE)
@@ -75,9 +65,15 @@ local({
 #    x = readLines('elsarticle.latex')
 #    options(tikzDocumentDeclaration = x[1], tikzDefaultEngine = 'xetex')
 #    assign('tikzPackages', c(x[2:13], '\n'), envir = knitr:::.knitEnv)
+#
+    theme_publish <- theme_set(theme_bw(8))
+    theme_publish <- theme_update(
+      panel.background = element_blank(), 
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank())
 
     # use pdf graphics for PDF output
-    opts_chunk$set(dev = 'pdf', fig.width=5, fig.height=5)
+    opts_chunk$set(dev = 'Cairo_pdf', fig.width=7, fig.height=7)
   }
   
   # knit all _knit_.md files 

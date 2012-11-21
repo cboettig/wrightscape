@@ -3,6 +3,15 @@
 
 `ro echo=FALSE, fig.width=7, fig.height=4 or`
 
+``` {r libraries}
+library(xtable) 
+library(ggplot2)
+require(wrightscape)
+require(reshape2)
+require(grid)
+````
+
+
 # Introduction
 
 ## The release of constraint hypothesis
@@ -34,7 +43,7 @@ without no central tendency imposed by the constraint in the OU model.  If the
 basic Brownian rate parameter increases at the time of the innovation, a pattern
 of increased growth in disparity can still be observed without the corresponding
 mechanism of a release of constraint.  Modeling a change in a Brownian rate 
-parameter was first introduced in @O'Meara2006 in the software *Brownie*; hence 
+parameter was first introduced in @OMeara2006 in the software *Brownie*; hence 
 we will refer to this as the Brownie model. 
 
 Though the processes are not identical, the exhibit remarkably similar patterns.
@@ -54,11 +63,6 @@ the strong constraint.
 
 
 ``` {r include=FALSE, echo=FALSE}
-require(wrightscape)
-require(ggplot2)
-require(reshape2)
-require(grid)
-theme_set(theme_bw())
 plot.path_sim <- function(x, ...) ggplot(x) + geom_line(aes(time, 
     value, group = rep), alpha = 0.05)
 reps <- 500
@@ -116,7 +120,7 @@ load("wrightscape.rda")
 
 ``` {r figure3, fig.cap="Parameter estimates for the release of constraint model. The estimated value of the alpha parameter, representing the strenth of the constraint, is smallest in the clade containing the intramandibular joint innovation in both traits. Parrotfish without this innovation show the strongest constraint in the kt ratio among the three clades.  Wrasses show a more strongly constrained opening lever ratio than both groups of parrotfish."}
 ggplot(subset(dat, model=="release" & parameter == "alpha")) + 
-  geom_boxplot(aes(model, value, fill=regime)) +
+  geom_boxplot(aes(regime, value)) +
   facet_wrap(~trait, scale="free_y") + ylab("alpha")
 ````
 

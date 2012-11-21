@@ -62,7 +62,7 @@ selection occurs, the traits begin to explore outside the range
 previously possible under the strong constraint.
 
 ![plot of chunk
-figure2](http://farm8.staticflickr.com/7212/7316178846_c2fc71cf29_o.png)
+figure2](http://farm9.staticflickr.com/8144/7490774590_f0f3098459_o.png)
 
 By contrast, the Brownie model shows a sharper transition at this
 boundary. A close look at the figure shows a shock front at the moment
@@ -90,7 +90,7 @@ constraint, is smallest in the clade containing the intramandibular
 joint innovation in both traits. Parrotfish without this innovation show
 the strongest constraint in the kt ratio among the three clades. Wrasses
 show a more strongly constrained opening lever ratio than both groups of
-parrotfish.](http://farm8.staticflickr.com/7097/7316179292_16e6be835c_o.png)
+parrotfish.](http://farm9.staticflickr.com/8431/7490775094_a852e8f1dd_o.png)
 
 Comparing models
 ----------------
@@ -101,7 +101,7 @@ line indicates the likelihood ratio of the release model relative to the
 Brownie model in the observed data. For both the kt ratio and opening
 lever ratio, this line falls clearly in the distribution corresponding
 to the release of constraint
-model](http://farm9.staticflickr.com/8015/7316179706_e02ea371f5_o.png)
+model](http://farm8.staticflickr.com/7139/7490775492_e021215cd3_o.png)
 
 (Show that Brownie model rejects the OUCH model/thetas?)
 

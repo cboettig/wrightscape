@@ -11,6 +11,8 @@ SystemRequirements: Gnu Scientific Library version >= 1.8
 License: GPL-2
 Author: Carl Boettiger
 Maintainer: Carl Boettiger <cboettig@ucdavis.edu>
+URL: https://github.com/cboettig/wrightscape
+BugReports: https://github.com/cboettig/wrightscape/issues
 Depends:
     mcmcTools,
     ape

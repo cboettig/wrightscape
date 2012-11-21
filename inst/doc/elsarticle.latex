@@ -1,17 +1,5 @@
 \documentclass[author-year, review, 12pt]{elsarticle} %review=doublespace preprint=single 5p=2 column
 \usepackage{amsmath, amsfonts, amssymb}  % extended mathematics
-\usepackage{ifxetex}
-\ifxetex
-  \usepackage{fontspec,xltxtra,xunicode}
-  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
-  \setmainfont[Mapping=tex-text]{TeX Gyre Pagella}
-  \setsansfont[Mapping=tex-text]{DejaVu Sans}
-  \setmonofont{Bitstream Vera Sans Mono}
-\else
-  \usepackage[mathletters]{ucs}
-  \usepackage[utf8x]{inputenc}
-\fi
-
 % My package additions
 \usepackage[hyphens]{url}
 \usepackage{lineno} % add 
