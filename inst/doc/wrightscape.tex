@@ -1,0 +1,248 @@
+\documentclass[author-year, review, 12pt]{elsarticle} %review=doublespace preprint=single 5p=2 column
+\usepackage{amsmath, amsfonts, amssymb}  % extended mathematics
+% My package additions
+\usepackage[hyphens]{url}
+\usepackage{lineno} % add 
+\linenumbers % turns line numbering on 
+\bibliographystyle{elsarticle-harv}
+\biboptions{sort&compress} % For natbib
+\usepackage{graphicx}
+\usepackage{booktabs} % book-quality tables
+
+%% Redefines the elsarticle footer
+\makeatletter
+\def\ps@pprintTitle{%
+ \let\@oddhead\@empty
+ \let\@evenhead\@empty
+ \def\@oddfoot{\it \hfill\today}%
+ \let\@evenfoot\@oddfoot}
+\makeatother
+
+% A modified page layout
+\textwidth 6.75in
+\oddsidemargin -0.15in
+\evensidemargin -0.15in
+\textheight 9in
+\topmargin -0.5in
+
+
+\usepackage{microtype}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\pagenumbering{arabic}
+
+\usepackage{listings}
+\lstnewenvironment{code}{\lstset{language=Haskell,basicstyle=\small\ttfamily}}{}
+
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+
+
+%%% Syntax Highlighting for code  %%%
+%%% Adapted from knitr book %%% 
+\usepackage{fancyvrb}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+\usepackage{enumerate}
+\usepackage{ctable}
+\usepackage{float}
+
+% This is needed because raggedright in table elements redefines \\:
+\newcommand{\PreserveBackslash}[1]{\let\temp=\\#1\let\\=\temp}
+\let\PBS=\PreserveBackslash
+\usepackage[normalem]{ulem}
+\newcommand{\textsubscr}[1]{\ensuremath{_{\scriptsize\textrm{#1}}}}
+
+% Configure hyperlinks package
+\usepackage[breaklinks=true,linktocpage,pdftitle={Detecting a release of constraint in Labrid fish},pdfauthor={Carl Boettiger, Jeremy Beaulieu and Peter C. Wainwright},xetex,colorlinks]{hyperref}
+\hypersetup{breaklinks=true, pdfborder={0 0 0}}
+
+% Pandoc toggle for numbering sections (defaults to be off)
+\setcounter{secnumdepth}{0}
+
+
+\VerbatimFootnotes % allows verbatim text in footnotes
+
+% Pandoc header
+
+
+
+\begin{document}
+\begin{frontmatter}
+  \title{Detecting a release of constraint in Labrid fish}
+  \author[cpb]{Carl Boettiger\corref{cor1}}
+  \author[cpb]{Peter C. Wainwright}
+  \ead{cboettig@ucdavis.edu}
+  \cortext[cor1]{Corresponding author, cboettig@ucdavis.edu}
+  \address[cpb]{Center for Population Biology, University of California, Davis, California 95616}
+ \end{frontmatter}
+
+
+\section{Introduction}
+
+\subsection{The release of constraint hypothesis}
+
+\subsection{Key innovations in parrotfish}
+
+(Price et al. 2010)
+
+\begin{figure}[htbp]
+\centering
+\includegraphics{figure/labrid_phylo.pdf}
+\caption{The phylogenetic tree of Labrid fish used in this study. We
+divide the tree into three clades: Wrasses, Parrotfish with an
+intramandibular joint and pharyngeal joint, and parrotfish that lack the
+intramandibular joint. Diagrams of the jaw structure for representative
+species from each group are shown adjacent.}
+\end{figure}
+
+\subsection{Models for a release of constraint}
+
+The Ornstein-Uhlenbeck (OU) process is a stochastic, mean-reverting
+process commonly used in the comparative phylogenetics context to model
+the evolution of a trait under constraint (Hansen and Martins 1996). The
+model has been generalized to the case of multiple optima in (Butler and
+King 2004) and recently to the case of differing strengths of selection
+(Beaulieu et al. 2012). This latest extension is perhaps most
+interesting when used to detect a change in selection strength in a
+sub-clade following a potential innovation. This would predict and
+increase in the rate disparity increases in some focal traits in the
+sub-clade relative to the base rate observed. We will refer to this
+model in which the strength of stabilizing selection decreases as the
+release of constraint model.
+
+Unfortunately, this basic pattern corresponds to a similar scenario that
+does not involve a release of constraint. It is commonly postulated that
+a trait's evolutionary pattern may correspond best to a Brownian motion
+(BM) process without no central tendency imposed by the constraint in
+the OU model. If the basic Brownian rate parameter increases at the time
+of the innovation, a pattern of increased growth in disparity can still
+be observed without the corresponding mechanism of a release of
+constraint. Modeling a change in a Brownian rate parameter was first
+introduced in O'Meara et al. (2006) in the software \emph{Brownie};
+hence we will refer to this as the Brownie model.
+
+Though the processes are not identical, the exhibit remarkably similar
+patterns. Figure 2 illustrates the Brownie and release of constraint
+models through 500 replicate simulations of each. In the top panel, BM
+and OU processes with comparable parameters are shown for reference. In
+both the Brownie and release of constraint models, the same variance has
+been reached at the time of the shift and at the time the simulation
+ends. The distinguishing feature in the release of constraint model is
+similar to the distinction between a BM and OU processes -- before the
+shift occurs, the trait dynamics have begun to approach an equilibrium
+that balances the diversification process against the constraint. This
+corresponds to traits values more closely reflecting a match to their
+environment than to their evolutionary history. After the shift in
+selection occurs, the traits begin to explore outside the range
+previously possible under the strong constraint.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics{figure/figure2.pdf}
+\caption{}
+\end{figure}
+
+By contrast, the Brownie model shows a sharper transition at this
+boundary. A close look at the figure shows a shock front at the moment
+of this transition.\\Whereas in the release of constraint model, the
+trajectories only loose their central bias, but otherwise continue to
+make similar step sizes, in the Brownie model the entire tempo of the
+evolutionary process has changed, taking bigger steps in both
+directions. It is these subtle differences in the patterns of the
+evolutionary processes implied by the different models that we seek to
+tease apart. To obtain the most powerful statistical comparison between
+the two models that accounts for the uncertainty in the model estimate,
+we use the method described in Boettiger, Coop, and Ralph (2012) which
+uses a bootstrap simulation approach to compare likelihood ratios of the
+models.
+
+\section{Results}
+
+\subsection{Estimating the release of constraint model}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics{figure/figure3.pdf}
+\caption{}
+\end{figure}
+
+\subsection{Comparing models}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics{figure/figure4.pdf}
+\caption{}
+\end{figure}
+
+(Show that Brownie model rejects the OUCH model/thetas?)
+
+\section{Discussion}
+
+Our analysis identified two functional traits in the labrid jaw
+morphology that show clear evidence of a release of constraint.
+
+Functional innovations\ldots{}
+
+\section{Acknowledgements}
+
+This work was supported by a Computational Sciences Graduate Fellowship
+from the Department of Energy under grant number DE-FG02-97ER25308 to CB
+and NSF grant DEB-1061981 to PCW.
+
+\section{References}
+
+Beaulieu, Jeremy M., Dwueng-Chwuan Jhwueng, Carl Boettiger, and Brian C.
+O'Meara. 2012. ``Modeling Stabilizing Selection: Expanding the
+Ornstein-Uhlenbeck Model of Adaptive Evolution.'' \emph{Evolution}
+(mar). doi:10.1111/j.1558-5646.2012.01619.x.
+\href{http://doi.wiley.com/10.1111/j.1558-5646.2012.01619.x}{http://doi.wiley.com/10.1111/j.1558-5646.2012.01619.x}.
+
+Boettiger, Carl, Graham Coop, and Peter Ralph. 2012. ``Is your phylogeny
+informative? Measuring the power of comparative methods.''
+\emph{Evolution} (jan). doi:10.1111/j.1558-5646.2012.01574.x.
+\href{http://doi.wiley.com/10.1111/j.1558-5646.2012.01574.x}{http://doi.wiley.com/10.1111/j.1558-5646.2012.01574.x}.
+
+Butler, Marguerite A., and Aaron A. King. 2004. ``Phylogenetic
+Comparative Analysis: A Modeling Approach for Adaptive Evolution.''
+\emph{The American Naturalist} 164 (dec): 683--695. doi:10.1086/426002.
+\href{http://www.jstor.org/stable/10.1086/426002}{http://www.jstor.org/stable/10.1086/426002}.
+
+Hansen, Thomas F., and E. P. Martins. 1996. ``Translating between
+microevolutionary process and macroevolutionary patterns: the
+correlation structure of interspecific data.'' \emph{Evolution} 50:
+1404--1417.
+
+O'Meara, Brian C., Cécile Ané, Michael J. Sanderson, and Peter C.
+Wainwright. 2006. ``Testing for different rates of continuous trait
+evolution using likelihood.'' \emph{Evolution} 60 (may): 922--33.
+\href{http://www.ncbi.nlm.nih.gov/pubmed/16817533}{http://www.ncbi.nlm.nih.gov/pubmed/16817533}.
+
+Price, Samantha a, Peter C. Wainwright, David R. Bellwood, Erem
+Kazancioglu, David C. Collar, and Thomas J. Near. 2010. ``Functional
+innovations and morphological diversification in parrotfish.''
+\emph{Evolution; international journal of organic evolution} 64 (oct):
+3057--68. doi:10.1111/j.1558-5646.2010.01036.x.
+\href{http://www.ncbi.nlm.nih.gov/pubmed/20497217}{http://www.ncbi.nlm.nih.gov/pubmed/20497217}.
+
+
+\bibliography{}
+
+
+\end{document}
