@@ -1,4 +1,5 @@
 
+[![DOI](https://zenodo.org/badge/672381.svg)](https://zenodo.org/badge/latestdoi/672381)
 
 
 # wrightscape
